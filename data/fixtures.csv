@@ -1,0 +1,64 @@
+Team_1,Team_2,Date,Stage
+Qatar,Ecuador,2022-11-20,Group
+England,Iran,2022-11-21,Group
+Senegal,Netherlands,2022-11-21,Group
+USA,Wales,2022-11-21,Group
+Argentina,Saudi Arabia,2022-11-22,Group
+Mexico,Poland,2022-11-22,Group
+Denmark,Tunisia,2022-11-22,Group
+France,Australia,2022-11-22,Group
+Morocco,Croatia,2022-11-23,Group
+Germany,Japan,2022-11-23,Group
+Spain,Costa Rica,2022-11-23,Group
+Belgium,Canada,2022-11-23,Group
+Brazil,Serbia,2022-11-24,Group
+Portugal,Ghana,2022-11-24,Group
+Uruguay,South Korea,2022-11-24,Group
+Switzerland,Cameroon,2022-11-24,Group
+England,USA,2022-11-25,Group
+Netherlands,Ecuador,2022-11-25,Group
+Qatar,Senegal,2022-11-25,Group
+Wales,Iran,2022-11-25,Group
+Argentina,Mexico,2022-11-26,Group
+France,Denmark,2022-11-26,Group
+Poland,Saudi Arabia,2022-11-26,Group
+Tunisia,Australia,2022-11-26,Group
+Spain,Germany,2022-11-27,Group
+Croatia,Canada,2022-11-27,Group
+Belgium,Morocco,2022-11-27,Group
+Japan,Costa Rica,2022-11-27,Group
+Portugal,Uruguay,2022-11-28,Group
+Brazil,Switzerland,2022-11-28,Group
+South Korea,Ghana,2022-11-28,Group
+Cameroon,Serbia,2022-11-28,Group
+Netherlands,Qatar,2022-11-29,Group
+Ecuador,Senegal,2022-11-29,Group
+Iran,USA,2022-11-29,Group
+Wales,England,2022-11-29,Group
+Saudi Arabia,Mexico,2022-11-30,Group
+Poland,Argentina,2022-11-30,Group
+Tunisia,France,2022-11-30,Group
+Australia,Denmark,2022-11-30,Group
+Costa Rica,Germany,2022-12-01,Group
+Japan,Spain,2022-12-01,Group
+Canada,Morocco,2022-12-01,Group
+Croatia,Belgium,2022-12-01,Group
+Cameroon,Brazil,2022-12-02,Group
+Serbia,Switzerland,2022-12-02,Group
+South Korea,Portugal,2022-12-02,Group
+Ghana,Uruguay,2022-12-02,Group
+1A,2B,2022-12-03,R16
+1C,2D,2022-12-03,R16
+1B,2A,2022-12-04,R16
+1D,2C,2022-12-04,R16
+1G,2H,2022-12-05,R16
+1E,2F,2022-12-05,R16
+1H,2G,2022-12-06,R16
+1F,2E,2022-12-06,R16
+1A2B,1C2D,2022-12-09,QF
+1G2H,1E2F,2022-12-09,QF
+1B2A,1D2C,2022-12-10,QF
+1H2G,1F2E,2022-12-10,QF
+1A2B1C2D,1G2H1E2F,2022-12-13,SF
+1B2A1D2C,1H2G1F2E,2022-12-14,SF
+1A2B1C2D1G2H1E2F,1B2A1D2C1H2G1F2E,2022-12-19,F
