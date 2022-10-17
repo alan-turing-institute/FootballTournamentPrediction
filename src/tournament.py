@@ -8,6 +8,38 @@ import pandas as pd
 import random
 
 
+def get_teams_data():
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(current_dir, "..","data","teams.csv")
+    return pd.read_csv(csv_path)
+
+
+def get_fixture_data():
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(current_dir, "..","data","fixtures.csv")
+    return pd.read_csv(csv_path)
+
+
+def find_group(team, teams_df):
+    """
+    Look in teams_df and find the group for a given team
+
+    Parameters
+    ==========
+    team: str, team name, as given in teams.csv
+    teams_df: Pandas dataframe
+
+    Returns
+    =======
+    group_name: str, "A"-"H", or None if team not found
+    """
+    for idx, row in teams_df.iterrows():
+        if row.Team == team:
+            return row.Group
+    print("Unable to find {} in teams.csv".format(team))
+    return None
+
+
 def predict_knockout_match(team_1, team_2):
     """
     Parameters
@@ -194,13 +226,13 @@ class Group:
 
 class Tournament:
     def __init__(self):
-        self.teams_df = pd.read_csv("../data/teams.csv")
-        self.fixtures_df = pd.read_csv("../data/fixtures.csv")
+        self.teams_df = get_teams_data()
+        self.fixtures_df = get_fixture_data()
         self.group_names = list(set(self.teams_df["Group"].values))
-        self.groups = []
+        self.groups = {}
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"]==n].Team.values))
-            self.groups.append(g)
+            self.groups[n] = g
         self.aliases = {}
 
 
@@ -218,8 +250,14 @@ class Tournament:
         for idx, row in self.fixtures_df:
             if stage != row.Stage:
                 continue
-
-
+            if stage == "Group":
+                if set([row.Team_1, row.Team_2]) == set([team_1,team_2]):
+                    
+                    fixtures_df.iloc[idx, fixtures_df.columns.get_loc('Played')] = True
+                    # find the group
+                    group = find_group(team_1, self.teams_df)
+                    self.groups[group].add_result(team_1, team_2, score_1, score_2)
+                    
     def play_group_stage(self):
         for g in self.groups:
             g.play_all_matches(self.fixtures_df)
