@@ -40,6 +40,29 @@ def find_group(team, teams_df):
     return None
 
 
+def sort_teams_by(table_dict, metric):
+    """
+    Given a dictionary in the same format as self.table (i.e. keyed by
+    team name), return a list of dicts
+    [{"team": <team_name>, "points": <points>, ...},{...}]
+    in order of whatever metric is supplied
+
+    Parameters
+    ==========
+    table_dict: dict, keyed by team name, in the same format as self.table
+
+    Returns
+    =======
+    team_list: list of dicts, [{"team": "abc","points": x},...], ordered
+               according to metric
+    """
+    if not metric in ["points","goal_difference","goals_for","goals_against"]:
+        raise RuntimeError(f"unknown metric for sorting: {metric}")
+    team_list = [{"team": k, **v} for k,v in table_dict.items()]
+    team_list = sorted(team_list, key=lambda t: t[metric],reverse=True)
+    return team_list
+
+
 def predict_knockout_match(team_1, team_2):
     """
     Parameters
@@ -66,26 +89,27 @@ def predict_group_match(team_1, team_2):
     ========
     score_1, score_2: both int, score for each team
     """
-    if random.random()>0.2:
-        return (1,0)
-    elif random.random()>0.4:
-        return (0,1)
-    elif random.random()>0.6:
-        return (1,1)
-    elif random.random()>0.8:
-        return (3,2)
-    else:
-        return (0,0)
+    score_1 = random.randint(0,3)
+    score_2 = random.randint(0,3)
+    return score_1, score_2
 
 
 class Group:
     def __init__(self, name, teams):
         self.name = name
         self.teams = teams
+        # "table" is a dictionary keyed by team name, with the points, gf,ga
         self.table = {}
         for t in self.teams:
-            self.table[t] = {"points":0, "goals_for": 0, "goals_against": 0}
+            self.table[t] = {"points":0, "goals_for": 0, "goals_against": 0, "goal_difference": 0}
+        # "standings" is a dictionary with keys "1st", "2nd", "3rd", "4th"
+        # and values being the team names.
+        self.standings = {"1st": None, "2nd": None, "3rd": None, "4th": None}
+        # results is a list of played matches, where each entry is a
+        # dict {"<team1_name>": <score>, "<team2_name>" <score>}
         self.results = []
+        # order of criteria for deciding group order
+        self.metrics = ["points","goal_difference","goals_for", "head-to-head", "random"]
 
     def play_match(self, fixture):
         """
@@ -101,21 +125,11 @@ class Group:
                 and values are the goals for that team
         """
         goals_1, goals_2 = predict_group_match(fixture.Team_1, fixture.Team_2)
-        self.table[fixture.Team_1]["goals_for"] += goals_1
-        self.table[fixture.Team_2]["goals_for"] += goals_2
-        self.table[fixture.Team_1]["goals_against"] += goals_2
-        self.table[fixture.Team_2]["goals_against"] += goals_1
-        if goals_1 > goals_2:
-            self.table[fixture.Team_1]["points"] += 3
-        elif goals_2 > goals_1:
-            self.table[fixture.Team_2]["points"] += 3
-        else:
-            self.table[fixture.Team_1]["points"] += 1
-            self.table[fixture.Team_2]["points"] += 1
-        result = {fixture.Team_1 : goals_1, fixture.Team_2 : goals_2}
+        result = {fixture.Team_1 : goals_1, fixture.Team_2: goals_2}
+        self.results.append(result)
         return result
 
-    def play_all_matches(self, fixture_df):
+    def play_all_matches(self, fixture_df, verbose=False):
         """
         Given the full DataFrame full of fixtures, find the ones that correspond
         to this group, and use them to fill our list of results
@@ -128,7 +142,33 @@ class Group:
             if fixture.Team_1 in self.teams and fixture.Team_2 in self.teams:
                 print(f"{fixture.Team_1} vs {fixture.Team_2}")
                 result = self.play_match(fixture)
-                self.results.append(result)
+                if verbose:
+                    print(result)
+
+    def calc_table(self):
+        """
+        Go through the results, and add points and goals to the table
+        """
+        # reset the table, in case we previously ran this function
+        for t in self.teams:
+            self.table[t]["points"] = 0
+            self.table[t]["goals_for"] = 0
+            self.table[t]["goals_against"] = 0
+        for result in self.results:
+            teams = list(result.keys())
+            if result[teams[0]] > result[teams[1]]:
+                self.table[teams[0]]["points"] += 3
+            elif result[teams[0]] < result[teams[1]]:
+                self.table[teams[1]]["points"] += 3
+            else:
+                self.table[teams[0]]["points"] += 1
+                self.table[teams[1]]["points"] += 1
+            for i,t in enumerate(teams):
+                self.table[t]["goals_for"] += result[t]
+                self.table[teams[(i+1)%2]]["goals_against"] += result[t]
+        # loop through teams again to fill in goal difference
+        for t in self.teams:
+            self.table[t]["goal_difference"] = self.table[t]["goals_for"] - self.table[t]["goals_against"]
 
 
     def get_qualifiers(self):
@@ -138,78 +178,163 @@ class Group:
         if len(self.results) < 6:
             print(f"Group {self.name} not finished yet - only {len(self.results)} matches played")
             return
-        sorted_table = self.sort_table()
-        return sorted_table[0]["team"], sorted_table[1]["team"]
+        self.calc_standings()
+
+        return self.standings["1st"], self.standings["2nd"]
 
 
-    def sort_two_teams(self, team_1, team_2):
+    def fill_standings_position(self, team, position):
         """
-        Decide which of two teams is ahead in the table, according to rules:
-        1) most points
-        2) best goal difference
-        3) most goals scored
-        4) head-to-head
-        5) random
-
-        Returns
-        =======
-        team_1, team_2: str, in order of higher-to-lower placing
+        Fill specified slot in our team standings.
         """
-        # decide by points
-        if self.table[team_1]["points"] > self.table[team_2]["points"]:
-            return team_1, team_2
-        elif self.table[team_1]["points"] < self.table[team_2]["points"]:
-            return team_2, team_1
-        # decide by goal difference
-        elif (self.table[team_1]["goals_for"] - self.table[team_1]["goals_for"])   >\
-              (self.table[team_2]["goals_for"] - self.table[team_2]["goals_for"]):
-               return team_1, team_2
-        elif (self.table[team_1]["goals_for"] - self.table[team_1]["goals_for"])   <\
-             (self.table[team_2]["goals_for"] - self.table[team_2]["goals_for"]):
-              return team_2, team_1
-        # decide by goals scored
-        elif self.table[team_1]["goals_for"] > self.table[team_2]["goals_for"]:
-              return team_1, team_2
-        elif self.table[team_1]["goals_for"] < self.table[team_2]["goals_for"]:
-              return team_2, team_1
-        # decide by head-to-head
-        else:
-            for result in self.results:
-                if list(result.keys()) == [team_1, team_2]:
-                    if result[team_1] > result[team_2]:
-                        return team_1, team_2
-                    elif result[team_2] > result[team_1]:
-                        return team_2, team_1
-                    break
-        # decide by random
-        if random.random() > 0.5:
-            return team_2, team_1
-        else:
-            return team_1, team_2
+        if self.standings[position]:
+            raise RuntimeError("Position {} is already filled!".format(position))
+        print("Putting {} in {}".format(team, position))
+        self.standings[position] = team
+        return
 
-    def sort_table(self):
-        team_list = [{"team": k, **v} for k,v in self.table.items()]
-        team_list = sorted(team_list, key=lambda t: t['points'],reverse=True)
-        # easy situation first
-        if team_list[0]["points"] > team_list[1]["points"] and team_list[1]["points"] > team_list[2]["points"]:
-            return team_list
-        else:
-            # see if we need to swap 2nd and 3rd
-            if team_list[1]["points"] == team_list[2]["points"]:
-                new_team_1, new_team_2 = self.sort_two_teams(team_list[1]["team"], team_list[2]["team"])
-                if new_team_1 != team_list[1]["team"]:
-                    tmp_team = team_list[1]
-                    team_list[1] = team_list[2]
-                    team_list[2] = tmp_team
-            # see if we need to swap 1st and 2nd
-            if team_list[0]["points"] == team_list[1]["points"]:
-                new_team_0, new_team_1 = self.sort_two_teams(team_list[0]["team"], team_list[1]["team"])
-                if new_team_0 != team_list[0]["team"]:
-                    tmp_team = team_list[0]
-                    team_list[0] = team_list[1]
-                    team_list[1] = tmp_team
-        return team_list
+    def find_head_to_head_winner(self, team_A, team_B):
+        team_1 = None
+        team_2 = None
+        for result in self.results:
+            if set(result.keys()) == set([team_A, team_B]):
+                if result[team_A] > result[team_B]:
+                    team_1 = team_A
+                    team_2 = team_B
+                elif result[team_B] > result[team_A]:
+                    team_1 = team_B
+                    team_2 = team_A
+                break
+        return team_1, team_2
 
+    def set_positions_using_metric(self, teams_to_sort, positions_to_fill, metric):
+        if len(teams_to_sort) != len(positions_to_fill):
+            raise RuntimeError(f"Can't fill {len(positions_to_fill)} positions with {len(teams_to_sort)} teams")
+        print("Sorting {} using {} to fill positions {}".format(teams_to_sort, metric, positions_to_fill))
+        # if random, just shuffle our list
+        if metric == "random":
+            random.shuffle(teams_to_sort)
+            for i, pos in enumerate(positions_to_fill):
+                self.fill_standings_position(teams_to_sort[i], pos)
+            print("randomly assigned {} teams".format(len(teams_to_sort)))
+            return
+        elif metric == "head-to-head":
+            if len(teams_to_sort) > 2:
+                print("Can't use head-to-head for more than 2 teams")
+                # skip ahead to random
+                self.set_positions_using_metric(teams_to_sort, positions_to_fill, "random")
+            else:
+                team_1, team_2 = self.find_head_to_head_winner(teams_to_sort[0],teams_to_sort[1])
+                if team_1 and team_2: # not null if there was a winner
+                    self.fill_standings_position(team_1, positions_to_fill[0])
+                    self.fill_standings_position(team_2, positions_to_fill[1])
+                else:
+                    # go to random
+                    self.set_positions_using_metric(teams_to_sort, positions_to_fill, "random")
+            return
+        # ok, otherwise we need to sort the table by the metric
+        team_dict = {t: self.table[t] for t in teams_to_sort }
+        team_scores = sort_teams_by(team_dict, metric) # list of dicts of teams
+        team_list = [t["team"] for t in team_scores] # ordered list of teams
+        # figure out the next metric, in case this one doesn't differentiate
+        current_metric_index = self.metrics.index(metric)
+        new_metric = self.metrics[current_metric_index+1]
+
+        # OK, let's get sorting!! Start with two-team case
+        if len(team_list) == 2:
+            if team_scores[0][metric] > team_scores[1][metric]: # one team is better
+                self.fill_standings_position(team_list[0],positions_to_fill[0])
+                self.fill_standings_position(team_list[1],positions_to_fill[1])
+                return
+            else:
+                # they are equal - call this func again with the next metric
+                self.set_positions_using_metric(team_list, positions_to_fill, new_metric)
+                return
+        elif len(team_list) == 3:
+            # 4 possible cases
+            if team_scores[0][metric] > team_scores[1][metric] and \
+               team_scores[1][metric] > team_scores[2][metric]: #1st > 2nd > 3rd
+                self.fill_standings_position(team_list[0],positions_to_fill[0])
+                self.fill_standings_position(team_list[1],positions_to_fill[1])
+                self.fill_standings_position(team_list[2],positions_to_fill[2])
+                return # we are done!
+            elif team_scores[0][metric] > team_scores[1][metric] and \
+                 team_scores[1][metric] == team_scores[2][metric]: #last two equal
+                self.fill_standings_position(team_list[0],positions_to_fill[0])
+                # call this func again with the last two, and the next metric
+                self.set_positions_using_metric(team_list[1:], positions_to_fill[1:], new_metric)
+                return
+            elif team_scores[0][metric] == team_scores[1][metric] and \
+                 team_scores[1][metric] > team_scores[2][metric]: #first two equal
+                self.fill_standings_position(team_list[2], positions_to_fill[2])
+                # call this func again with the first two, and the next metric
+                self.set_positions_using_metric(team_list[:2], positions_to_fill[:2], new_metric)
+            else: # all three teams equal - just move onto the next metric
+                self.set_positions_using_metric(team_list, positions_to_fill, new_metric)
+            return
+        elif len(team_list) == 4: # 8 possible cases.
+            print("TEAM LIST", team_scores)
+            if team_scores[0][metric] > team_scores[1][metric] and \
+               team_scores[1][metric] > team_scores[2][metric] and \
+               team_scores[2][metric] > team_scores[3][metric]: # case 1) all in order
+                self.fill_standings_position(team_list[0],"1st")
+                self.fill_standings_position(team_list[1],"2nd")
+                self.fill_standings_position(team_list[2],"3rd")
+                self.fill_standings_position(team_list[3],"4th")
+                # we are done!
+                return
+            elif team_scores[0][metric] == team_scores[1][metric] and \
+                 team_scores[1][metric] > team_scores[2][metric] and \
+                 team_scores[2][metric] > team_scores[3][metric]: # case 2) first two equal
+                self.fill_standings_position(team_list[2],"3rd")
+                self.fill_standings_position(team_list[3],"4th")
+                # call this func with the first two and the next metric
+                self.set_positions_using_metric(team_list[:2], positions_to_fill[:2], new_metric)
+            elif team_scores[0][metric] > team_scores[1][metric] and \
+                 team_scores[1][metric] == team_scores[2][metric] and \
+                 team_scores[2][metric] > team_scores[3][metric]: # case 3) middle two equal
+                self.fill_standings_position(team_list[0],"1st")
+                self.fill_standings_position(team_list[3],"4th")
+                # call this func with the middle two and the next metric
+                self.set_positions_using_metric(team_list[1:3], positions_to_fill[1:3], new_metric)
+            elif team_scores[0][metric] > team_scores[1][metric] and \
+                 team_scores[1][metric] > team_scores[2][metric] and \
+                 team_scores[2][metric] == team_scores[3][metric]: # case 4) last two equal
+                self.fill_standings_position(team_list[0],"1st")
+                self.fill_standings_position(team_list[1],"2nd")
+                # call this func with the last two and the next metric
+                self.set_positions_using_metric(team_list[2:], positions_to_fill[2:], new_metric)
+            elif team_scores[0][metric] == team_scores[1][metric] and \
+                 team_scores[1][metric] == team_scores[2][metric] and \
+                 team_scores[2][metric] > team_scores[3][metric]: # case 5) all equal except last
+                self.fill_standings_position(team_list[3],"4th")
+                # call this func with the first three and the next metric
+                self.set_positions_using_metric(team_list[:3], positions_to_fill[:3], new_metric)
+            elif team_scores[0][metric] > team_scores[1][metric] and \
+                 team_scores[1][metric] == team_scores[2][metric] and \
+                 team_scores[2][metric] == team_scores[3][metric]: # case 6) all equal except first
+                self.fill_standings_position(team_list[0],"1st")
+                # call this func with the last three and the next metric
+                self.set_positions_using_metric(team_list[1:], positions_to_fill[1:], new_metric)
+            elif team_scores[0][metric] == team_scores[1][metric] and \
+                 team_scores[1][metric] > team_scores[2][metric] and \
+                 team_scores[2][metric] == team_scores[3][metric]: # case 7) nightmare scenario!!
+                # call func with first two and next metric
+                self.set_positions_using_metric(team_list[:2], positions_to_fill[:2], new_metric)
+                # call func with last two and next metric
+                self.set_positions_using_metric(team_list[2:], positions_to_fill[2:], new_metric)
+            else:  # case 8) all equal - carry on to next metric
+                # call this func with the last three and the next metric
+                self.set_positions_using_metric(team_list, positions_to_fill, new_metric)
+            return
+
+    def calc_standings(self):
+        """
+        sort the table, and try and assign positions in the standings
+        """
+        self.calc_table()
+        self.set_positions_using_metric(self.teams, ["1st","2nd","3rd","4th"],"points")
+        return
 
     def __str__(self):
         max_team_name_length = 0
@@ -252,12 +377,12 @@ class Tournament:
                 continue
             if stage == "Group":
                 if set([row.Team_1, row.Team_2]) == set([team_1,team_2]):
-                    
+
                     fixtures_df.iloc[idx, fixtures_df.columns.get_loc('Played')] = True
                     # find the group
                     group = find_group(team_1, self.teams_df)
                     self.groups[group].add_result(team_1, team_2, score_1, score_2)
-                    
+
     def play_group_stage(self):
         for g in self.groups:
             g.play_all_matches(self.fixtures_df)
