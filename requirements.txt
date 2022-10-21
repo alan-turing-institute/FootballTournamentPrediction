@@ -1,3 +1,4 @@
 numpy
 pandas
 pytest
+git+https://github.com/anguswilliams91/bpl-next
