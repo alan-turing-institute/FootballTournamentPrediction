@@ -116,15 +116,17 @@ class WCPred:
         )
 
     def get_goal_probabilities_for_fixtures(self, max_goals: int = 10) -> dict[int, dict[str, DeviceArray]]:
-        """Get the probability that each team in a fixture scores any number of goals up
-        to max_goals."""
+        """
+        Get the probability that each team in a fixture scores any number of goals up
+        to max_goals.
+        """
         goals = np.arange(0, max_goals + 1)
         probs = {}
         if self.model is None:
             self.fit_model()
         for index, row in self.fixtures.iterrows():
             home_team_goal_prob = self.model.predict_score_n_proba(
-                goals, row.Team_1, row.Team_2, home=True
+                goals, row.Team_1, row.Team_2, home=False
             )
             away_team_goal_prob = self.model.predict_score_n_proba(
                 goals, row.Team_1, row.Team_2, home=False
