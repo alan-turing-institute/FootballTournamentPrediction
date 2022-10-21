@@ -222,3 +222,28 @@ def test_many_standings():
         g.calc_standings()
         assert sanity_check_points(g)
         assert sanity_check_goal_diff(g)
+
+
+def test_play_group_stage():
+    """
+    Play simulated group stage 100 times - ensure that we always have 16 qualifying teams at the end.
+    """
+    for _ in range(100):
+        t = Tournament()
+        t.play_group_stage()
+        for group in t.groups.values():
+            assert len(group.results) == 6
+            assert len(group.get_qualifiers()) == 2
+
+
+def test_play_knockout_stages():
+    """
+    Play simulated knockout stages 100 times, check that we always get a winner.
+    """
+    teams_df = get_teams_data()
+    teams = list(teams_df.Team.values)
+    t = Tournament()
+    t.play_group_stage()
+    for _ in range(100):
+        t.play_knockout_stages()
+        assert t.winner in teams

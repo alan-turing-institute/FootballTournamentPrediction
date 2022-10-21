@@ -333,6 +333,10 @@ class Group:
         sort the table, and try and assign positions in the standings
         """
         self.calc_table()
+        # reset the standings table to start from scratch
+        for k in self.standings.keys():
+            self.standings[k] = None
+        # now calculate the standings again
         self.set_positions_using_metric(self.teams, ["1st","2nd","3rd","4th"],"points")
         return
 
@@ -384,7 +388,7 @@ class Tournament:
                     self.groups[group].add_result(team_1, team_2, score_1, score_2)
 
     def play_group_stage(self):
-        for g in self.groups:
+        for g in self.groups.values():
             g.play_all_matches(self.fixtures_df)
 
 
@@ -393,7 +397,7 @@ class Tournament:
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
-        for g in self.groups:
+        for g in self.groups.values():
             if len(g.results) != 6:
                 print(f" Group {g.name} has only played {len(g.results)} matches")
             t1, t2 = g.get_qualifiers()
