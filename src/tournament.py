@@ -6,6 +6,8 @@ knockout stages, to the final, and produce a winner.
 import os
 import pandas as pd
 import random
+from bpl_interface import WCPred
+from typing import Optional, Union, List, Tuple
 
 
 def get_teams_data():
@@ -63,7 +65,7 @@ def sort_teams_by(table_dict, metric):
     return team_list
 
 
-def predict_knockout_match(team_1, team_2):
+def predict_knockout_match(wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None) -> str:
     """
     Parameters
     ==========
@@ -73,13 +75,12 @@ def predict_knockout_match(team_1, team_2):
     ========
     winning_team: str, one of team_1 or team_2
     """
-    if random.random()>0.5:
-        return team_2
-    else:
-        return team_1
+    return wc_pred.get_fixture_probabilities(fixture_teams = [(team_1, team_2)],
+                                             knockout = True,
+                                             seed = seed)["simulated_outcome"][0]
 
 
-def predict_group_match(team_1, team_2):
+def predict_group_match(wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None) -> Tuple[int, int]:
     """
     Parameters
     ==========
@@ -89,9 +90,7 @@ def predict_group_match(team_1, team_2):
     ========
     score_1, score_2: both int, score for each team
     """
-    score_1 = random.randint(0,3)
-    score_2 = random.randint(0,3)
-    return score_1, score_2
+    return wc_pred.get_fixture_goal_probabilities(fixture_teams = [(team_1, team_2)], seed = seed)[1][0]
 
 
 class Group:
@@ -111,7 +110,7 @@ class Group:
         # order of criteria for deciding group order
         self.metrics = ["points","goal_difference","goals_for", "head-to-head", "random"]
 
-    def play_match(self, fixture):
+    def play_match(self, wc_pred, fixture, seed = None):
         """
         Play a simulated group match.
 
@@ -124,12 +123,12 @@ class Group:
         result: dict, where keys are the team names,
                 and values are the goals for that team
         """
-        goals_1, goals_2 = predict_group_match(fixture.Team_1, fixture.Team_2)
+        goals_1, goals_2 = predict_group_match(wc_pred, fixture.Team_1, fixture.Team_2, seed)
         result = {fixture.Team_1 : goals_1, fixture.Team_2: goals_2}
         self.results.append(result)
         return result
 
-    def play_all_matches(self, fixture_df, verbose=False):
+    def play_all_matches(self, wc_pred, fixture_df, seed = None, verbose=False):
         """
         Given the full DataFrame full of fixtures, find the ones that correspond
         to this group, and use them to fill our list of results
@@ -141,7 +140,7 @@ class Group:
         for _, fixture in fixture_df.iterrows():
             if fixture.Team_1 in self.teams and fixture.Team_2 in self.teams:
                 print(f"{fixture.Team_1} vs {fixture.Team_2}")
-                result = self.play_match(fixture)
+                result = self.play_match(wc_pred, fixture, seed)
                 if verbose:
                     print(result)
 
@@ -170,7 +169,6 @@ class Group:
         for t in self.teams:
             self.table[t]["goal_difference"] = self.table[t]["goals_for"] - self.table[t]["goals_against"]
 
-
     def get_qualifiers(self):
         """
         return the two teams that topped the group
@@ -181,7 +179,6 @@ class Group:
         self.calc_standings()
 
         return self.standings["1st"], self.standings["2nd"]
-
 
     def fill_standings_position(self, team, position):
         """
@@ -395,7 +392,6 @@ class Tournament:
             self.groups[n] = g
         self.aliases = {}
 
-
     def add_result(self, team_1, team_2, score_1, score_2, stage):
         """
         Enter a match result explicitly
@@ -416,14 +412,18 @@ class Tournament:
         for idx, row in self.fixtures_df.iterrows():
             if stage != row.Stage:
                 continue
+            if stage == "Group":
+                if set([row.Team_1, row.Team_2]) == set([team_1,team_2]):
+                    self.fixtures_df.iloc[idx, self.fixtures_df.columns.get_loc('Played')] = True
+                    # find the group
+                    group = find_group(team_1, self.teams_df)
+                    self.groups[group].add_result(team_1, team_2, score_1, score_2)
 
-
-    def play_group_stage(self):
+    def play_group_stage(self, wc_pred, seed = None):
         for g in self.groups.values():
-            g.play_all_matches(self.fixtures_df)
+            g.play_all_matches(wc_pred, self.fixtures_df, seed)
 
-
-    def play_knockout_stages(self):
+    def play_knockout_stages(self, wc_pred, seed = None):
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
@@ -437,7 +437,7 @@ class Tournament:
         for stage in ["R16","QF","SF","F"]:
             for _, f in self.fixtures_df.iterrows():
                 if f.Stage == stage:
-                    self.aliases[f.Team_1+f.Team_2] = predict_knockout_match(self.aliases[f.Team_1], self.aliases[f.Team_2])
+                    self.aliases[f.Team_1+f.Team_2] = predict_knockout_match(wc_pred, self.aliases[f.Team_1], self.aliases[f.Team_2], seed)
         for k,v in self.aliases.items():
             if len(k) == 32:
                 self.winner = v
