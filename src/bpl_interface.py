@@ -11,7 +11,7 @@ from jax.numpy import DeviceArray
 class WCPred:
     def __init__(self,
                  results: pd.DataFrame,
-                 fixtures: pd.DataFrame,
+                 fixtures: Optional[pd.DataFrame] = None,
                  ratings: Optional[pd.DataFrame] = None,
                  teams: Optional[List[str]] = None,
                  years: Optional[List[int]] = None):
@@ -92,47 +92,85 @@ class WCPred:
         self.model = ExtendedDixonColesMatchPredictor().fit(self.training_data)
 
     def get_fixture_teams(self) -> List[Tuple[str, str]]:
+        if self.fixtures is None:
+            raise ValueError("No fixtures have been set into self.fixtures")
         return [(row.Team_1, row.Team_2) for index,row in self.fixtures.iterrows()]
 
-    def get_fixture_probabilities(self) -> pd.DataFrame:
+    def get_fixture_probabilities(self,
+                                  fixture_teams: Optional[List[Tuple[str,str]]] = None,
+                                  knockout: bool = False,
+                                  seed: Optional[int] = None) -> pd.DataFrame:
         """
-        Returns probabilities for all fixtures in a given gameweek and season, as a data
+        Returns probabilities and predictions for all fixtures in a given gameweek and season, as a data
         frame with a row for each fixture and columns being home_team,
         away_team, home_win_probability, draw_probability, away_win_probability.
         """
+        if seed is not None:
+            np.random.seed(seed)
         if self.model is None:
             self.fit_model()
-        fixture_teams = self.get_fixture_teams()
+        # if fixture_teams is not passed, we just predict for all games in self.fixtures by default
+        if fixture_teams is None:
+            fixture_teams = self.get_fixture_teams()
         Team_1, Team_2 = zip(*fixture_teams)
-        probabilities = self.model.predict_outcome_proba(Team_1, Team_2)
+        p = self.model.predict_outcome_proba(Team_1, Team_2)
+        # predict outcome of the game
+        simulated_outcome = []
+        for i in range(len(fixture_teams)):
+            if knockout:
+                prob = np.array([p["home_win"][i], p["away_win"][i]])
+                simulated_outcome.append(np.random.choice(a=[Team_1[i], Team_2[i]],
+                                                          p=prob/prob.sum()))
+            else:
+                prob = np.array([p["home_win"][i], p["draw"][i], p["away_win"][i]])
+                simulated_outcome.append(np.random.choice(a=[Team_1[i], "Draw", Team_2[i]],
+                                                          p=prob/prob.sum()))
         return pd.DataFrame(
             {
                 "Team_1": Team_1,
                 "Team_2": Team_2,
-                "home_win_probability": probabilities["home_win"],
-                "draw_probability": probabilities["draw"],
-                "away_win_probability": probabilities["away_win"],
+                "Team_1_win_probability": p["home_win"],
+                "draw_probability": p["draw"],
+                "Team_2_win_probability": p["away_win"],
+                "simulated_outcome": simulated_outcome
             }
         )
 
-    def get_goal_probabilities_for_fixtures(self, max_goals: int = 10) -> dict[int, dict[str, DeviceArray]]:
+    def get_fixture_goal_probabilities(self,
+                                       fixture_teams: Optional[List[Tuple[str,str]]] = None,
+                                       seed: Optional[int] = None,
+                                       max_goals: int = 10) -> Tuple[dict[int, dict[str, DeviceArray]], List[Tuple[int, int]]]:
         """
-        Get the probability that each team in a fixture scores any number of goals up
-        to max_goals.
+        Get the probability that each team in a fixture scores any number of goals up to max_goals,
+        and prediction of goals scored.
         """
-        goals = np.arange(0, max_goals + 1)
-        probs = {}
+        if seed is not None:
+            np.random.seed(seed)
         if self.model is None:
             self.fit_model()
-        for index, row in self.fixtures.iterrows():
+        goals = np.arange(0, max_goals + 1)
+        probs = {}
+        simulated_scores = []
+        # if fixture_teams is not passed, we just predict for all games in self.fixtures by default
+        if fixture_teams is None:
+            fixture_teams = self.get_fixture_teams()
+        Team_1, Team_2 = zip(*fixture_teams)
+        for i in range(len(fixture_teams)):
             home_team_goal_prob = self.model.predict_score_n_proba(
-                goals, row.Team_1, row.Team_2, home=False
+                goals, Team_1[i], Team_2[i], home=False
             )
             away_team_goal_prob = self.model.predict_score_n_proba(
-                goals, row.Team_1, row.Team_2, home=False
+                goals, Team_1[i], Team_2[i], home=False
             )
-            probs[index] = {
-                row.Team_1: {g: p for g, p in zip(goals, home_team_goal_prob)},
-                row.Team_2: {g: p for g, p in zip(goals, away_team_goal_prob)},
+            probs[i] = {
+                Team_1[i]: {g: p for g, p in zip(goals, home_team_goal_prob)},
+                Team_2[i]: {g: p for g, p in zip(goals, away_team_goal_prob)},
             }
-        return probs
+            # predict number of goals scored by Team 1
+            T1_prob = np.array(list(probs[i][Team_1[i]].values()))
+            T1_goals = np.random.choice(a=range(max_goals+1), p=T1_prob/T1_prob.sum())
+            # predict number of goals scored by Team 2
+            T2_prob = np.array(list(probs[i][Team_2[i]].values()))
+            T2_goals = np.random.choice(a=range(max_goals+1), p=T2_prob/T2_prob.sum())
+            simulated_scores.append((T1_goals, T2_goals))
+        return probs, simulated_scores
