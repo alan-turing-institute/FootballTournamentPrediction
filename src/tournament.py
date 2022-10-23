@@ -340,6 +340,37 @@ class Group:
         self.set_positions_using_metric(self.teams, ["1st","2nd","3rd","4th"],"points")
         return
 
+    def check_if_result_exists(self, team_1, team_2):
+        """
+        See if we already have a result for these two teams.
+
+        Parameters
+        ==========
+        team_1, team_2: both str, team names, as in teams.csv
+
+        Returns
+        =======
+        True if result already stored, False otherwise
+        """
+        for result in self.results:
+            if set([team_1, team_2]) == set(result.keys()):
+                return True
+        return False
+
+    def add_result(self, team_1, team_2, score_1, score_2):
+        """
+        Add a result for a group-stage match.
+
+        Parameters
+        ==========
+        team_1, team_2: both str, team names, as in teams.csv
+        score_1, score_2: both int, number of goals scored by each team.
+        """
+        if not self.check_if_result_exists(team_1, team_2):
+            result = {team_1: score_1, team_2: score_2}
+            self.results.append(result)
+        return
+
     def __str__(self):
         max_team_name_length = 0
         for t in self.teams:
@@ -365,7 +396,7 @@ class Tournament:
         self.aliases = {}
 
 
-    def add_result(team_1, team_2, score_1, score_2, stage):
+    def add_result(self, team_1, team_2, score_1, score_2, stage):
         """
         Enter a match result explicitly
 
@@ -375,17 +406,17 @@ class Tournament:
         score_1, score_2: both int, scores of respective teams
         stage: str, must be "Group", "R16", "QF", "SF", "F"
         """
+        if stage == "Group":
+            # find the group
+            group = find_group(team_1, self.teams_df)
+            self.groups[group].add_result(team_1, team_2, score_1, score_2)
+            return
+        # find aliases for the two teams
         # find the fixture
-        for idx, row in self.fixtures_df:
+        for idx, row in self.fixtures_df.iterrows():
             if stage != row.Stage:
                 continue
-            if stage == "Group":
-                if set([row.Team_1, row.Team_2]) == set([team_1,team_2]):
 
-                    fixtures_df.iloc[idx, fixtures_df.columns.get_loc('Played')] = True
-                    # find the group
-                    group = find_group(team_1, self.teams_df)
-                    self.groups[group].add_result(team_1, team_2, score_1, score_2)
 
     def play_group_stage(self):
         for g in self.groups.values():

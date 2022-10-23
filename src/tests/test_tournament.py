@@ -224,6 +224,25 @@ def test_many_standings():
         assert sanity_check_goal_diff(g)
 
 
+def test_add_group_result():
+    """
+    Add a result and check that the group has the result.
+    """
+    t = Tournament()
+    t.add_result("Qatar","Netherlands", 3, 2, "Group")
+    assert len(t.groups["A"].results) == 1
+
+
+def test_add_group_result_twice():
+    """
+    Add same result twice and check that the group has the result once.
+    """
+    t = Tournament()
+    t.add_result("Qatar","Netherlands", 3, 2, "Group")
+    t.add_result("Netherlands","Qatar", 1, 1, "Group")
+    assert len(t.groups["A"].results) == 1
+
+
 def test_play_group_stage():
     """
     Play simulated group stage 100 times - ensure that we always have 16 qualifying teams at the end.
