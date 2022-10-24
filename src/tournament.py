@@ -225,13 +225,15 @@ class Group:
 
     def fill_standings_position(self,
                                 team: str,
-                                position: int) -> None:
+                                position: int,
+                                verbose: bool = False) -> None:
         """
         Fill specified slot in our team standings.
         """
         if self.standings[position]:
             raise RuntimeError("Position {} is already filled!".format(position))
-        print("Putting {} in {}".format(team, position))
+        if verbose:
+            print("Putting {} in {}".format(team, position))
         self.standings[position] = team
         return
 
@@ -254,7 +256,8 @@ class Group:
     def set_positions_using_metric(self,
                                    teams_to_sort: List[str],
                                    positions_to_fill: List[str],
-                                   metric: str) -> None:
+                                   metric: str,
+                                   verbose: bool = False) -> None:
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(f"Can't fill {len(positions_to_fill)} positions with {len(teams_to_sort)} teams")
         if verbose:
@@ -322,7 +325,8 @@ class Group:
                 self.set_positions_using_metric(team_list, positions_to_fill, new_metric)
             return
         elif len(team_list) == 4: # 8 possible cases.
-            print("TEAM LIST", team_scores)
+            if verbose:
+                print("TEAM LIST", team_scores)
             if team_scores[0][metric] > team_scores[1][metric] and \
                team_scores[1][metric] > team_scores[2][metric] and \
                team_scores[2][metric] > team_scores[3][metric]: # case 1) all in order
