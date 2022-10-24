@@ -22,6 +22,30 @@ def get_fixture_data():
     return pd.read_csv(csv_path)
 
 
+def get_fifa_rankings_data():
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(current_dir, "..","data","fifa_rankings.csv")
+    return pd.read_csv(csv_path)
+
+
+def get_results_data():
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(current_dir, "..","data","match_results_since_2018.csv")
+    return pd.read_csv(csv_path,parse_dates=['date'])
+
+
+def get_and_train_model():
+    results = get_results_data()
+    teams = list(get_teams_data().Team)
+    ratings = get_fifa_rankings_data()
+    wc_pred = WCPred(results=results,
+                     teams=teams,
+                     ratings=ratings)
+    wc_pred.set_training_data()
+    wc_pred.fit_model()
+    return wc_pred
+
+
 def find_group(team, teams_df):
     """
     Look in teams_df and find the group for a given team
@@ -139,7 +163,8 @@ class Group:
         """
         for _, fixture in fixture_df.iterrows():
             if fixture.Team_1 in self.teams and fixture.Team_2 in self.teams:
-                print(f"{fixture.Team_1} vs {fixture.Team_2}")
+                if verbose:
+                    print(f"{fixture.Team_1} vs {fixture.Team_2}")
                 result = self.play_match(wc_pred, fixture, seed)
                 if verbose:
                     print(result)
@@ -204,16 +229,18 @@ class Group:
                 break
         return team_1, team_2
 
-    def set_positions_using_metric(self, teams_to_sort, positions_to_fill, metric):
+    def set_positions_using_metric(self, teams_to_sort, positions_to_fill, metric, verbose=False):
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(f"Can't fill {len(positions_to_fill)} positions with {len(teams_to_sort)} teams")
-        print("Sorting {} using {} to fill positions {}".format(teams_to_sort, metric, positions_to_fill))
+        if verbose:
+            print("Sorting {} using {} to fill positions {}".format(teams_to_sort, metric, positions_to_fill))
         # if random, just shuffle our list
         if metric == "random":
             random.shuffle(teams_to_sort)
             for i, pos in enumerate(positions_to_fill):
                 self.fill_standings_position(teams_to_sort[i], pos)
-            print("randomly assigned {} teams".format(len(teams_to_sort)))
+            if verbose:
+                print("randomly assigned {} teams".format(len(teams_to_sort)))
             return
         elif metric == "head-to-head":
             if len(teams_to_sort) > 2:
@@ -391,6 +418,7 @@ class Tournament:
             g = Group(n, list(self.teams_df[self.teams_df["Group"]==n].Team.values))
             self.groups[n] = g
         self.aliases = {}
+        self.is_complete = False
 
     def add_result(self, team_1, team_2, score_1, score_2, stage):
         """
@@ -442,3 +470,43 @@ class Tournament:
             if len(k) == 32:
                 self.winner = v
         print(f"====== WINNER: {self.winner} =======")
+        self.is_complete = True
+
+
+    def get_furthest_position_for_team(self, team_name):
+        """
+        Given a team name, see how far they got in the tournament.
+
+        Parameters
+        ==========
+        team_name: str, one of the team names, as defined in teams.csv
+
+        Returns
+        =======
+        "G", "R16", "QF", "SF", "RU", "W" depending on how far the team got.
+        """
+        if not self.is_complete:
+            print("Tournament is not yet complete")
+            return None
+        if self.winner == team_name:
+            return "W"
+        elif team_name not in self.aliases.values():
+            return "G"
+        else:
+            # the length of the 'alias' string, e.g. "1A2B" shows how far a team got
+            key_length_lookup = {
+                2: "R16",
+                4: "QF",
+                8: "SF",
+                16: "RU"
+            }
+            # convert the aliases dict into a list, and sort by length of the key
+            # (this will represent how far the team got - if we look in reverse order
+            # of key length, we will find the latest stage a team got to first)
+            alias_list = [(k,v) for k,v in self.aliases.items()]
+            sorted_aliases = sorted(alias_list, key=lambda x: len(x[0]), reverse=True)
+            for k,v in sorted_aliases:
+                if v == team_name:
+                    return key_length_lookup[len(k)]
+            # we should never get to here
+            raise RuntimeError(f"Unable to find team {team_name} in aliases table")
