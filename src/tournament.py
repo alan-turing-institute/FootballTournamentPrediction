@@ -89,7 +89,10 @@ def sort_teams_by(table_dict, metric):
     return team_list
 
 
-def predict_knockout_match(wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None) -> str:
+def predict_knockout_match(wc_pred: WCPred,
+                           team_1: str,
+                           team_2: str,
+                           seed: Optional[int] = None) -> str:
     """
     Parameters
     ==========
@@ -104,7 +107,10 @@ def predict_knockout_match(wc_pred: WCPred, team_1: str, team_2: str, seed: Opti
                                              seed = seed)["simulated_outcome"][0]
 
 
-def predict_group_match(wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None) -> Tuple[int, int]:
+def predict_group_match(wc_pred: WCPred,
+                        team_1: str,
+                        team_2: str,
+                        seed: Optional[int] = None) -> Tuple[int, int]:
     """
     Parameters
     ==========
@@ -114,11 +120,12 @@ def predict_group_match(wc_pred: WCPred, team_1: str, team_2: str, seed: Optiona
     ========
     score_1, score_2: both int, score for each team
     """
-    return wc_pred.get_fixture_goal_probabilities(fixture_teams = [(team_1, team_2)], seed = seed)[1][0]
+    return wc_pred.get_fixture_goal_probabilities(fixture_teams = [(team_1, team_2)],
+                                                  seed = seed)[1][0]
 
 
 class Group:
-    def __init__(self, name, teams):
+    def __init__(self, name: str, teams: List[str]):
         self.name = name
         self.teams = teams
         # "table" is a dictionary keyed by team name, with the points, gf,ga
@@ -134,7 +141,10 @@ class Group:
         # order of criteria for deciding group order
         self.metrics = ["points","goal_difference","goals_for", "head-to-head", "random"]
 
-    def play_match(self, wc_pred, fixture, seed = None):
+    def play_match(self,
+                   wc_pred: WCPred,
+                   fixture: pd.Series,
+                   seed = None) -> dict[str, int]:
         """
         Play a simulated group match.
 
@@ -147,12 +157,19 @@ class Group:
         result: dict, where keys are the team names,
                 and values are the goals for that team
         """
-        goals_1, goals_2 = predict_group_match(wc_pred, fixture.Team_1, fixture.Team_2, seed)
-        result = {fixture.Team_1 : goals_1, fixture.Team_2: goals_2}
+        goals_1, goals_2 = predict_group_match(wc_pred = wc_pred,
+                                               team_1 = fixture.Team_1,
+                                               team_2 = fixture.Team_2,
+                                               seed = seed)
+        result = {fixture.Team_1: goals_1, fixture.Team_2: goals_2}
         self.results.append(result)
         return result
 
-    def play_all_matches(self, wc_pred, fixture_df, seed = None, verbose=False):
+    def play_all_matches(self,
+                         wc_pred: WCPred,
+                         fixture_df: pd.DataFrame,
+                         seed: Optional[int] = None,
+                         verbose: bool = False) -> None:
         """
         Given the full DataFrame full of fixtures, find the ones that correspond
         to this group, and use them to fill our list of results
@@ -167,9 +184,10 @@ class Group:
                     print(f"{fixture.Team_1} vs {fixture.Team_2}")
                 result = self.play_match(wc_pred, fixture, seed)
                 if verbose:
-                    print(result)
+                    print(f"{fixture.Team_1} vs {fixture.Team_2}: "
+                          + f"{result[fixture.Team_1]}-{result[fixture.Team_2]}")
 
-    def calc_table(self):
+    def calc_table(self) -> None:
         """
         Go through the results, and add points and goals to the table
         """
@@ -194,7 +212,7 @@ class Group:
         for t in self.teams:
             self.table[t]["goal_difference"] = self.table[t]["goals_for"] - self.table[t]["goals_against"]
 
-    def get_qualifiers(self):
+    def get_qualifiers(self) -> Tuple:
         """
         return the two teams that topped the group
         """
@@ -205,7 +223,9 @@ class Group:
 
         return self.standings["1st"], self.standings["2nd"]
 
-    def fill_standings_position(self, team, position):
+    def fill_standings_position(self,
+                                team: str,
+                                position: int) -> None:
         """
         Fill specified slot in our team standings.
         """
@@ -215,7 +235,9 @@ class Group:
         self.standings[position] = team
         return
 
-    def find_head_to_head_winner(self, team_A, team_B):
+    def find_head_to_head_winner(self,
+                                 team_A: str,
+                                 team_B: str) -> Tuple[str, str]:
         team_1 = None
         team_2 = None
         for result in self.results:
@@ -229,7 +251,10 @@ class Group:
                 break
         return team_1, team_2
 
-    def set_positions_using_metric(self, teams_to_sort, positions_to_fill, metric, verbose=False):
+    def set_positions_using_metric(self,
+                                   teams_to_sort: List[str],
+                                   positions_to_fill: List[str],
+                                   metric: str) -> None:
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(f"Can't fill {len(positions_to_fill)} positions with {len(teams_to_sort)} teams")
         if verbose:
@@ -352,7 +377,7 @@ class Group:
                 self.set_positions_using_metric(team_list, positions_to_fill, new_metric)
             return
 
-    def calc_standings(self):
+    def calc_standings(self) -> None:
         """
         sort the table, and try and assign positions in the standings
         """
@@ -367,11 +392,9 @@ class Group:
     def check_if_result_exists(self, team_1, team_2):
         """
         See if we already have a result for these two teams.
-
         Parameters
         ==========
         team_1, team_2: both str, team names, as in teams.csv
-
         Returns
         =======
         True if result already stored, False otherwise
@@ -384,7 +407,6 @@ class Group:
     def add_result(self, team_1, team_2, score_1, score_2):
         """
         Add a result for a group-stage match.
-
         Parameters
         ==========
         team_1, team_2: both str, team names, as in teams.csv
@@ -395,7 +417,7 @@ class Group:
             self.results.append(result)
         return
 
-    def __str__(self):
+    def __str__(self) -> str:
         max_team_name_length = 0
         for t in self.teams:
             if len(t) > max_team_name_length:
@@ -420,7 +442,12 @@ class Tournament:
         self.aliases = {}
         self.is_complete = False
 
-    def add_result(self, team_1, team_2, score_1, score_2, stage):
+    def add_result(self,
+                   team_1: str,
+                   team_2: str,
+                   score_1: int,
+                   score_2: int,
+                   stage: str) -> None:
         """
         Enter a match result explicitly
 
@@ -430,14 +457,8 @@ class Tournament:
         score_1, score_2: both int, scores of respective teams
         stage: str, must be "Group", "R16", "QF", "SF", "F"
         """
-        if stage == "Group":
-            # find the group
-            group = find_group(team_1, self.teams_df)
-            self.groups[group].add_result(team_1, team_2, score_1, score_2)
-            return
-        # find aliases for the two teams
         # find the fixture
-        for idx, row in self.fixtures_df.iterrows():
+        for idx, row in self.fixtures_df:
             if stage != row.Stage:
                 continue
             if stage == "Group":
@@ -447,25 +468,39 @@ class Tournament:
                     group = find_group(team_1, self.teams_df)
                     self.groups[group].add_result(team_1, team_2, score_1, score_2)
 
-    def play_group_stage(self, wc_pred, seed = None):
+    def play_group_stage(self,
+                         wc_pred: WCPred,
+                         seed: Optional[int] = None,
+                         verbose: bool = False) -> None:
         for g in self.groups.values():
-            g.play_all_matches(wc_pred, self.fixtures_df, seed)
+            g.play_all_matches(wc_pred = wc_pred,
+                               fixture_df = self.fixtures_df,
+                               seed = seed,
+                               verbose = verbose)
 
-    def play_knockout_stages(self, wc_pred, seed = None):
+    def play_knockout_stages(self,
+                             wc_pred: WCPred,
+                             seed: Optional[int] = None,
+                             verbose: bool = False) -> None:
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
         for g in self.groups.values():
             if len(g.results) != 6:
-                print(f" Group {g.name} has only played {len(g.results)} matches")
+                print(f" Group {g.name} has played {len(g.results)} matches")
             t1, t2 = g.get_qualifiers()
             self.aliases["1"+g.name] = t1
             self.aliases["2"+g.name] = t2
         for stage in ["R16","QF","SF","F"]:
             for _, f in self.fixtures_df.iterrows():
                 if f.Stage == stage:
-                    self.aliases[f.Team_1+f.Team_2] = predict_knockout_match(wc_pred, self.aliases[f.Team_1], self.aliases[f.Team_2], seed)
+                    self.aliases[f.Team_1+f.Team_2] = predict_knockout_match(wc_pred = wc_pred,
+                                                                             team_1 = self.aliases[f.Team_1],
+                                                                             team_2 = self.aliases[f.Team_2],
+                                                                             seed = seed)
+                    if verbose:
+                        print(f"{stage}: {f.Team_1} vs {f.Team_2}: Winner: {self.aliases[f.Team_1+f.Team_2]}" )
         for k,v in self.aliases.items():
             if len(k) == 32:
                 self.winner = v
