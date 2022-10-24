@@ -160,7 +160,7 @@ class WCPred:
                 goals, Team_1[i], Team_2[i], home=False
             )
             away_team_goal_prob = self.model.predict_score_n_proba(
-                goals, Team_1[i], Team_2[i], home=False
+                goals, Team_2[i], Team_1[i], home=False
             )
             probs[i] = {
                 Team_1[i]: {g: p for g, p in zip(goals, home_team_goal_prob)},
