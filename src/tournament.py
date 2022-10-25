@@ -34,13 +34,22 @@ def get_results_data():
     return pd.read_csv(csv_path,parse_dates=['date'])
 
 
-def get_and_train_model():
+def get_and_train_model(only_wc_teams: bool = True,
+                        use_ratings: bool = True):
     results = get_results_data()
     teams = list(get_teams_data().Team)
     ratings = get_fifa_rankings_data()
-    wc_pred = WCPred(results=results,
-                     teams=teams,
-                     ratings=ratings)
+    if (only_wc_teams and use_ratings):    
+        wc_pred = WCPred(results=results,
+                        teams=teams,
+                        ratings=ratings)
+    elif only_wc_teams and not use_ratings:
+        wc_pred = WCPred(results=results,
+                        teams=teams)
+    elif not only_wc_teams and use_ratings:
+        raise ValueError("Cannot fit model for all teams and use fifa ratings as don't have ratings for every country")
+    else:
+        wc_pred = WCPred(results=results)
     wc_pred.set_training_data()
     wc_pred.fit_model()
     return wc_pred
