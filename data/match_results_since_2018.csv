@@ -71,18 +71,14 @@
 69,2018-08-18,Grenada,Jamaica,1,5,Friendly,St. George's,Grenada,False
 70,2018-08-18,Guatemala,Cuba,1,0,Friendly,Quetzaltenango,Guatemala,False
 71,2018-08-20,Barbados,Jamaica,2,2,Friendly,Bridgetown,Barbados,False
-72,2018-08-22,Sint Maarten,Anguilla,1,1,Friendly,Philipsburg,Sint Maarten,False
-73,2018-08-25,Anguilla,Saint Martin,1,2,Friendly,The Valley,Anguilla,False
 74,2018-08-26,Barbados,Cuba,0,0,Friendly,Bridgetown,Barbados,False
 75,2018-08-29,Bangladesh,Sri Lanka,0,1,Friendly,Nilphamari Sadar,Bangladesh,False
 76,2018-08-29,Barbados,Cuba,0,2,Friendly,Bridgetown,Barbados,False
 77,2018-08-29,Macau,Solomon Islands,1,4,Friendly,Taipa,Macau,False
-78,2018-09-01,Timor-Leste,Brunei,3,1,AFF Championship qualification,Kuala Lumpur,Malaysia,True
+78,2018-09-01,Timor-Leste,Brunei Darussalam,3,1,AFF Championship qualification,Kuala Lumpur,Malaysia,True
 79,2018-09-02,Ethiopia,Burundi,1,1,Friendly,Hawassa,Ethiopia,False
-80,2018-09-02,Guam,Northern Mariana Islands,4,0,EAFF Championship,Ulaanbaatar,Mongolia,True
 81,2018-09-02,Mongolia,Macau,4,1,EAFF Championship,Ulaanbaatar,Mongolia,False
 82,2018-09-04,Macau,Guam,2,0,EAFF Championship,Ulaanbaatar,Mongolia,True
-83,2018-09-04,Mongolia,Northern Mariana Islands,9,0,EAFF Championship,Ulaanbaatar,Mongolia,False
 84,2018-09-04,Nepal,Pakistan,1,2,SAFF Cup,Dhaka,Bangladesh,True
 85,2018-09-04,Bangladesh,Bhutan,2,0,SAFF Cup,Dhaka,Bangladesh,False
 86,2018-09-05,Fiji,Solomon Islands,1,1,Friendly,Suva,Fiji,False
@@ -105,7 +101,6 @@
 103,2018-09-06,Portugal,Croatia,1,1,Friendly,Faro-Loulé,Portugal,False
 104,2018-09-06,Trinidad and Tobago,United Arab Emirates,2,0,Friendly,Llagostera,Trinidad and Tobago,False
 105,2018-09-06,Uzbekistan,Syria,1,1,Friendly,Tashkent,Uzbekistan,False
-106,2018-09-06,Northern Mariana Islands,Macau,1,1,EAFF Championship,Ulaanbaatar,Mongolia,True
 107,2018-09-06,Mongolia,Guam,1,1,EAFF Championship,Ulaanbaatar,Mongolia,False
 108,2018-09-06,Nepal,Bhutan,4,0,SAFF Cup,Dhaka,Bangladesh,True
 109,2018-09-06,Bangladesh,Pakistan,1,0,SAFF Cup,Dhaka,Bangladesh,False
@@ -129,7 +124,6 @@
 127,2018-09-07,USA,Brazil,0,2,Friendly,East Rutherford,USA,False
 128,2018-09-07,Venezuela,Colombia,1,2,Friendly,Miami Gardens,USA,True
 129,2018-09-07,Maldives,Sri Lanka,0,0,SAFF Cup,Dhaka,Bangladesh,True
-130,2018-09-07,Anguilla,French Guiana,0,5,CONCACAF Nations League qualification,The Valley,Anguilla,False
 131,2018-09-07,Antigua and Barbuda,Saint Lucia,0,3,CONCACAF Nations League qualification,North Sound,Antigua and Barbuda,False
 132,2018-09-07,Belize,Bahamas,4,0,CONCACAF Nations League qualification,Belmopan,Belize,False
 133,2018-09-08,Switzerland,Iceland,6,0,UEFA Nations League,St. Gallen,Switzerland,False
@@ -139,7 +133,7 @@
 137,2018-09-08,Estonia,Greece,0,1,UEFA Nations League,Tallinn,Estonia,False
 138,2018-09-08,Belarus,San Marino,5,0,UEFA Nations League,Minsk,Belarus,False
 139,2018-09-08,Luxembourg,Moldova,4,0,UEFA Nations League,Luxembourg City,Luxembourg,False
-140,2018-09-08,Brunei,Timor-Leste,1,0,AFF Championship qualification,Bandar Seri Begawan,Brunei,False
+140,2018-09-08,Brunei Darussalam,Timor-Leste,1,0,AFF Championship qualification,Bandar Seri Begawan,Brunei,False
 141,2018-09-08,Equatorial Guinea,Sudan,1,0,African Cup of Nations qualification,Bata,Equatorial Guinea,False
 142,2018-09-08,Comoros,Cameroon,1,1,African Cup of Nations qualification,Mitsamiouli,Comoros,False
 143,2018-09-08,Gabon,Burundi,1,1,African Cup of Nations qualification,Libreville,Gabon,False
@@ -167,7 +161,6 @@
 165,2018-09-09,Congo,Zimbabwe,1,1,African Cup of Nations qualification,Brazzaville,Congo,False
 166,2018-09-09,Rwanda,Ivory Coast,1,2,African Cup of Nations qualification,Kigali,Rwanda,False
 167,2018-09-09,India,Maldives,2,0,SAFF Cup,Dhaka,Bangladesh,True
-168,2018-09-09,Bonaire,Dominican Republic,0,5,CONCACAF Nations League qualification,Willemstad,Netherlands Antilles,True
 169,2018-09-09,USA Virgin Islands,Canada,0,8,CONCACAF Nations League qualification,Bradenton,USA,True
 170,2018-09-09,Aruba,Bermuda,3,1,CONCACAF Nations League qualification,Willemstad,Netherlands Antilles,True
 171,2018-09-09,Jamaica,Cayman Islands,4,0,CONCACAF Nations League qualification,Kingston,Jamaica,False
@@ -186,7 +179,6 @@
 184,2018-09-10,Kyrgyzstan,Syria,2,1,Friendly,Bishkek,Kyrgyzstan,False
 185,2018-09-10,Russia,Czech Republic,5,1,Friendly,Rostov-on-Don,Russia,False
 186,2018-09-10,Saudi Arabia,Bolivia,2,2,Friendly,Riyadh,Saudi Arabia,False
-187,2018-09-10,Haiti,Sint Maarten,13,0,CONCACAF Nations League qualification,Port-au-Prince,Haiti,False
 188,2018-09-10,Curaçao,Grenada,10,0,CONCACAF Nations League qualification,Willemstad,Curaçao,False
 189,2018-09-11,Iceland,Belgium,0,3,UEFA Nations League,Reykjavík,Iceland,False
 190,2018-09-11,Spain,Croatia,6,0,UEFA Nations League,Elche,Spain,False
@@ -213,7 +205,6 @@
 211,2018-09-11,Singapore,Fiji,2,0,Friendly,Bishan,Singapore,False
 212,2018-09-11,USA,Mexico,1,0,Friendly,Nashville,USA,False
 213,2018-09-11,Uzbekistan,Iran,0,1,Friendly,Tashkent,Uzbekistan,False
-214,2018-09-11,Saint Martin,Guadeloupe,0,3,CONCACAF Nations League qualification,The Valley,Anguilla,True
 215,2018-09-12,Brazil,El Salvador,5,0,Friendly,Landover,USA,True
 216,2018-09-12,India,Pakistan,3,1,SAFF Cup,Dhaka,Bangladesh,True
 217,2018-09-12,Nepal,Maldives,0,3,SAFF Cup,Dhaka,Bangladesh,True
@@ -243,7 +234,6 @@
 241,2018-10-11,USA,Colombia,2,4,Friendly,Tampa,USA,False
 242,2018-10-11,Wales,Spain,1,4,Friendly,Cardiff,Wales,False
 243,2018-10-11,Congo,Liberia,3,1,African Cup of Nations qualification,Brazzaville,Congo,False
-244,2018-10-11,French Guiana,Saint Vincent and the Grenadines,0,1,CONCACAF Nations League qualification,Cayenne,French Guiana,False
 245,2018-10-12,Belgium,Switzerland,2,1,UEFA Nations League,Brussels,Belgium,False
 246,2018-10-12,Croatia,England,0,0,UEFA Nations League,Rijeka,Croatia,False
 247,2018-10-12,Austria,Northern Ireland,1,0,UEFA Nations League,Vienna,Austria,False
@@ -266,11 +256,9 @@
 264,2018-10-12,Angola,Mauritania,4,1,African Cup of Nations qualification,Luanda,Angola,False
 265,2018-10-12,Egypt,Eswatini,4,1,African Cup of Nations qualification,Cairo,Egypt,False
 266,2018-10-12,Cape Verde,Tanzania,3,0,African Cup of Nations qualification,Praia,Cape Verde,False
-267,2018-10-12,Basque Country,Venezuela,4,2,Friendly,Vitoria-Gasteiz,Spain,False
 268,2018-10-12,USA Virgin Islands,Curaçao,0,5,CONCACAF Nations League qualification,Bradenton,USA,True
 269,2018-10-12,Bahamas,Antigua and Barbuda,0,6,CONCACAF Nations League qualification,Nassau,Bahamas,False
 270,2018-10-12,Dominican Republic,Cayman Islands,3,0,CONCACAF Nations League qualification,Santiago de los Caballeros,Dominican Republic,False
-271,2018-10-12,Bermuda,Sint Maarten,12,0,CONCACAF Nations League qualification,Hamilton,Bermuda,False
 272,2018-10-12,Grenada,Cuba,0,2,CONCACAF Nations League qualification,St. George's,Grenada,False
 273,2018-10-13,Netherlands,Germany,3,0,UEFA Nations League,Amsterdam,Netherlands,False
 274,2018-10-13,Slovakia,Czech Republic,1,2,UEFA Nations League,Trnava,Slovakia,False
@@ -287,7 +275,6 @@
 285,2018-10-13,Uzbekistan,North Korea,2,0,Friendly,Tashkent,Uzbekistan,False
 286,2018-10-13,Equatorial Guinea,Madagascar,0,1,African Cup of Nations qualification,Bata,Equatorial Guinea,False
 287,2018-10-13,Nigeria,Libya,4,0,African Cup of Nations qualification,Uyo,Nigeria,False
-288,2018-10-13,Puerto Rico,Martinique,0,1,CONCACAF Nations League qualification,Bayamón,Puerto Rico,False
 289,2018-10-13,Turks and Caicos Islands,Guyana,0,8,CONCACAF Nations League qualification,Providenciales,Turks and Caicos Islands,False
 290,2018-10-13,Suriname,British Virgin Islands,5,0,CONCACAF Nations League qualification,Paramaribo,Suriname,False
 291,2018-10-13,El Salvador,Barbados,3,0,CONCACAF Nations League qualification,San Salvador,El Salvador,False
@@ -301,8 +288,6 @@
 299,2018-10-14,Scotland,Portugal,1,3,Friendly,Glasgow,Scotland,False
 300,2018-10-14,Thailand,Trinidad and Tobago,1,0,Friendly,Suphan Buri,Thailand,False
 301,2018-10-14,Guinea-Bissau,Zambia,2,1,African Cup of Nations qualification,Bissau,Guinea-Bissau,False
-302,2018-10-14,Saint Martin,Saint Kitts and Nevis,0,10,CONCACAF Nations League qualification,The Valley,Anguilla,True
-303,2018-10-14,Bonaire,Jamaica,0,6,CONCACAF Nations League qualification,Willemstad,Netherlands Antilles,True
 304,2018-10-14,Montserrat,Belize,1,0,CONCACAF Nations League qualification,Lookout,Montserrat,False
 305,2018-10-14,Nicaragua,Anguilla,6,0,CONCACAF Nations League qualification,Heredia,Costa Rica,True
 306,2018-10-15,Iceland,Switzerland,1,2,UEFA Nations League,Reykjavík,Iceland,False
@@ -353,11 +338,8 @@
 351,2018-10-16,Eswatini,Egypt,0,2,African Cup of Nations qualification,Manzini,Eswatini,False
 352,2018-10-16,Tanzania,Cape Verde,2,0,African Cup of Nations qualification,Dar es Salaam,Tanzania,False
 353,2018-10-16,Argentina,Brazil,0,1,Superclásico de las Américas,Jeddah,Saudi Arabia,True
-354,2018-10-16,Martinique,British Virgin Islands,4,0,CONCACAF Nations League qualification,Fort-de-France,Martinique,False
 355,2018-10-16,Canada,Dominica,5,0,CONCACAF Nations League qualification,Toronto,Canada,False
-356,2018-10-16,Guadeloupe,Aruba,0,0,CONCACAF Nations League qualification,Les Abymes,Guadeloupe,False
 357,2018-10-16,Saint Lucia,Haiti,1,2,CONCACAF Nations League qualification,Fort-de-France,Martinique,True
-358,2018-10-21,Parishes of Jersey,Yorkshire,2,1,Friendly,St. Peter,Jersey,False
 359,2018-11-03,Malaysia,Maldives,3,0,Friendly,Kuala Lumpur,Malaysia,False
 360,2018-11-08,Cambodia,Malaysia,0,1,AFF Championship,Phnom Penh,Cambodia,False
 361,2018-11-08,Laos,Vietnam,0,3,AFF Championship,Vientiane,Laos,False
@@ -413,7 +395,6 @@
 411,2018-11-16,Egypt,Tunisia,3,2,African Cup of Nations qualification,Alexandria,Egypt,False
 412,2018-11-16,Taiwan,North Korea,0,2,EAFF Championship,Taipei,Taiwan,False
 413,2018-11-16,Mongolia,Hong Kong,1,5,EAFF Championship,Taipei,Taiwan,True
-414,2018-11-16,Grenada,Saint Martin,5,2,CONCACAF Nations League qualification,St. George's,Grenada,False
 415,2018-11-16,Bermuda,El Salvador,1,0,CONCACAF Nations League qualification,Hamilton,Bermuda,False
 416,2018-11-16,Aruba,Montserrat,0,2,CONCACAF Nations League qualification,Willemstad,Netherlands Antilles,True
 417,2018-11-16,Belize,Puerto Rico,1,0,CONCACAF Nations League qualification,Belmopan,Belize,False
@@ -450,7 +431,6 @@
 448,2018-11-18,Congo,DR Congo,1,1,African Cup of Nations qualification,Brazzaville,Congo,False
 449,2018-11-18,Guinea,Ivory Coast,1,1,African Cup of Nations qualification,Conakry,Guinea,False
 450,2018-11-18,Angola,Burkina Faso,2,1,African Cup of Nations qualification,Luanda,Angola,False
-451,2018-11-18,Yorkshire,Panjab,5,4,Friendly,Ossett,England,False
 452,2018-11-18,Turks and Caicos Islands,Saint Vincent and the Grenadines,3,2,CONCACAF Nations League qualification,Providenciales,Turks and Caicos Islands,False
 453,2018-11-18,Bahamas,Anguilla,1,1,CONCACAF Nations League qualification,Nassau,Bahamas,False
 454,2018-11-18,Barbados,USA Virgin Islands,3,0,CONCACAF Nations League qualification,Bridgetown,Barbados,False
@@ -466,8 +446,6 @@
 464,2018-11-19,Liechtenstein,Armenia,2,2,UEFA Nations League,Vaduz,Liechtenstein,False
 465,2018-11-19,Iceland,Qatar,2,2,Friendly,Eupen,Belgium,True
 466,2018-11-19,Oman,Bahrain,2,1,Friendly,Muscat,Oman,False
-467,2018-11-19,Curaçao,Guadeloupe,6,0,CONCACAF Nations League qualification,Willemstad,Curaçao,False
-468,2018-11-19,Martinique,Antigua and Barbuda,4,2,CONCACAF Nations League qualification,Fort-de-France,Martinique,False
 469,2018-11-20,Portugal,Poland,1,1,UEFA Nations League,Guimarães,Portugal,False
 470,2018-11-20,Sweden,Russia,2,0,UEFA Nations League,Stockholm,Sweden,False
 471,2018-11-20,Scotland,Israel,3,2,UEFA Nations League,Glasgow,Scotland,False
@@ -499,8 +477,6 @@
 497,2018-11-20,United Arab Emirates,Yemen,2,0,Friendly,Dubai,United Arab Emirates,False
 498,2018-11-20,Myanmar,Vietnam,0,0,AFF Championship,Yangon,Myanmar,False
 499,2018-11-20,Cambodia,Laos,3,1,AFF Championship,Phnom Penh,Cambodia,False
-500,2018-11-20,Sint Maarten,Dominica,0,2,CONCACAF Nations League qualification,The Valley,Anguilla,True
-501,2018-11-20,French Guiana,Guyana,2,1,CONCACAF Nations League qualification,Cayenne,French Guiana,False
 502,2018-11-21,Philippines,Thailand,1,1,AFF Championship,Bacolod,Philippines,False
 503,2018-11-21,Singapore,Timor-Leste,6,1,AFF Championship,Kallang,Singapore,False
 504,2018-11-24,Vietnam,Cambodia,3,0,AFF Championship,Hanoi,Vietnam,False
@@ -638,7 +614,6 @@
 636,2019-03-22,Moldova,France,1,4,UEFA Euro qualification,Chișinău,Moldova,False
 637,2019-03-22,Botswana,Angola,0,1,African Cup of Nations qualification,Francistown,Botswana,False
 638,2019-03-22,Anguilla,USA Virgin Islands,0,3,CONCACAF Nations League qualification,The Valley,Anguilla,False
-639,2019-03-22,Saint Vincent and the Grenadines,Bonaire,2,1,CONCACAF Nations League qualification,Arnos Vale,Saint Vincent and the Grenadines,False
 640,2019-03-22,Cayman Islands,Montserrat,1,2,CONCACAF Nations League qualification,West Bay,Cayman Islands,False
 641,2019-03-22,Saint Lucia,Aruba,3,2,CONCACAF Nations League qualification,North Sound,Antigua and Barbuda,True
 642,2019-03-23,Brazil,Panama,1,1,Friendly,Porto,Portugal,True
@@ -659,11 +634,9 @@
 657,2019-03-23,Niger,Egypt,1,1,African Cup of Nations qualification,Niamey,Niger,False
 658,2019-03-23,Zambia,Namibia,4,1,African Cup of Nations qualification,Lusaka,Zambia,False
 659,2019-03-23,Dominica,Bahamas,4,0,CONCACAF Nations League qualification,Roseau,Dominica,False
-660,2019-03-23,Sint Maarten,Saint Martin,4,3,CONCACAF Nations League qualification,The Valley,Anguilla,True
 661,2019-03-23,Antigua and Barbuda,Curaçao,2,1,CONCACAF Nations League qualification,North Sound,Antigua and Barbuda,False
 662,2019-03-23,Guyana,Belize,2,1,CONCACAF Nations League qualification,Leonora,Guyana,False
 663,2019-03-23,Suriname,Saint Kitts and Nevis,2,0,CONCACAF Nations League qualification,Paramaribo,Suriname,False
-664,2019-03-23,Guadeloupe,Martinique,0,1,CONCACAF Nations League qualification,Les Abymes,Guadeloupe,False
 665,2019-03-24,Taiwan,Solomon Islands,0,1,Friendly,Taipei,Taiwan,False
 666,2019-03-24,Fiji,Mauritius,1,0,Friendly,Lautoka,Fiji,False
 667,2019-03-24,Northern Ireland,Belarus,2,1,UEFA Euro qualification,Belfast,Northern Ireland,False
@@ -681,14 +654,11 @@
 679,2019-03-24,Zimbabwe,Congo,2,0,African Cup of Nations qualification,Harare,Zimbabwe,False
 680,2019-03-24,Central African Republic,Guinea,0,0,African Cup of Nations qualification,Bangui,Central African Republic,False
 681,2019-03-24,Tanzania,Uganda,3,0,African Cup of Nations qualification,Dar es Salaam,Tanzania,False
-682,2019-03-24,British Virgin Islands,Bonaire,1,2,CONCACAF Nations League qualification,The Valley,Anguilla,True
 683,2019-03-24,Puerto Rico,Grenada,0,2,CONCACAF Nations League qualification,Bayamón,Puerto Rico,False
-684,2019-03-24,Canada,French Guiana,4,1,CONCACAF Nations League qualification,Vancouver,Canada,False
 685,2019-03-24,Dominican Republic,Bermuda,1,3,CONCACAF Nations League qualification,Santiago de los Caballeros,Dominican Republic,False
 686,2019-03-24,Haiti,Cuba,2,1,CONCACAF Nations League qualification,Port-au-Prince,Haiti,False
 687,2019-03-24,Barbados,Nicaragua,0,1,CONCACAF Nations League qualification,Bridgetown,Barbados,False
 688,2019-03-24,El Salvador,Jamaica,2,0,CONCACAF Nations League qualification,San Salvador,El Salvador,False
-689,2019-03-25,Catalonia,Venezuela,2,1,Friendly,Girona,Spain,False
 690,2019-03-25,Azerbaijan,Lithuania,0,0,Friendly,Baku,Azerbaijan,False
 691,2019-03-25,Kuwait,Nepal,1,0,Friendly,Al Ahmadi,Kuwait,False
 692,2019-03-25,Myanmar,Indonesia,0,2,Friendly,Mandalay,Myanmar,False
@@ -727,12 +697,9 @@
 725,2019-03-26,Armenia,Finland,0,2,UEFA Euro qualification,Yerevan,Armenia,False
 726,2019-04-20,Botswana,Seychelles,2,0,African Nations Championship qualification,Lobatse,Botswana,False
 727,2019-04-20,Eswatini,Malawi,0,0,African Nations Championship qualification,Manzini,Eswatini,False
-728,2019-05-04,Yorkshire,Somaliland,6,2,Friendly,Athersley,England,False
 729,2019-05-11,Malawi,Eswatini,1,1,African Nations Championship qualification,Blantyre,Malawi,False
 730,2019-05-11,Seychelles,Botswana,1,3,African Nations Championship qualification,Victoria,Seychelles,False
 731,2019-05-25,Eswatini,Mauritius,2,2,COSAFA Cup,Durban,South Africa,True
-732,2019-05-25,Kernow,Barawa,5,0,Friendly,Bodmin,England,False
-733,2019-05-25,Cascadia,Chagos Islands,6,3,Friendly,Kent,USA,False
 734,2019-05-26,Mozambique,Namibia,1,2,COSAFA Cup,Durban,South Africa,True
 735,2019-05-26,Malawi,Seychelles,3,0,COSAFA Cup,Durban,South Africa,True
 736,2019-05-27,Eswatini,Comoros,2,2,COSAFA Cup,Durban,South Africa,True
@@ -740,7 +707,6 @@
 738,2019-05-28,Namibia,Malawi,1,2,COSAFA Cup,Durban,South Africa,True
 739,2019-05-28,Laos,Sri Lanka,2,1,Friendly,Vientiane,Laos,False
 740,2019-05-29,Comoros,Mauritius,2,1,COSAFA Cup,Durban,South Africa,True
-741,2019-05-29,Panama,Basque Country,0,0,Friendly,Panama City,Panama,False
 742,2019-05-30,Mozambique,Malawi,1,1,COSAFA Cup,Durban,South Africa,True
 743,2019-05-30,Namibia,Seychelles,3,0,COSAFA Cup,Durban,South Africa,True
 744,2019-05-30,Turkey,Greece,2,1,Friendly,Antalya,Turkey,False
@@ -748,7 +714,6 @@
 746,2019-06-01,Lesotho,Uganda,0,0,COSAFA Cup,Durban,South Africa,True
 747,2019-06-01,Zimbabwe,Comoros,2,0,COSAFA Cup,Durban,South Africa,True
 748,2019-06-01,Venezuela,Ecuador,1,1,Friendly,Miami Gardens,USA,True
-749,2019-06-01,Yorkshire,Parishes of Jersey,1,0,Atlantic Heritage Cup,Ossett,England,False
 750,2019-06-02,South Africa,Botswana,2,2,COSAFA Cup,Durban,South Africa,False
 751,2019-06-02,Zambia,Malawi,2,2,COSAFA Cup,Durban,South Africa,True
 752,2019-06-02,El Salvador,Haiti,1,0,Friendly,Washington,USA,True
@@ -756,22 +721,9 @@
 754,2019-06-02,Luxembourg,Madagascar,3,3,Friendly,Luxembourg City,Luxembourg,False
 755,2019-06-02,Malaysia,Nepal,2,0,Friendly,Kuala Lumpur,Malaysia,False
 756,2019-06-02,Turkey,Uzbekistan,0,0,Friendly,Alanya,Turkey,False
-757,2019-06-02,Abkhazia,Chameria,3,1,CONIFA European Football Cup,Askeran,Azerbaijan,True
-758,2019-06-02,Artsakh,Sápmi,3,2,CONIFA European Football Cup,Stepanakert,Azerbaijan,False
-759,2019-06-02,Padania,Székely Land,4,0,CONIFA European Football Cup,Martakert,Azerbaijan,True
-760,2019-06-02,Western Armenia,South Ossetia,1,2,CONIFA European Football Cup,Martuni,Azerbaijan,True
-761,2019-06-02,Parishes of Jersey,Chagos Islands,9,2,Atlantic Heritage Cup,Harrogate,England,False
 762,2019-06-03,Colombia,Panama,3,0,Friendly,Bogotá,Colombia,False
 763,2019-06-03,Vanuatu,Tahiti,2,0,Friendly,Port Vila,Vanuatu,False
-764,2019-06-03,Artsakh,Chameria,1,4,CONIFA European Football Cup,Martuni,Azerbaijan,False
-765,2019-06-03,Sápmi,Abkhazia,0,1,CONIFA European Football Cup,Martakert,Azerbaijan,True
-766,2019-06-03,Székely Land,Western Armenia,0,5,CONIFA European Football Cup,Askeran,Azerbaijan,True
-767,2019-06-03,South Ossetia,Padania,2,1,CONIFA European Football Cup,Stepanakert,Azerbaijan,True
 768,2019-06-04,Comoros,Malawi,1,2,COSAFA Cup,Durban,South Africa,True
-769,2019-06-04,Artsakh,Abkhazia,1,1,CONIFA European Football Cup,Martuni,Azerbaijan,False
-770,2019-06-04,Chameria,Sápmi,4,0,CONIFA European Football Cup,Martakert,Azerbaijan,True
-771,2019-06-04,South Ossetia,Székely Land,2,2,CONIFA European Football Cup,Askeran,Azerbaijan,True
-772,2019-06-04,Padania,Western Armenia,1,1,CONIFA European Football Cup,Stepanakert,Azerbaijan,True
 773,2019-06-04,South Africa,Uganda,1,1,COSAFA Cup,Durban,South Africa,False
 774,2019-06-05,Lesotho,Botswana,1,2,COSAFA Cup,Durban,South Africa,True
 775,2019-06-05,Zimbabwe,Zambia,0,0,COSAFA Cup,Durban,South Africa,True
@@ -789,15 +741,11 @@
 787,2019-06-06,Slovakia,Jordan,5,1,Friendly,Trnava,Slovakia,False
 788,2019-06-06,Tajikistan,Afghanistan,1,1,Friendly,Dushanbe,Tajikistan,False
 789,2019-06-06,England,Netherlands,1,3,UEFA Nations League,Guimarães,Portugal,True
-790,2019-06-06,Abkhazia,Western Armenia,1,1,CONIFA European Football Cup,Stepanakert,Azerbaijan,True
-791,2019-06-06,South Ossetia,Chameria,0,0,CONIFA European Football Cup,Askeran,Azerbaijan,True
-792,2019-06-06,Padania,Sápmi,4,0,CONIFA European Football Cup,Martakert,Azerbaijan,True
-793,2019-06-06,Artsakh,Székely Land,2,1,CONIFA European Football Cup,Martuni,Azerbaijan,False
 794,2019-06-06,Bhutan,Guam,1,0,FIFA World Cup qualification,Thimphu,Bhutan,False
 795,2019-06-06,Cambodia,Pakistan,2,0,FIFA World Cup qualification,Phnom Penh,Cambodia,False
 796,2019-06-06,Laos,Bangladesh,0,1,FIFA World Cup qualification,Vientiane,Laos,False
 797,2019-06-06,Macau,Sri Lanka,1,0,FIFA World Cup qualification,Zhuhai,Macau,False
-798,2019-06-06,Mongolia,Brunei,2,0,FIFA World Cup qualification,Ulaanbaatar,Mongolia,False
+798,2019-06-06,Mongolia,Brunei Darussalam,2,0,FIFA World Cup qualification,Ulaanbaatar,Mongolia,False
 799,2019-06-07,Czech Republic,Bulgaria,2,1,UEFA Euro qualification,Prague,Czech Republic,False
 800,2019-06-07,Montenegro,Kosovo,1,1,UEFA Euro qualification,Podgorica,Montenegro,False
 801,2019-06-07,Lithuania,Luxembourg,1,1,UEFA Euro qualification,Vilnius,Lithuania,False
@@ -839,9 +787,6 @@
 837,2019-06-08,Angola,Guinea-Bissau,2,0,Friendly,Penafiel,Angola,False
 838,2019-06-08,Nigeria,Zimbabwe,0,0,Friendly,Asaba,Nigeria,False
 839,2019-06-08,Singapore,Solomon Islands,4,3,Friendly,Kallang,Singapore,False
-840,2019-06-08,Abkhazia,Chameria,0,0,CONIFA European Football Cup,Stepanakert,Azerbaijan,True
-841,2019-06-08,Sápmi,Székely Land,3,2,CONIFA European Football Cup,Askeran,Azerbaijan,True
-842,2019-06-08,Artsakh,Padania,2,0,CONIFA European Football Cup,Stepanakert,Azerbaijan,False
 843,2019-06-09,Brazil,Honduras,7,0,Friendly,Porto Alegre,Brazil,False
 844,2019-06-09,Cameroon,Zambia,2,1,Friendly,Majadahonda,Cameroon,False
 845,2019-06-09,DR Congo,Burkina Faso,0,0,Friendly,Marbella,Spain,True
@@ -853,7 +798,6 @@
 851,2019-06-09,USA,Venezuela,0,3,Friendly,Cincinnati,USA,False
 852,2019-06-09,Switzerland,England,0,0,UEFA Nations League,Guimarães,Portugal,True
 853,2019-06-09,Portugal,Netherlands,1,0,UEFA Nations League,Porto,Portugal,False
-854,2019-06-09,Western Armenia,South Ossetia,0,1,CONIFA European Football Cup,Stepanakert,Azerbaijan,True
 855,2019-06-10,Czech Republic,Montenegro,3,0,UEFA Euro qualification,Olomouc,Czech Republic,False
 856,2019-06-10,Bulgaria,Kosovo,2,3,UEFA Euro qualification,Sofia,Bulgaria,False
 857,2019-06-10,Serbia,Lithuania,4,1,UEFA Euro qualification,Belgrade,Serbia,False
@@ -891,30 +835,24 @@
 889,2019-06-11,Singapore,Myanmar,1,2,Friendly,Kallang,Singapore,False
 890,2019-06-11,Uzbekistan,Syria,2,0,Friendly,Tashkent,Uzbekistan,False
 891,2019-06-11,Bangladesh,Laos,0,0,FIFA World Cup qualification,Dhaka,Bangladesh,False
-892,2019-06-11,Brunei,Mongolia,2,1,FIFA World Cup qualification,Bandar Seri Begawan,Brunei,False
+892,2019-06-11,Brunei Darussalam,Mongolia,2,1,FIFA World Cup qualification,Bandar Seri Begawan,Brunei,False
 893,2019-06-11,Guam,Bhutan,5,0,FIFA World Cup qualification,Dededo,Guam,False
 894,2019-06-11,Pakistan,Cambodia,1,2,FIFA World Cup qualification,Doha,Qatar,True
 895,2019-06-11,Sri Lanka,Macau,3,0,FIFA World Cup qualification,Colombo,Sri Lanka,False
 896,2019-06-11,Malaysia,Timor-Leste,5,1,FIFA World Cup qualification,Kuala Lumpur,Malaysia,False
 897,2019-06-12,Morocco,Gambia,0,1,Friendly,Marrakech,Morocco,False
-898,2019-06-12,Ynys Môn,Saint Helena,7,2,Friendly,Anglesey,Wales,False
 899,2019-06-13,Egypt,Tanzania,1,0,Friendly,Alexandria,Egypt,False
 900,2019-06-14,Cameroon,Mali,1,1,Friendly,Al Wakrah,Qatar,True
 901,2019-06-14,Madagascar,Mauritania,1,3,Friendly,Marrakech,Morocco,True
 902,2019-06-14,Brazil,Bolivia,3,0,Copa América,São Paulo,Brazil,False
 903,2019-06-15,Venezuela,Peru,0,0,Copa América,Porto Alegre,Brazil,True
 904,2019-06-15,Argentina,Colombia,0,2,Copa América,Salvador,Brazil,True
-905,2019-06-15,Canada,Martinique,4,0,Gold Cup,Los Angeles,USA,True
 906,2019-06-15,Mexico,Cuba,7,0,Gold Cup,Los Angeles,USA,True
 907,2019-06-15,Ghana,South Africa,0,0,Friendly,Dubai,United Arab Emirates,True
 908,2019-06-15,Indonesia,Vanuatu,6,0,Friendly,Jakarta,Indonesia,False
 909,2019-06-15,Ivory Coast,Uganda,0,1,Friendly,Abu Dhabi,United Arab Emirates,True
 910,2019-06-15,Kenya,DR Congo,1,1,Friendly,Madrid,Spain,True
 911,2019-06-15,Tanzania,Zimbabwe,1,1,Friendly,Cairo,Egypt,True
-912,2019-06-16,Jersey,Orkney,5,0,Inter Games Football Tournament,Anglesey,Wales,True
-913,2019-06-16,Ynys Môn,Western Isles,2,1,Inter Games Football Tournament,Anglesey,Wales,False
-914,2019-06-16,Alderney,Hitra,2,4,Inter Games Football Tournament,Anglesey,Wales,True
-915,2019-06-16,Saint Helena,Shetland,1,6,Inter Games Football Tournament,Anglesey,Wales,True
 916,2019-06-16,Paraguay,Qatar,2,2,Copa América,Rio de Janeiro,Brazil,True
 917,2019-06-16,Uruguay,Ecuador,4,0,Copa América,Belo Horizonte,Brazil,True
 918,2019-06-16,Haiti,Bermuda,2,1,Gold Cup,San José,Jamaica,True
@@ -923,18 +861,10 @@
 921,2019-06-16,Egypt,Guinea,3,1,Friendly,Alexandria,Egypt,False
 922,2019-06-16,Morocco,Zambia,2,3,Friendly,Marrakech,Morocco,False
 923,2019-06-16,Senegal,Nigeria,1,0,Friendly,Ismaila,Egypt,True
-924,2019-06-17,Ynys Môn,Orkney,3,1,Inter Games Football Tournament,Anglesey,Wales,False
-925,2019-06-17,Jersey,Western Isles,7,0,Inter Games Football Tournament,Anglesey,Wales,True
-926,2019-06-17,Isle of Man,Hitra,7,1,Inter Games Football Tournament,Anglesey,Wales,True
-927,2019-06-17,Guernsey,Shetland,2,1,Inter Games Football Tournament,Anglesey,Wales,True
 928,2019-06-17,Japan,Chile,0,4,Copa América,São Paulo,Brazil,True
 929,2019-06-17,Curaçao,El Salvador,0,1,Gold Cup,Kingston,Jamaica,True
 930,2019-06-17,Jamaica,Honduras,3,2,Gold Cup,Kingston,Jamaica,False
 931,2019-06-17,Tunisia,Burundi,2,1,Friendly,Radès,Tunisia,False
-932,2019-06-18,Ynys Môn,Jersey,1,0,Inter Games Football Tournament,Anglesey,Wales,False
-933,2019-06-18,Western Isles,Orkney,1,2,Inter Games Football Tournament,Anglesey,Wales,True
-934,2019-06-18,Isle of Man,Alderney,6,1,Inter Games Football Tournament,Anglesey,Wales,True
-935,2019-06-18,Guernsey,Saint Helena,9,0,Inter Games Football Tournament,Anglesey,Wales,True
 936,2019-06-18,Bolivia,Peru,1,3,Copa América,Rio de Janeiro,Brazil,True
 937,2019-06-18,Brazil,Venezuela,0,0,Copa América,Salvador,Brazil,False
 938,2019-06-18,Panama,Trinidad and Tobago,2,0,Gold Cup,Saint Paul,USA,True
@@ -942,19 +872,11 @@
 940,2019-06-18,Benin,Mauritania,3,1,Friendly,Marrakech,Morocco,True
 941,2019-06-19,Colombia,Qatar,1,0,Copa América,São Paulo,Brazil,True
 942,2019-06-19,Argentina,Paraguay,1,1,Copa América,Belo Horizonte,Brazil,True
-943,2019-06-19,Cuba,Martinique,0,3,Gold Cup,Denver,USA,True
 944,2019-06-19,Mexico,Canada,3,1,Gold Cup,Denver,USA,True
 945,2019-06-19,Ivory Coast,Zambia,4,1,Friendly,Abu Dhabi,United Arab Emirates,True
-946,2019-06-20,Western Isles,Saint Helena,2,1,Inter Games Football Tournament,Anglesey,Wales,True
-947,2019-06-20,Orkney,Alderney,1,2,Inter Games Football Tournament,Anglesey,Wales,True
-948,2019-06-20,Jersey,Hitra,3,1,Inter Games Football Tournament,Anglesey,Wales,True
-949,2019-06-20,Ynys Môn,Shetland,2,1,Inter Games Football Tournament,Anglesey,Wales,False
-950,2019-06-20,Isle of Man,Guernsey,2,3,Inter Games Football Tournament,Anglesey,Wales,True
 951,2019-06-20,Uruguay,Japan,2,2,Copa América,Porto Alegre,Brazil,True
 952,2019-06-20,Nicaragua,Haiti,0,2,Gold Cup,Frisco,USA,True
 953,2019-06-20,Costa Rica,Bermuda,2,1,Gold Cup,Frisco,USA,True
-954,2019-06-21,Shetland,Isle of Man,0,5,Inter Games Football Tournament,Anglesey,Wales,True
-955,2019-06-21,Ynys Môn,Guernsey,2,1,Inter Games Football Tournament,Anglesey,Wales,False
 956,2019-06-21,Egypt,Zimbabwe,1,0,African Cup of Nations,Cairo,Egypt,False
 957,2019-06-21,Ecuador,Chile,1,2,Copa América,Salvador,Brazil,True
 958,2019-06-21,El Salvador,Jamaica,0,0,Gold Cup,Houston,USA,True
@@ -972,7 +894,6 @@
 970,2019-06-23,Colombia,Paraguay,1,0,Copa América,Salvador,Brazil,True
 971,2019-06-23,Qatar,Argentina,0,2,Copa América,Porto Alegre,Brazil,True
 972,2019-06-23,Canada,Cuba,7,0,Gold Cup,Charlotte,USA,True
-973,2019-06-23,Martinique,Mexico,2,3,Gold Cup,Charlotte,USA,True
 974,2019-06-24,Ivory Coast,South Africa,1,0,African Cup of Nations,Cairo,Egypt,True
 975,2019-06-24,Tunisia,Angola,1,1,African Cup of Nations,Suez,Egypt,True
 976,2019-06-24,Mali,Mauritania,4,1,African Cup of Nations,Suez,Egypt,True
@@ -1036,27 +957,23 @@
 1034,2019-07-08,Mali,Ivory Coast,0,1,African Cup of Nations,Suez,Egypt,True
 1035,2019-07-08,Samoa,Papua New Guinea,0,6,Pacific Games,Apia,Samoa,False
 1036,2019-07-08,American Samoa,New Caledonia,0,5,Pacific Games,Apia,Samoa,True
-1037,2019-07-08,Tuvalu,Solomon Islands,0,13,Pacific Games,Apia,Samoa,True
 1038,2019-07-08,Tahiti,Fiji,1,2,Pacific Games,Apia,Samoa,True
 1039,2019-07-08,Syria,North Korea,5,2,Intercontinental Cup,Ahmedabad,India,True
 1040,2019-07-10,Nigeria,South Africa,2,1,African Cup of Nations,Cairo,Egypt,True
 1041,2019-07-10,Senegal,Benin,1,0,African Cup of Nations,Cairo,Egypt,True
 1042,2019-07-10,Papua New Guinea,Vanuatu,2,0,Pacific Games,Apia,Samoa,True
-1043,2019-07-10,Tuvalu,Tahiti,0,7,Pacific Games,Apia,Samoa,True
 1044,2019-07-10,American Samoa,Fiji,0,9,Pacific Games,Apia,Samoa,True
 1045,2019-07-10,Solomon Islands,New Caledonia,0,2,Pacific Games,Apia,Samoa,True
 1046,2019-07-10,Tajikistan,Syria,2,0,Intercontinental Cup,Ahmedabad,India,True
 1047,2019-07-11,Ivory Coast,Algeria,1,1,African Cup of Nations,Suez,Egypt,True
 1048,2019-07-11,Madagascar,Tunisia,0,3,African Cup of Nations,Cairo,Egypt,True
 1049,2019-07-12,Samoa,Tonga,2,0,Pacific Games,Apia,Samoa,False
-1050,2019-07-12,American Samoa,Tuvalu,1,1,Pacific Games,Apia,Samoa,True
 1051,2019-07-12,Solomon Islands,Tahiti,0,3,Pacific Games,Apia,Samoa,True
 1052,2019-07-12,New Caledonia,Fiji,1,0,Pacific Games,Apia,Samoa,True
 1053,2019-07-13,India,North Korea,2,5,Intercontinental Cup,Ahmedabad,India,False
 1054,2019-07-14,Algeria,Nigeria,2,1,African Cup of Nations,Cairo,Egypt,True
 1055,2019-07-14,Senegal,Tunisia,1,0,African Cup of Nations,Cairo,Egypt,True
 1056,2019-07-15,Tonga,Vanuatu,0,14,Pacific Games,Apia,Samoa,True
-1057,2019-07-15,Fiji,Tuvalu,10,1,Pacific Games,Apia,Samoa,True
 1058,2019-07-15,Solomon Islands,American Samoa,13,0,Pacific Games,Apia,Samoa,True
 1059,2019-07-15,Tahiti,New Caledonia,0,3,Pacific Games,Apia,Samoa,True
 1060,2019-07-15,North Korea,Tajikistan,1,0,Intercontinental Cup,Ahmedabad,India,True
@@ -1064,7 +981,6 @@
 1062,2019-07-17,Tunisia,Nigeria,0,1,African Cup of Nations,Cairo,Egypt,True
 1063,2019-07-18,Papua New Guinea,Tonga,8,0,Pacific Games,Apia,Samoa,True
 1064,2019-07-18,Samoa,Vanuatu,0,11,Pacific Games,Apia,Samoa,False
-1065,2019-07-18,New Caledonia,Tuvalu,11,0,Pacific Games,Apia,Samoa,True
 1066,2019-07-18,American Samoa,Tahiti,8,1,Pacific Games,Apia,Samoa,True
 1067,2019-07-18,Fiji,Solomon Islands,4,4,Pacific Games,Apia,Samoa,True
 1068,2019-07-19,Senegal,Algeria,0,1,African Cup of Nations,Cairo,Egypt,True
@@ -1139,10 +1055,8 @@
 1137,2019-09-05,Japan,Paraguay,2,0,Kirin Challenge Cup,Kashima,Japan,False
 1138,2019-09-05,Bermuda,Panama,1,4,CONCACAF Nations League,Hamilton,Bermuda,False
 1139,2019-09-05,Grenada,Saint Kitts and Nevis,2,1,CONCACAF Nations League,St. George's,Grenada,False
-1140,2019-09-05,French Guiana,Belize,3,0,CONCACAF Nations League,Cayenne,French Guiana,False
 1141,2019-09-05,Dominica,Suriname,1,2,CONCACAF Nations League,Roseau,Dominica,False
 1142,2019-09-05,USA Virgin Islands,Cayman Islands,0,2,CONCACAF Nations League,Saint Croix,USA Virgin Islands,False
-1143,2019-09-05,Barbados,Saint Martin,4,0,CONCACAF Nations League,Bridgetown,Barbados,False
 1144,2019-09-05,Guatemala,Anguilla,10,0,CONCACAF Nations League,Guatemala City,Guatemala,False
 1145,2019-09-05,Guam,Maldives,0,1,FIFA World Cup qualification,Dededo,Guam,False
 1146,2019-09-05,Philippines,Syria,2,5,FIFA World Cup qualification,Bacolod,Philippines,False
@@ -1178,11 +1092,9 @@
 1176,2019-09-06,Cyprus,Kazakhstan,1,1,UEFA Euro qualification,Nicosia,Cyprus,False
 1177,2019-09-06,Scotland,Russia,1,2,UEFA Euro qualification,Glasgow,Scotland,False
 1178,2019-09-06,San Marino,Belgium,0,4,UEFA Euro qualification,Serravalle,San Marino,False
-1179,2019-09-06,Martinique,Trinidad and Tobago,1,1,CONCACAF Nations League,Fort-de-France,Martinique,False
 1180,2019-09-06,Aruba,Guyana,0,1,CONCACAF Nations League,Willemstad,Curaçao,True
 1181,2019-09-06,Jamaica,Antigua and Barbuda,6,0,CONCACAF Nations League,Montego Bay,Jamaica,False
 1182,2019-09-06,Nicaragua,Saint Vincent and the Grenadines,1,1,CONCACAF Nations League,Managua,Nicaragua,False
-1183,2019-09-06,Bonaire,British Virgin Islands,4,2,CONCACAF Nations League,Willemstad,Curaçao,True
 1184,2019-09-06,Comoros,Togo,1,1,FIFA World Cup qualification,Moroni,Comoros,False
 1185,2019-09-06,Gambia,Angola,0,1,FIFA World Cup qualification,Bakau,Gambia,False
 1186,2019-09-07,Libya,Niger,2,0,Friendly,Berrechid,Egypt,True
@@ -1197,7 +1109,6 @@
 1195,2019-09-07,Curaçao,Haiti,1,0,CONCACAF Nations League,Willemstad,Curaçao,False
 1196,2019-09-07,Montserrat,Dominican Republic,2,1,CONCACAF Nations League,Lookout,Montserrat,False
 1197,2019-09-07,El Salvador,Saint Lucia,3,0,CONCACAF Nations League,San Salvador,El Salvador,False
-1198,2019-09-07,Guadeloupe,Sint Maarten,5,1,CONCACAF Nations League,Les Abymes,Guadeloupe,False
 1199,2019-09-07,Botswana,Malawi,0,0,FIFA World Cup qualification,Francistown,Botswana,False
 1200,2019-09-08,Kenya,Uganda,1,1,Friendly,Nairobi,Kenya,False
 1201,2019-09-08,Switzerland,Gibraltar,4,0,UEFA Euro qualification,Sion,Switzerland,False
@@ -1210,10 +1121,8 @@
 1208,2019-09-08,Greece,Liechtenstein,1,1,UEFA Euro qualification,Athens,Greece,False
 1209,2019-09-08,Panama,Bermuda,0,2,CONCACAF Nations League,Panama City,Panama,False
 1210,2019-09-08,Belize,Grenada,1,2,CONCACAF Nations League,Belmopan,Belize,False
-1211,2019-09-08,Saint Kitts and Nevis,French Guiana,2,2,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,False
 1212,2019-09-08,Saint Vincent and the Grenadines,Dominica,1,0,CONCACAF Nations League,Arnos Vale,Saint Vincent and the Grenadines,False
 1213,2019-09-08,Suriname,Nicaragua,6,0,CONCACAF Nations League,Paramaribo,Suriname,False
-1214,2019-09-08,Saint Martin,USA Virgin Islands,1,2,CONCACAF Nations League,The Valley,Anguilla,True
 1215,2019-09-08,Cayman Islands,Barbados,3,2,CONCACAF Nations League,George Town,Cayman Islands,False
 1216,2019-09-08,Equatorial Guinea,South Sudan,1,0,FIFA World Cup qualification,Malabo,Equatorial Guinea,False
 1217,2019-09-08,Lesotho,Ethiopia,1,1,FIFA World Cup qualification,Maseru,Lesotho,False
@@ -1232,10 +1141,8 @@
 1230,2019-09-09,Scotland,Belgium,0,4,UEFA Euro qualification,Glasgow,Scotland,False
 1231,2019-09-09,Russia,Kazakhstan,1,0,UEFA Euro qualification,Kaliningrad,Russia,False
 1232,2019-09-09,San Marino,Cyprus,0,4,UEFA Euro qualification,Serravalle,San Marino,False
-1233,2019-09-09,Trinidad and Tobago,Martinique,2,2,CONCACAF Nations League,Couva,Trinidad and Tobago,False
 1234,2019-09-09,Antigua and Barbuda,Aruba,2,1,CONCACAF Nations League,North Sound,Antigua and Barbuda,False
 1235,2019-09-09,Guyana,Jamaica,0,4,CONCACAF Nations League,Georgetown,Guyana,False
-1236,2019-09-09,Bahamas,Bonaire,2,1,CONCACAF Nations League,Nassau,Bahamas,False
 1237,2019-09-10,Argentina,Mexico,4,0,Friendly,San Antonio,USA,True
 1238,2019-09-10,Brazil,Peru,0,1,Friendly,Los Angeles,USA,True
 1239,2019-09-10,Colombia,Venezuela,0,0,Friendly,Tampa,USA,True
@@ -1260,7 +1167,6 @@
 1258,2019-09-10,Montserrat,Saint Lucia,1,1,CONCACAF Nations League,Lookout,Montserrat,False
 1259,2019-09-10,Dominican Republic,El Salvador,1,0,CONCACAF Nations League,Santiago de los Caballeros,Dominican Republic,False
 1260,2019-09-10,Puerto Rico,Guatemala,0,5,CONCACAF Nations League,Mayagüez,Puerto Rico,False
-1261,2019-09-10,Turks and Caicos Islands,Guadeloupe,0,3,CONCACAF Nations League,Providenciales,Turks and Caicos Islands,False
 1262,2019-09-10,Guam,Philippines,1,4,FIFA World Cup qualification,Dededo,Guam,False
 1263,2019-09-10,Maldives,China PR,0,5,FIFA World Cup qualification,Malé,Maldives,False
 1264,2019-09-10,Kuwait,Australia,0,3,FIFA World Cup qualification,Kuwait City,Kuwait,False
@@ -1337,9 +1243,7 @@
 1335,2019-10-10,Trinidad and Tobago,Honduras,0,2,CONCACAF Nations League,Port of Spain,Trinidad and Tobago,False
 1336,2019-10-10,Haiti,Costa Rica,1,1,CONCACAF Nations League,Port-au-Prince,Haiti,False
 1337,2019-10-10,Belize,Saint Kitts and Nevis,0,4,CONCACAF Nations League,Belmopan,Belize,False
-1338,2019-10-10,French Guiana,Grenada,0,0,CONCACAF Nations League,Cayenne,French Guiana,False
 1339,2019-10-10,British Virgin Islands,Bahamas,0,4,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,True
-1340,2019-10-10,Sint Maarten,Turks and Caicos Islands,2,5,CONCACAF Nations League,Willemstad,Curaçao,True
 1341,2019-10-10,Syria,Maldives,2,1,FIFA World Cup qualification,Dubai,United Arab Emirates,True
 1342,2019-10-10,China PR,Guam,7,0,FIFA World Cup qualification,Guangzhou,China PR,False
 1343,2019-10-10,Jordan,Kuwait,0,0,FIFA World Cup qualification,Amman,Jordan,False
@@ -1386,7 +1290,6 @@
 1384,2019-10-12,Montserrat,El Salvador,0,2,CONCACAF Nations League,Lookout,Montserrat,False
 1385,2019-10-12,Jamaica,Aruba,2,0,CONCACAF Nations League,Kingston,Jamaica,False
 1386,2019-10-12,Barbados,USA Virgin Islands,1,0,CONCACAF Nations League,Bridgetown,Barbados,False
-1387,2019-10-12,Saint Martin,Cayman Islands,3,0,CONCACAF Nations League,The Valley,Anguilla,True
 1388,2019-10-12,Anguilla,Guatemala,0,5,CONCACAF Nations League,The Valley,Anguilla,False
 1389,2019-10-13,Belarus,Netherlands,1,2,UEFA Euro qualification,Minsk,Belarus,False
 1390,2019-10-13,Estonia,Germany,0,3,UEFA Euro qualification,Tallinn,Estonia,False
@@ -1411,11 +1314,8 @@
 1409,2019-10-13,Niger,Central African Republic,0,2,Friendly,Niger,Niger,False
 1410,2019-10-13,Slovakia,Paraguay,1,1,Friendly,Bratislava,Slovakia,False
 1411,2019-10-13,South Africa,Mali,2,1,Friendly,Port Elizabeth,South Africa,False
-1412,2019-10-13,Honduras,Martinique,1,0,CONCACAF Nations League,San Pedro Sula,Honduras,False
 1413,2019-10-13,Costa Rica,Curaçao,0,0,CONCACAF Nations League,San José,Costa Rica,False
 1414,2019-10-13,Saint Kitts and Nevis,Belize,0,1,CONCACAF Nations League,Saint Kitts and Nevis,Saint Kitts and Nevis,False
-1415,2019-10-13,Grenada,French Guiana,1,0,CONCACAF Nations League,Grenada,Grenada,False
-1416,2019-10-13,British Virgin Islands,Bonaire,3,4,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,True
 1417,2019-10-14,Kosovo,Montenegro,2,0,UEFA Euro qualification,Pristina,Kosovo,False
 1418,2019-10-14,Bulgaria,England,0,6,UEFA Euro qualification,Sofia,Bulgaria,False
 1419,2019-10-14,Lithuania,Serbia,1,2,UEFA Euro qualification,Vilnius,Lithuania,False
@@ -1430,7 +1330,6 @@
 1428,2019-10-14,Guyana,Antigua and Barbuda,5,1,CONCACAF Nations League,Leonora,Guyana,False
 1429,2019-10-14,Dominica,Nicaragua,0,4,CONCACAF Nations League,Roseau,Dominica,False
 1430,2019-10-14,Suriname,Saint Vincent and the Grenadines,0,1,CONCACAF Nations League,Paramaribo,Suriname,False
-1431,2019-10-14,Sint Maarten,Guadeloupe,1,2,CONCACAF Nations League,Willemstad,Curaçao,True
 1432,2019-10-15,Gibraltar,Georgia,2,3,UEFA Euro qualification,Gibraltar,Gibraltar,False
 1433,2019-10-15,Switzerland,Republic of Ireland,2,0,UEFA Euro qualification,Geneva,Switzerland,False
 1434,2019-10-15,Faroe Islands,Malta,1,0,UEFA Euro qualification,Tórshavn,Faroe Islands,False
@@ -1454,7 +1353,6 @@
 1452,2019-10-15,Dominican Republic,Montserrat,0,0,CONCACAF Nations League,Santo Domingo,Dominican Republic,False
 1453,2019-10-15,Saint Lucia,El Salvador,0,2,CONCACAF Nations League,Gros Islet,Saint Lucia,False
 1454,2019-10-15,Aruba,Jamaica,0,6,CONCACAF Nations League,Willemstad,Curaçao,True
-1455,2019-10-15,Cayman Islands,Saint Martin,1,0,CONCACAF Nations League,George Town,Cayman Islands,False
 1456,2019-10-15,USA Virgin Islands,Barbados,0,4,CONCACAF Nations League,Saint Croix,USA Virgin Islands,False
 1457,2019-10-15,Anguilla,Puerto Rico,2,3,CONCACAF Nations League,The Valley,Anguilla,False
 1458,2019-10-15,Syria,Guam,4,0,FIFA World Cup qualification,Dubai,United Arab Emirates,True
@@ -1520,12 +1418,10 @@
 1518,2019-11-14,Turkey,Iceland,0,0,UEFA Euro qualification,Istanbul,Turkey,False
 1519,2019-11-14,Albania,Andorra,2,2,UEFA Euro qualification,Elbasan,Albania,False
 1520,2019-11-14,France,Moldova,2,1,UEFA Euro qualification,Paris,France,False
-1521,2019-11-14,Martinique,Honduras,1,1,CONCACAF Nations League,Fort-de-France,Martinique,False
+
 1522,2019-11-14,Curaçao,Costa Rica,1,2,CONCACAF Nations League,Willemstad,Curaçao,False
 1523,2019-11-14,Saint Kitts and Nevis,Grenada,0,0,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,False
-1524,2019-11-14,Belize,French Guiana,2,0,CONCACAF Nations League,Belmopan,Belize,False
 1525,2019-11-14,Bahamas,British Virgin Islands,3,0,CONCACAF Nations League,Nassau,Bahamas,False
-1526,2019-11-14,Turks and Caicos Islands,Sint Maarten,3,2,CONCACAF Nations League,Providenciales,Turks and Caicos Islands,False
 1527,2019-11-14,Bulgaria,Paraguay,0,1,Friendly,Sofia,Bulgaria,False
 1528,2019-11-14,Cambodia,Mongolia,1,1,Friendly,Phnom Penh,Cambodia,False
 1529,2019-11-14,Ecuador,Trinidad and Tobago,3,0,Friendly,Portoviejo,Ecuador,False
@@ -1583,7 +1479,6 @@
 1581,2019-11-16,Russia,Belgium,1,4,UEFA Euro qualification,Saint Petersburg,Russia,False
 1582,2019-11-16,Saint Lucia,Dominican Republic,1,0,CONCACAF Nations League,Gros Islet,Saint Lucia,False
 1583,2019-11-16,El Salvador,Montserrat,1,0,CONCACAF Nations League,San Salvador,El Salvador,False
-1584,2019-11-16,Saint Martin,Barbados,1,0,CONCACAF Nations League,The Valley,Anguilla,True
 1585,2019-11-16,Cayman Islands,USA Virgin Islands,1,0,CONCACAF Nations League,George Town,Cayman Islands,False
 1586,2019-11-16,Guatemala,Puerto Rico,5,0,CONCACAF Nations League,Guatemala City,Guatemala,False
 1587,2019-11-17,Chad,Mali,0,2,African Cup of Nations qualification,N'Djamena,Chad,False
@@ -1607,9 +1502,6 @@
 1605,2019-11-17,Honduras,Trinidad and Tobago,4,0,CONCACAF Nations League,San Pedro Sula,Honduras,False
 1606,2019-11-17,Costa Rica,Haiti,1,1,CONCACAF Nations League,San José,Costa Rica,False
 1607,2019-11-17,Grenada,Belize,3,2,CONCACAF Nations League,St. George's,Grenada,False
-1608,2019-11-17,French Guiana,Saint Kitts and Nevis,3,1,CONCACAF Nations League,Cayenne,French Guiana,False
-1609,2019-11-17,Bonaire,Bahamas,1,1,CONCACAF Nations League,Willemstad,Curaçao,True
-1610,2019-11-17,Guadeloupe,Turks and Caicos Islands,10,0,CONCACAF Nations League,Les Abymes,Guadeloupe,False
 1611,2019-11-17,Lithuania,New Zealand,1,0,Friendly,Vilnius,Lithuania,False
 1612,2019-11-18,São Tomé and Príncipe,Ghana,0,1,African Cup of Nations qualification,São Tomé,São Tomé and Príncipe,False
 1613,2019-11-18,Gambia,DR Congo,2,2,African Cup of Nations qualification,Bakau,Gambia,False
@@ -1653,7 +1545,6 @@
 1651,2019-11-19,El Salvador,Dominican Republic,2,0,CONCACAF Nations League,San Salvador,El Salvador,False
 1652,2019-11-19,Saint Lucia,Montserrat,0,1,CONCACAF Nations League,Gros Islet,Saint Lucia,False
 1653,2019-11-19,Barbados,Cayman Islands,3,0,CONCACAF Nations League,Bridgetown,Barbados,False
-1654,2019-11-19,USA Virgin Islands,Saint Martin,1,2,CONCACAF Nations League,Upper Bethlehem,USA Virgin Islands,False
 1655,2019-11-19,Puerto Rico,Anguilla,3,0,CONCACAF Nations League,Bayamón,Puerto Rico,False
 1656,2019-11-19,Brazil,South Korea,3,0,Friendly,Abu Dhabi,United Arab Emirates,True
 1657,2019-11-19,Croatia,Georgia,2,1,Friendly,Pula,Croatia,False
@@ -1957,7 +1848,6 @@
 1955,2020-11-16,Jordan,Syria,1,0,Friendly,Sharjah,United Arab Emirates,True
 1956,2020-11-16,United Arab Emirates,Bahrain,1,0,Friendly,Dubai,United Arab Emirates,False
 1957,2020-11-16,USA,Panama,6,2,Friendly,Wiener Neustadt,Austria,True
-1958,2020-11-16,Basque Country,Costa Rica,2,1,Friendly,Eibar,Spain,False
 1959,2020-11-17,Croatia,Portugal,2,3,UEFA Nations League,Split,Croatia,False
 1960,2020-11-17,France,Sweden,4,2,UEFA Nations League,Paris,France,False
 1961,2020-11-17,Spain,Germany,6,0,UEFA Nations League,Seville,Spain,False
@@ -2487,15 +2377,11 @@
 2485,2021-07-03,Uruguay,Colombia,0,0,Copa América,Brasília,Brazil,True
 2486,2021-07-03,Argentina,Ecuador,3,0,Copa América,Goiânia,Brazil,True
 2487,2021-07-03,Guatemala,Guyana,4,0,Gold Cup qualification,Fort Lauderdale,USA,True
-2488,2021-07-03,Cuba,French Guiana,0,3,Gold Cup qualification,Fort Lauderdale,USA,True
-2489,2021-07-03,Guadeloupe,Bahamas,2,0,Gold Cup qualification,Fort Lauderdale,USA,True
 2490,2021-07-04,Qatar,El Salvador,1,0,Friendly,Pula,Croatia,True
 2491,2021-07-05,Brazil,Peru,1,0,Copa América,Rio de Janeiro,Brazil,False
 2492,2021-07-06,Argentina,Colombia,1,1,Copa América,Brasília,Brazil,True
 2493,2021-07-06,Italy,Spain,1,1,UEFA Euro,London,England,True
 2494,2021-07-06,Haiti,Bermuda,4,1,Gold Cup qualification,Fort Lauderdale,USA,True
-2495,2021-07-06,Guatemala,Guadeloupe,1,1,Gold Cup qualification,Fort Lauderdale,USA,True
-2496,2021-07-06,Trinidad and Tobago,French Guiana,1,1,Gold Cup qualification,Fort Lauderdale,USA,True
 2497,2021-07-06,Eswatini,Lesotho,3,1,COSAFA Cup,Port Elizabeth,South Africa,True
 2498,2021-07-06,South Africa,Botswana,1,0,COSAFA Cup,Port Elizabeth,South Africa,False
 2499,2021-07-07,England,Denmark,2,1,UEFA Euro,London,England,False
@@ -2514,10 +2400,8 @@
 2512,2021-07-11,Namibia,Zimbabwe,2,0,COSAFA Cup,Port Elizabeth,South Africa,True
 2513,2021-07-11,Mozambique,Malawi,2,0,COSAFA Cup,Port Elizabeth,South Africa,True
 2514,2021-07-11,El Salvador,Guatemala,2,0,Gold Cup,Frisco,USA,True
-2515,2021-07-11,Canada,Martinique,4,1,Gold Cup,Kansas City,USA,True
 2516,2021-07-11,USA,Haiti,1,0,Gold Cup,Kansas City,USA,False
 2517,2021-07-12,Jamaica,Suriname,2,0,Gold Cup,Orlando,USA,True
-2518,2021-07-12,Costa Rica,Guadeloupe,3,1,Gold Cup,Orlando,USA,True
 2519,2021-07-13,Botswana,Zambia,1,2,COSAFA Cup,Port Elizabeth,South Africa,True
 2520,2021-07-13,South Africa,Lesotho,4,0,COSAFA Cup,Port Elizabeth,South Africa,False
 2521,2021-07-13,Senegal,Zimbabwe,2,1,COSAFA Cup,Port Elizabeth,South Africa,True
@@ -2531,10 +2415,8 @@
 2529,2021-07-14,Trinidad and Tobago,El Salvador,0,2,Gold Cup,Frisco,USA,True
 2530,2021-07-14,Guatemala,Mexico,0,3,Gold Cup,Dallas,USA,True
 2531,2021-07-15,Haiti,Canada,1,4,Gold Cup,Kansas City,USA,True
-2532,2021-07-15,USA,Martinique,6,1,Gold Cup,Kansas City,USA,False
 2533,2021-07-16,Senegal,Eswatini,2,2,COSAFA Cup,Port Elizabeth,South Africa,True
 2534,2021-07-16,South Africa,Mozambique,3,0,COSAFA Cup,Port Elizabeth,South Africa,False
-2535,2021-07-16,Guadeloupe,Jamaica,1,2,Gold Cup,Orlando,USA,True
 2536,2021-07-16,Suriname,Costa Rica,1,2,Gold Cup,Orlando,USA,True
 2537,2021-07-17,Grenada,Qatar,0,4,Gold Cup,Houston,USA,True
 2538,2021-07-17,Panama,Honduras,2,3,Gold Cup,Houston,USA,True
@@ -2542,9 +2424,7 @@
 2540,2021-07-18,South Africa,Senegal,0,0,COSAFA Cup,Port Elizabeth,South Africa,False
 2541,2021-07-18,Guatemala,Trinidad and Tobago,1,1,Gold Cup,Frisco,USA,True
 2542,2021-07-18,Mexico,El Salvador,1,0,Gold Cup,Dallas,USA,True
-2543,2021-07-18,Martinique,Haiti,1,2,Gold Cup,Frisco,USA,True
 2544,2021-07-18,USA,Canada,1,0,Gold Cup,Kansas City,USA,False
-2545,2021-07-20,Suriname,Guadeloupe,2,1,Gold Cup,Houston,USA,True
 2546,2021-07-20,Costa Rica,Jamaica,1,0,Gold Cup,Orlando,USA,True
 2547,2021-07-20,Panama,Grenada,3,1,Gold Cup,Orlando,USA,True
 2548,2021-07-20,Honduras,Qatar,0,2,Gold Cup,Houston,USA,True
@@ -3209,7 +3089,6 @@
 3207,2022-03-23,Bahrain,India,2,1,Friendly,Riffa,Bahrain,False
 3208,2022-03-23,Gibraltar,Grenada,0,0,Friendly,Gibraltar,Gibraltar,False
 3209,2022-03-23,Guinea-Bissau,Equatorial Guinea,3,0,Friendly,Óbidos,Portugal,True
-3210,2022-03-23,Guadeloupe,Cape Verde,0,2,Friendly,Orléans,France,True
 3211,2022-03-23,Laos,Mongolia,1,0,Friendly,Vientiane,Laos,False
 3212,2022-03-23,Malaysia,Philippines,2,0,Friendly,Kallang,Singapore,True
 3213,2022-03-23,Mozambique,Niger,1,1,Friendly,Nouakchott,Mauritania,True
@@ -3299,7 +3178,7 @@
 3297,2022-03-27,Belize,Cuba,0,3,Friendly,Belmopan,Belize,False
 3298,2022-03-27,Benin,Zambia,2,1,Friendly,Antalya,Turkey,True
 3299,2022-03-27,Guatemala,Haiti,2,1,Friendly,Fort Lauderdale,USA,True
-3300,2022-03-27,Laos,Brunei,3,2,Friendly,Vientiane,Laos,False
+3300,2022-03-27,Laos,Brunei Darussalam,3,2,Friendly,Vientiane,Laos,False
 3301,2022-03-27,Liberia,Sierra Leone,0,1,Friendly,Antalya,Turkey,True
 3302,2022-03-27,Thailand,Suriname,1,0,Friendly,Pathum Thani,Thailand,False
 3303,2022-03-27,South Sudan,Djibouti,1,0,African Cup of Nations qualification,Entebbe,Uganda,True
@@ -3376,14 +3255,10 @@
 3374,2022-05-12,Dominica,Saint Vincent and the Grenadines,2,1,Friendly,Roseau,Dominica,False
 3375,2022-05-14,Bahamas,Turks and Caicos Islands,1,2,Friendly,Nassau,Bahamas,False
 3376,2022-05-15,Dominica,Saint Vincent and the Grenadines,3,1,Friendly,Roseau,Dominica,False
-3377,2022-05-21,Yoruba Nation,Matabeleland,1,1,CONIFA Africa Football Cup,Johannesburg,South Africa,True
-3378,2022-05-22,Biafra,Matabeleland,0,1,CONIFA Africa Football Cup,Johannesburg,South Africa,True
-3379,2022-05-23,Yoruba Nation,Biafra,0,1,CONIFA Africa Football Cup,Johannesburg,South Africa,True
 3380,2022-05-24,Mozambique,Eswatini,0,1,Friendly,Maputo,Mozambique,False
 3381,2022-05-24,Thailand,Bahrain,3,1,Friendly,Bangkok,Thailand,False
-3382,2022-05-25,Biafra,Matabeleland,1,0,CONIFA Africa Football Cup,Johannesburg,South Africa,True
 3383,2022-05-27,Bahrain,Myanmar,2,0,Friendly,Pathum Thani,Thailand,True
-3384,2022-05-27,Malaysia,Brunei,4,0,Friendly,Kuala Lumpur,Malaysia,False
+3384,2022-05-27,Malaysia,Brunei Darussalam,4,0,Friendly,Kuala Lumpur,Malaysia,False
 3385,2022-05-27,Thailand,Turkmenistan,1,0,Friendly,Sisaket,Thailand,False
 3386,2022-05-28,Ethiopia,Lesotho,1,1,Friendly,Adama,Ethiopia,False
 3387,2022-05-28,India,Jordan,0,2,Friendly,Doha,Qatar,True
@@ -3410,9 +3285,7 @@
 3408,2022-06-02,Mozambique,Rwanda,1,1,African Cup of Nations qualification,Johannesburg,South Africa,True
 3409,2022-06-02,Panama,Costa Rica,2,0,CONCACAF Nations League,Panama City,Panama,False
 3410,2022-06-02,Barbados,Antigua and Barbuda,0,1,CONCACAF Nations League,Gros Islet,Saint Lucia,True
-3411,2022-06-02,Guadeloupe,Cuba,2,1,CONCACAF Nations League,Les Abymes,Guadeloupe,False
 3412,2022-06-02,Belize,Dominican Republic,0,2,CONCACAF Nations League,Belmopan,Belize,False
-3413,2022-06-02,French Guiana,Guatemala,2,0,CONCACAF Nations League,Cayenne,French Guiana,False
 3414,2022-06-02,Anguilla,Dominica,0,0,CONCACAF Nations League,The Valley,Anguilla,False
 3415,2022-06-02,Czech Republic,Switzerland,2,1,UEFA Nations League,Prague,Czech Republic,False
 3416,2022-06-02,Spain,Portugal,1,1,UEFA Nations League,Sevilla,Spain,False
@@ -3436,9 +3309,6 @@
 3434,2022-06-03,Curaçao,Honduras,0,1,CONCACAF Nations League,Willemstad,Curaçao,False
 3435,2022-06-03,Bahamas,Saint Vincent and the Grenadines,1,0,CONCACAF Nations League,Nassau,Bahamas,False
 3436,2022-06-03,Nicaragua,Trinidad and Tobago,2,1,CONCACAF Nations League,Managua,Nicaragua,False
-3437,2022-06-03,Sint Maarten,USA Virgin Islands,1,1,CONCACAF Nations League,Willemstad,Curaçao,True
-3438,2022-06-03,Turks and Caicos Islands,Bonaire,1,4,CONCACAF Nations League,Providenciales,Turks and Caicos Islands,False
-3439,2022-06-03,Saint Martin,Aruba,0,0,CONCACAF Nations League,The Valley,Anguilla,True
 3440,2022-06-03,British Virgin Islands,Cayman Islands,1,1,CONCACAF Nations League,Tortola,British Virgin Islands,False
 3441,2022-06-03,Croatia,Austria,0,3,UEFA Nations League,Osijek,Croatia,False
 3442,2022-06-03,France,Denmark,1,2,UEFA Nations League,Paris,France,False
@@ -3473,11 +3343,8 @@
 3471,2022-06-05,Central African Republic,Ghana,1,1,African Cup of Nations qualification,Luanda,Angola,True
 3472,2022-06-05,Madagascar,Angola,1,1,African Cup of Nations qualification,Antananarivo,Madagascar,False
 3473,2022-06-05,Botswana,Tunisia,0,0,African Cup of Nations qualification,Francistown,Botswana,False
-3474,2022-06-05,Costa Rica,Martinique,2,0,CONCACAF Nations League,San José,Costa Rica,False
 3475,2022-06-05,Cuba,Barbados,3,0,CONCACAF Nations League,Santiago,Cuba,False
-3476,2022-06-05,Antigua and Barbuda,Guadeloupe,1,0,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,True
 3477,2022-06-05,Guatemala,Belize,2,0,CONCACAF Nations League,Guatemala City,Guatemala,False
-3478,2022-06-05,Dominican Republic,French Guiana,2,3,CONCACAF Nations League,Santo Domingo,Dominican Republic,False
 3479,2022-06-05,Dominica,Anguilla,1,1,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,True
 3480,2022-06-05,Portugal,Switzerland,4,0,UEFA Nations League,Lisbon,Portugal,False
 3481,2022-06-05,Czech Republic,Spain,2,2,UEFA Nations League,Prague,Czech Republic,False
@@ -3497,9 +3364,7 @@
 3495,2022-06-06,Honduras,Curaçao,1,2,CONCACAF Nations League,San Pedro Sula,Honduras,False
 3496,2022-06-06,Saint Vincent and the Grenadines,Nicaragua,2,2,CONCACAF Nations League,Kingstown,Saint Vincent and the Grenadines,False
 3497,2022-06-06,Trinidad and Tobago,Bahamas,1,0,CONCACAF Nations League,Port of Spain,Trinidad and Tobago,False
-3498,2022-06-06,Bonaire,Sint Maarten,2,2,CONCACAF Nations League,Willemstad,Curaçao,True
 3499,2022-06-06,USA Virgin Islands,Turks and Caicos Islands,3,2,CONCACAF Nations League,Saint Croix,USA Virgin Islands,False
-3500,2022-06-06,Aruba,Saint Martin,3,0,CONCACAF Nations League,Willemstad,Curaçao,True
 3501,2022-06-06,Cayman Islands,British Virgin Islands,1,1,CONCACAF Nations League,George Town,Cayman Islands,False
 3502,2022-06-06,Austria,Denmark,1,2,UEFA Nations League,Vienna,Austria,False
 3503,2022-06-06,Croatia,France,1,1,UEFA Nations League,Split,Croatia,False
@@ -3554,11 +3419,8 @@
 3552,2022-06-09,South Sudan,Mali,1,3,African Cup of Nations qualification,Entebbe,Uganda,True
 3553,2022-06-09,Lesotho,Ivory Coast,0,0,African Cup of Nations qualification,Soweto,South Africa,True
 3554,2022-06-09,Morocco,South Africa,2,1,African Cup of Nations qualification,Rabat,Morocco,False
-3555,2022-06-09,Panama,Martinique,5,0,CONCACAF Nations League,Panama City,Panama,False
 3556,2022-06-09,Canada,Curaçao,4,0,CONCACAF Nations League,Vancouver,Canada,False
-3557,2022-06-09,Barbados,Guadeloupe,0,1,CONCACAF Nations League,Gros Islet,Saint Lucia,True
 3558,2022-06-09,Antigua and Barbuda,Cuba,0,2,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,True
-3559,2022-06-09,Belize,French Guiana,1,1,CONCACAF Nations League,Belmopan,Belize,False
 3560,2022-06-09,Aruba,Saint Kitts and Nevis,2,3,CONCACAF Nations League,Willemstad,Curaçao,True
 3561,2022-06-09,Dominica,Saint Lucia,0,1,CONCACAF Nations League,Roseau,Dominica,False
 3562,2022-06-09,Cayman Islands,Puerto Rico,0,3,CONCACAF Nations League,George Town,Cayman Islands,False
@@ -3603,8 +3465,6 @@
 3601,2022-06-11,Mexico,Suriname,3,0,CONCACAF Nations League,Torreón,Mexico,False
 3602,2022-06-11,Guyana,Haiti,2,6,CONCACAF Nations League,Leonora,Guyana,False
 3603,2022-06-11,Montserrat,Bermuda,3,2,CONCACAF Nations League,Santo Domingo,Dominican Republic,True
-3604,2022-06-11,USA Virgin Islands,Bonaire,0,2,CONCACAF Nations League,Saint Croix,USA Virgin Islands,False
-3605,2022-06-11,Sint Maarten,Turks and Caicos Islands,8,2,CONCACAF Nations League,Willemstad,Curaçao,True
 3606,2022-06-11,England,Italy,0,0,UEFA Nations League,Wolverhampton,England,False
 3607,2022-06-11,Hungary,Germany,1,1,UEFA Nations League,Budapest,Hungary,False
 3608,2022-06-11,Wales,Belgium,1,1,UEFA Nations League,Cardiff,Wales,False
@@ -3617,10 +3477,7 @@
 3615,2022-06-11,Luxembourg,Turkey,0,2,UEFA Nations League,Luxembourg,Luxembourg,False
 3616,2022-06-11,Ecuador,Cape Verde,1,0,Friendly,Fort Lauderdale,USA,True
 3617,2022-06-11,Uruguay,Panama,5,0,Friendly,Montevideo,Uruguay,False
-3618,2022-06-12,Martinique,Panama,0,0,CONCACAF Nations League,Fort de France,Martinique,False
 3619,2022-06-12,Cuba,Antigua and Barbuda,3,1,CONCACAF Nations League,Santiago,Cuba,False
-3620,2022-06-12,Guadeloupe,Barbados,2,1,CONCACAF Nations League,Les Abymes,Guadeloupe,False
-3621,2022-06-12,Saint Kitts and Nevis,Saint Martin,1,1,CONCACAF Nations League,Basseterre,Saint Kitts and Nevis,False
 3622,2022-06-12,Saint Lucia,Anguilla,2,0,CONCACAF Nations League,Gros Islet,Saint Lucia,False
 3623,2022-06-12,Puerto Rico,British Virgin Islands,6,0,CONCACAF Nations League,Mayagüez,Puerto Rico,False
 3624,2022-06-12,Spain,Czech Republic,2,0,UEFA Nations League,Málaga,Spain,False
@@ -3663,9 +3520,6 @@
 3661,2022-06-14,Jamaica,Mexico,1,1,CONCACAF Nations League,Kingston,Jamaica,False
 3662,2022-06-14,El Salvador,USA,1,1,CONCACAF Nations League,San Salvador,El Salvador,False
 3663,2022-06-14,Haiti,Guyana,6,0,CONCACAF Nations League,Santo Domingo,Dominican Republic,True
-3664,2022-06-14,French Guiana,Belize,1,0,CONCACAF Nations League,Cayenne,French Guiana,False
-3665,2022-06-14,Bonaire,USA Virgin Islands,2,0,CONCACAF Nations League,Willemstad,Curaçao,True
-3666,2022-06-14,Turks and Caicos Islands,Sint Maarten,2,0,CONCACAF Nations League,Providenciales,Turks and Caicos Islands,False
 3667,2022-06-14,England,Hungary,0,4,UEFA Nations League,Wolverhampton,England,False
 3668,2022-06-14,Germany,Italy,5,2,UEFA Nations League,Mönchengladbach,Germany,False
 3669,2022-06-14,Netherlands,Wales,3,2,UEFA Nations League,Rotterdam,Netherlands,False
@@ -3681,9 +3535,6 @@
 3679,2022-06-14,Chile,Ghana,0,0,Kirin Cup,Suita,Japan,True
 3680,2022-06-14,Japan,Tunisia,0,3,Kirin Cup,Suita,Japan,False
 3681,2022-06-14,South Korea,Egypt,4,1,Friendly,Seoul,South Korea,False
-3682,2022-06-17,Mapuche,Maule Sur,0,1,CONIFA South America Football Cup,Linares,Chile,True
-3683,2022-06-18,Mapuche,Aymara,3,1,CONIFA South America Football Cup,Linares,Chile,True
-3684,2022-06-19,Aymara,Maule Sur,0,1,CONIFA South America Football Cup,Linares,Chile,True
 3685,2022-08-31,Mexico,Paraguay,0,1,Friendly,Atlanta,USA,True
 3686,2022-09-17,Fiji,New Caledonia,1,0,MSG Prime Minister's Cup,Luganville,Vanuatu,True
 3687,2022-09-17,Solomon Islands,New Caledonia,1,0,MSG Prime Minister's Cup,Luganville,Vanuatu,True
