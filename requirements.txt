@@ -1,4 +1,6 @@
+matplotlib
 numpy
 pandas
 pytest
-git+https://github.com/anguswilliams91/bpl-next
+seaborn
+https://codeload.github.com/anguswilliams91/bpl-next/zip/refs/heads/feature/neutral-dixon-coles
