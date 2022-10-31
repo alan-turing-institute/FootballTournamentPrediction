@@ -361,12 +361,11 @@ class Tournament:
         stage: str, must be "Group", "R16", "QF", "SF", "F"
         """
         # find the fixture
-        for idx, row in self.fixtures_df:
+        for idx, row in self.fixtures_df.iterrows():
             if stage != row.Stage:
                 continue
             if stage == "Group":
                 if set([row.Team_1, row.Team_2]) == set([team_1,team_2]):
-                    self.fixtures_df.iloc[idx, self.fixtures_df.columns.get_loc('Played')] = True
                     # find the group
                     group = find_group(team_1, self.teams_df)
                     self.groups[group].add_result(team_1, team_2, score_1, score_2)
