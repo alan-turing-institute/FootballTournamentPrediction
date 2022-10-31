@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "wcpredictor"
+version = "0.1.0"
+description = "Using Bayesian methods to predict outcomes of the 2022 football World Cup"
+authors = ["Nick Barlow", "Ryan Chan", "Jack Roberts"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+bpl = { git = "https://github.com/anguswilliams91/bpl-next", branch = "main" }
+pandas = "^1.4.2"
+matplotlib = "^3.6.0"
+requests = "^2.27.1"
+numpyro = {version = "^0.9.2", optional = true}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pytest-mock = "^3.10.0"
+black = "^22.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
