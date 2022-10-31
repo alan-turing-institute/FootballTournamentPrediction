@@ -47,7 +47,7 @@ class WCPred:
             "away_team": np.array(self.results.away_team),
             "home_goals": np.array(self.results.home_score),
             "away_goals": np.array(self.results.away_score),
-            "neutral_venue": np.array(self.results.neutral_venue),
+            "neutral_venue": np.array(self.results.neutral),
         }
 
     def get_ratings_dict(self) -> dict:
