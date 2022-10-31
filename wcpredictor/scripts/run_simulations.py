@@ -9,7 +9,21 @@ from wcpredictor  import Tournament
 from wcpredictor  import get_and_train_model
 
 
-def main(args):
+def main():
+    parser = argparse.ArgumentParser("Simulate multiple World Cups")
+    parser.add_argument("--num_simulations",
+                        help="How many simulations to run",
+                        type=int)
+    parser.add_argument("--output_csv",
+                        help="Path to output CSV file",
+                        default="sim_results.csv")
+    parser.add_argument("--only_wc_teams",
+                        help="If set, only fits model to teams playing in the World Cup",
+                        action="store_true")
+    parser.add_argument("--use_ratings",
+                        help="If set, model is fitted using the Fifa rankings of each team",
+                        action="store_true")
+    args = parser.parse_args()
     model = get_and_train_model(only_wc_teams = args.only_wc_teams,
                                 use_ratings = args.use_ratings)
     teams_df = get_teams_data()
@@ -37,18 +51,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Simulate multiple World Cups")
-    parser.add_argument("--num_simulations",
-                        help="How many simulations to run",
-                        type=int)
-    parser.add_argument("--output_csv",
-                        help="Path to output CSV file",
-                        default="sim_results.csv")
-    parser.add_argument("--only_wc_teams",
-                        help="If set, only fits model to teams playing in the World Cup",
-                        action="store_true")
-    parser.add_argument("--use_ratings",
-                        help="If set, model is fitted using the Fifa rankings of each team",
-                        action="store_true")
-    args = parser.parse_args()
-    main(args)
+    main()
