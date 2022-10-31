@@ -1,6 +1,17 @@
 import pandas as pd
+import random
+from pytest_mock import mocker
 
-from wcpredictor.tournament import *
+from wcpredictor import (
+    find_group,
+    get_teams_data,
+    get_fixture_data,
+    predict_group_match,
+    predict_knockout_match,
+    sort_teams_by,
+    Tournament,
+    Group,
+)
 
 def test_get_teams_df():
     teams_df = get_teams_data()
@@ -218,7 +229,12 @@ def test_many_standings():
     fix_df = get_fixture_data()
     for _ in range(100):
         g=Group("A",["Qatar","Ecuador","Senegal","Netherlands"])
-        g.play_all_matches(fix_df)
+        g.results.append({"Ecuador": random.randint(0,4), "Qatar": random.randint(0,4)})
+        g.results.append({"Netherlands": random.randint(0,4), "Qatar": random.randint(0,4)})
+        g.results.append({"Netherlands": random.randint(0,4), "Senegal": random.randint(0,4)})
+        g.results.append({"Netherlands": random.randint(0,4), "Ecuador": random.randint(0,4)})
+        g.results.append({"Senegal": random.randint(0,4), "Qatar": random.randint(0,4)})
+        g.results.append({"Ecuador": random.randint(0,4), "Senegal": random.randint(0,4)})
         g.calc_standings()
         assert sanity_check_points(g)
         assert sanity_check_goal_diff(g)
@@ -243,26 +259,45 @@ def test_add_group_result_twice():
     assert len(t.groups["A"].results) == 1
 
 
-def test_play_group_stage():
+def test_play_group_stage(mocker):
     """
     Play simulated group stage 100 times - ensure that we always have 16 qualifying teams at the end.
     """
+    def pick_random_score():
+        s1 = random.randint(0,3)
+        s2 = random.randint(0,3)
+        return s1, s2
     for _ in range(100):
         t = Tournament()
-        t.play_group_stage()
+        mocker.patch('wcpredictor.src.tournament.predict_group_match',
+                     return_value=pick_random_score())
+        t.play_group_stage("dummy")
         for group in t.groups.values():
             assert len(group.results) == 6
             assert len(group.get_qualifiers()) == 2
 
 
-def test_play_knockout_stages():
+def test_play_knockout_stages(mocker):
     """
     Play simulated knockout stages 100 times, check that we always get a winner.
     """
+    def pick_random_score():
+        s1 = random.randint(0,3)
+        s2 = random.randint(0,3)
+        return s1, s2
+    def pick_random_winner(wc_pred, team_1, team_2, seed):
+        if random.random() > 0.5:
+            return team_1
+        else:
+            return team_2
     teams_df = get_teams_data()
     teams = list(teams_df.Team.values)
     t = Tournament()
-    t.play_group_stage()
+    mocker.patch('wcpredictor.src.tournament.predict_group_match',
+                     return_value=pick_random_score())
+    t.play_group_stage("dummy")
     for _ in range(100):
-        t.play_knockout_stages()
+        mocker.patch('wcpredictor.src.tournament.predict_knockout_match',
+                     new=pick_random_winner)
+        t.play_knockout_stages("dummy")
         assert t.winner in teams
