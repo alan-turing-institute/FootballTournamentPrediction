@@ -12,7 +12,14 @@ from flask import Blueprint, Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_session import Session
 
-from wcpredictor import get_teams_data, get_fixture_data
+from wcpredictor import (
+    get_teams_data,
+    get_fixture_data,
+    get_and_train_model,
+    predict_group_match,
+    predict_knockout_match,
+    Tournament
+)
 
 blueprint = Blueprint("wcpred", __name__)
 
@@ -26,6 +33,65 @@ def create_response(orig_response):
         "Origin, X-Requested-With, Content-Type, Accept, x-auth",
     )
     return response
+
+
+@blueprint.route("/tournament", methods=["GET"])
+def create_tournament():
+    """
+    set the tournament
+    """
+    session["tournament"] = Tournament()
+    return create_response("created new tournament")
+
+
+@blueprint.route("/train", methods=["GET"])
+def get_model():
+    """
+    get and train the model
+    """
+    session["model"] = get_and_train_model()
+    return create_response("model trained ok")
+
+
+@blueprint.route("/score_probs/<team_1>/<team_2>", methods=["GET"])
+def get_score_probabilities(team_1, team_2):
+    """
+    get score probabilities for a match
+    """
+    if not "model" in session.keys():
+        get_model()
+    probs = session["model"].get_fixture_goal_probabilities(
+        [(team_1, team_2)])[0][0]
+    # convert numpy types to regular python ints and floats
+    output = {}
+    for k,v in probs.items():
+        output[k] = {}
+        for kk,vv in v.items():
+            output[k][int(kk)] = float(vv)
+    return create_response(output)
+
+
+@blueprint.route("/predict_group_match/<team_1>/<team_2>", methods=["GET"])
+def get_match_scores(team_1, team_2):
+    """
+    get scores for a group match
+    """
+    if not "model" in session.keys():
+        get_model()
+    scores = predict_group_match(session["model"], team_1, team_2)
+    scores = [int(score) for score in scores]
+    return create_response(scores)
+
+
+@blueprint.route("/predict_knockout_match/<team_1>/<team_2>", methods=["GET"])
+def get_match_result(team_1, team_2):
+    """
+    get winner for a knockout match
+    """
+    if not "model" in session.keys():
+        get_model()
+    winner = predict_knockout_match(session["model"], team_1, team_2)
+    return create_response(winner)
 
 
 @blueprint.route("/teams", methods=["GET"])
