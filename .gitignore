@@ -131,3 +131,8 @@ dmypy.json
 
 # emacs autosave
 *~
+
+# javascript stuff
+.DS_STORE
+node_modules
+build
