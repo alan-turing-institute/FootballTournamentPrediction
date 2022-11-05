@@ -15,7 +15,6 @@ from .data_loader import (
     get_results_data
 )
 from .utils import (
-    get_and_train_model,
     find_group,
     sort_teams_by,
     predict_knockout_match,
@@ -326,17 +325,18 @@ class Group:
             if len(t) > max_team_name_length:
                 max_team_name_length = len(t)
 
-        output = f"  Team{' '*(max_team_name_length-8)}| Points | GS |  GA \n"
-        team_list = self.sort_table()
-        for t in team_list:
-            output += f" {t['team']}{' '*(max_team_name_length-len(t['team']))} {t['points']}      {t['goals_for']}     {t['goals_against']} \n"
+        output = f"Position |  Team{' '*(max_team_name_length-8)}| Points | GS |  GA \n"
+        self.calc_standings()
+        for k, v in self.standings.items():
+
+            output += f"   {k}    {v}{' '*(max_team_name_length-len(v))}   {self.table[v]['points']}      {self.table[v]['goals_for']}     {self.table[v]['goals_against']} \n"
         return output
 
 
 class Tournament:
-    def __init__(self):
-        self.teams_df = get_teams_data()
-        self.fixtures_df = get_fixture_data()
+    def __init__(self, year:str = "2022"):
+        self.teams_df = get_teams_data(year)
+        self.fixtures_df = get_fixture_data(year)
         self.group_names = list(set(self.teams_df["Group"].values))
         self.groups = {}
         for n in self.group_names:
