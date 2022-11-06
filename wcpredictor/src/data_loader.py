@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 def get_teams_data(year: str = "2022") -> pd.DataFrame:
-    if year not in ["2018","2022"]:
+    if year not in ["2014","2018","2022"]:
         raise RunTimeError("Unknown year "+year)
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(
@@ -13,7 +13,7 @@ def get_teams_data(year: str = "2022") -> pd.DataFrame:
 
 
 def get_fixture_data(year: str = "2022") -> pd.DataFrame:
-    if year not in ["2018","2022"]:
+    if year not in ["2014","2018","2022"]:
         raise RunTimeError("Unknown year "+year)
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(

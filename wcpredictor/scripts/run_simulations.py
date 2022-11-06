@@ -15,8 +15,8 @@ def main():
                         help="How many simulations to run",
                         type=int)
     parser.add_argument("--tournament_year",
-                        help="Which world cup to simulate? 2018 or 2022",
-                        choices={"2018","2022"},
+                        help="Which world cup to simulate? 2014, 2018 or 2022",
+                        choices={"2014","2018","2022"},
                         default="2022")
     parser.add_argument("--training_data_start",
                         help="earliest date for training data",

@@ -21,6 +21,9 @@ def get_and_train_model(only_wc_teams: bool = True,
     # the 2018 world cup?
     if "2018" in end_date:
         tournament_year = "2018"
+    # and same logic for 2014
+    if "2014" in end_date:
+        tournament_year = "2014"
     else:
         tournament_year = "2022"
     teams = list(get_teams_data(tournament_year).Team)
