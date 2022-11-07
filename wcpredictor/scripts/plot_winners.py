@@ -14,7 +14,14 @@ def main():
     df.sort_values(by="W", axis=0, ascending=False, inplace=True)
     # plot the top ten
     df = df[:10]
-    df.plot.bar(x="team",y="W")
+    fig, ax = plt.subplots(tight_layout=True)
+    xvals = list(df.team.values)
+    yvals = list(df.W.values)
+    ax.bar(xvals, yvals)
+    for label in ax.get_xticklabels():
+        label.set_rotation(45)
+        label.set_ha('right')
+    ax.set_ylabel("Number of wins")
     if args.output_png:
         plt.savefig(args.output_png)
     else:
