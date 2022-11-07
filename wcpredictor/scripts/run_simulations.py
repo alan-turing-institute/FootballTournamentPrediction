@@ -14,6 +14,16 @@ def main():
     parser.add_argument("--num_simulations",
                         help="How many simulations to run",
                         type=int)
+    parser.add_argument("--tournament_year",
+                        help="Which world cup to simulate? 2014, 2018 or 2022",
+                        choices={"2014","2018","2022"},
+                        default="2022")
+    parser.add_argument("--training_data_start",
+                        help="earliest date for training data",
+                        default="2018-06-30")
+    parser.add_argument("--training_data_end",
+                        help="latest date for training data",
+                        default="2022-11-20")
     parser.add_argument("--output_csv",
                         help="Path to output CSV file",
                         default="sim_results.csv")
@@ -25,8 +35,10 @@ def main():
                         action="store_true")
     args = parser.parse_args()
     model = get_and_train_model(only_wc_teams = args.only_wc_teams,
-                                use_ratings = args.use_ratings)
-    teams_df = get_teams_data()
+                                use_ratings = args.use_ratings,
+                                start_date = args.training_data_start,
+                                end_date = args.training_data_end)
+    teams_df = get_teams_data(args.tournament_year)
     teams = list(teams_df.Team.values)
     team_results = {
         team: {
@@ -39,7 +51,7 @@ def main():
         } for team in teams
     }
     for _ in range(args.num_simulations):
-        t = Tournament()
+        t = Tournament(args.tournament_year)
         t.play_group_stage(model)
         t.play_knockout_stages(model)
         for team in teams:

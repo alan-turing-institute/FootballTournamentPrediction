@@ -12,9 +12,21 @@ from .bpl_interface import WCPred
 
 
 def get_and_train_model(only_wc_teams: bool = True,
-                        use_ratings: bool = True):
-    results = get_results_data()
-    teams = list(get_teams_data().Team)
+                        use_ratings: bool = True,
+                        start_date: str = "2018-06-01",
+                        end_date: str = "2022-11-20"
+                        ) -> WCPred:
+    results = get_results_data(start_date, end_date)
+    # if we are getting results up to 2018, maybe we are simulating
+    # the 2018 world cup?
+    if "2018" in end_date:
+        tournament_year = "2018"
+    # and same logic for 2014
+    if "2014" in end_date:
+        tournament_year = "2014"
+    else:
+        tournament_year = "2022"
+    teams = list(get_teams_data(tournament_year).Team)
     ratings = get_fifa_rankings_data()
     if (only_wc_teams and use_ratings):
         wc_pred = WCPred(results=results,

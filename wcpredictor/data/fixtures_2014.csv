@@ -1,0 +1,64 @@
+Team_1,Team_2,Date,Stage
+Brazil,Croatia,2014-06-12,Group
+Mexico,Cameroon,2014-06-13,Group
+Brazil,Mexico,2014-06-17,Group
+Cameroon,Croatia,2014-06-18,Group
+Cameroon,Brazil,2014-06-23,Group
+Croatia,Mexico,2014-06-23,Group
+Spain,Netherlands,2014-06-13,Group
+Chile,Australia,2014-06-13,Group
+Australia,Netherlands,2014-06-18,Group
+Spain,Chile,2014-06-18,Group
+Australia,Spain,2014-06-23,Group
+Netherlands,Chile,2014-06-23,Group
+Colombia,Greece,2014-06-14,Group
+Ivory Coast,Japan,2014-06-15,Group
+Colombia,Ivory Coast,2014-06-19,Group
+Japan,Greece,2014-06-19,Group
+Japan,Colombia,2014-06-24,Group
+Greece,Ivory Coast,2014-06-24,Group
+Uruguay,Costa Rica,2014-06-14,Group
+England,Italy,2014-06-14,Group
+Uruguay,England,2014-06-19,Group
+Italy,Costa Rica,2014-06-20,Group
+Costa Rica,England,2014-06-24,Group
+Italy,Uruguay,2014-06-24,Group
+Switzerland,Ecuador,2014-06-15,Group
+France,Honduras,2014-06-15,Group
+Switzerland,France,2014-06-20,Group
+Honduras,Ecuador,2014-06-20,Group
+Honduras,Switzerland,2014-06-25,Group
+Ecuador,France,2014-06-25,Group
+Argentina,Bosnia and Herzegovina,2014-06-15,Group
+Iran,Nigeria,2014-06-16,Group
+Argentina,Iran,2014-06-21,Group
+Nigeria,Bosnia and Herzegovina,2014-06-21,Group
+Nigeria,Argentina,2014-06-25,Group
+Bosnia and Herzegovina,Iran,2014-06-25,Group
+Germany,Portugal,2014-06-16,Group
+Ghana,USA,2014-06-16,Group
+Germany,Ghana,2014-06-21,Group
+USA,Portugal,2014-06-22,Group
+Portugal,Ghana,2014-06-26,Group
+USA,Germany,2014-06-26,Group
+Belgium,Algeria,2014-06-17,Group
+Russia,South Korea,2014-06-17,Group
+Belgium,Russia,2014-06-22,Group
+South Korea,Algeria,2014-06-22,Group
+Algeria,Russia,2014-06-26,Group
+South Korea,Belgium,2014-06-26,Group
+1A,2B,2014-06-28,R16
+1C,2D,2014-06-28,R16
+1B,2A,2014-06-29,R16
+1D,2C,2014-06-29,R16
+1E,2F,2014-06-30,R16
+1G,2H,2014-06-30,R16
+1F,2E,2014-07-01,R16
+1H,2G,2014-07-01,R16
+1E2F,1G2H,2014-07-04,QF
+1A2B,1C2D,2014-07-04,QF
+1F2E,1H2G,2014-07-05,QF
+1B2A,1D2C,2014-07-05,QF
+1E2F1G2H,1A2B1C2D,2014-07-08,SF
+1F2E1H2G,1B2A1D2C,2014-07-09,SF
+1E2F1G2H1A2B1C2D,1F2E1H2G1B2A1D2C,2014-07-13,F

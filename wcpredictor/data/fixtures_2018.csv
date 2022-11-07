@@ -1,0 +1,64 @@
+Team_1,Team_2,Date,Stage
+Russia,Saudi Arabia,2018-06-14,Group
+Egypt,Uruguay,2018-06-15,Group
+Morocco,Iran,2018-06-15,Group
+Portugal,Spain,2018-06-15,Group
+France,Australia,2018-06-16,Group
+Argentina,Iceland,2018-06-16,Group
+Peru,Denmark,2018-06-16,Group
+Croatia,Nigeria,2018-06-16,Group
+Costa Rica,Serbia,2018-06-17,Group
+Germany,Mexico,2018-06-17,Group
+Brazil,Switzerland,2018-06-17,Group
+Sweden,South Korea,2018-06-18,Group
+Belgium,Panama,2018-06-18,Group
+Tunisia,England,2018-06-18,Group
+Colombia,Japan,2018-06-19,Group
+Poland,Senegal,2018-06-19,Group
+Russia,Egypt,2018-06-19,Group
+Portugal,Morocco,2018-06-20,Group
+Uruguay,Saudi Arabia,2018-06-20,Group
+Iran,Spain,2018-06-20,Group
+Denmark,Australia,2018-06-21,Group
+France,Peru,2018-06-21,Group
+Argentina,Croatia,2018-06-21,Group
+Brazil,Costa Rica,2018-06-22,Group
+Nigeria,Iceland,2018-06-22,Group
+Serbia,Switzerland,2018-06-22,Group
+Belgium,Tunisia,2018-06-23,Group
+South Korea,Mexico,2018-06-23,Group
+Germany,Sweden,2018-06-23,Group
+England,Panama,2018-06-24,Group
+Japan,Senegal,2018-06-24,Group
+Poland,Colombia,2018-06-24,Group
+Saudi Arabia,Egypt,2018-06-25,Group
+Uruguay,Russia,2018-06-25,Group
+Iran,Portugal,2018-06-25,Group
+Spain,Morocco,2018-06-25,Group
+Australia,Peru,2018-06-26,Group
+Denmark,France,2018-06-26,Group
+Nigeria,Argentina,2018-06-26,Group
+Iceland,Croatia,2018-06-26,Group
+Mexico,Sweden,2018-06-27,Group
+South Korea,Germany,2018-06-27,Group
+Switzerland,Costa Rica,2018-06-27,Group
+Serbia,Brazil,2018-06-27,Group
+Senegal,Colombia,2018-06-28,Group
+Japan,Poland,2018-06-28,Group
+England,Belgium,2018-06-28,Group
+Panama,Tunisia,2018-06-28,Group
+1C,2D,2018-06-30,R16
+1A,2B,2018-06-30,R16
+1B,2A,2018-06-30,R16
+1D,2C,2018-07-01,R16
+1E,2F,2018-07-02,R16
+1G,2H,2018-07-02,R16
+1F,2D,2018-07-03,R16
+1H,2G,2018-07-03,R16
+1A2B,1C2D,2018-07-06,QF
+1E2F,1G2H,2018-07-06,QF
+1H2G,1F2D,2018-07-07,QF
+1B2A,1D2C,2018-07-07,QF
+1A2B1C2D,1E2F1G2H,2018-07-10,SF
+1B2A1D2C,1H2G1F2D,2018-07-10,SF
+1A2B1C2D1E2F1G2H,1B2A1D2C1H2G1F2D,2018-07-15,F
