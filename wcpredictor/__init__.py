@@ -11,5 +11,6 @@ from .src.utils import (
     get_and_train_model,
     predict_group_match,
     predict_knockout_match,
+    predict_score_probabilities,
     sort_teams_by
 )

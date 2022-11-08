@@ -6,7 +6,7 @@ knockout stages, to the final, and produce a winner.
 import os
 import pandas as pd
 import random
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List, Tuple, Dict
 from .bpl_interface import WCPred
 from .data_loader import (
     get_teams_data,
@@ -39,6 +39,17 @@ class Group:
         self.results = []
         # order of criteria for deciding group order
         self.metrics = ["points","goal_difference","goals_for", "head-to-head", "random"]
+
+
+    def reset(self):
+        """
+        remove all results, reset all standings
+        """
+        for t in self.teams:
+            self.table[t] = {"points":0, "goals_for": 0, "goals_against": 0, "goal_difference": 0}
+        self.standings = {"1st": None, "2nd": None, "3rd": None, "4th": None}
+        self.results = []
+
 
     def play_match(self,
                    wc_pred: WCPred,
@@ -344,6 +355,19 @@ class Tournament:
             self.groups[n] = g
         self.aliases = {}
         self.is_complete = False
+        self.next_fixture_index = 0
+        self.knockout_results = []
+
+
+    def reset(self):
+        """
+        Go back to the start of the tournament, remove all results etc.
+        """
+        self.next_fixture_index = 0
+        self.knockout_results = []
+        self.aliases = {}
+        for group in self.groups.values():
+            group.reset()
 
     def add_result(self,
                    team_1: str,
@@ -369,6 +393,53 @@ class Tournament:
                     # find the group
                     group = find_group(team_1, self.teams_df)
                     self.groups[group].add_result(team_1, team_2, score_1, score_2)
+
+
+    def get_next_match(self) -> Dict:
+        """
+        Using next_fixture_index, return details of the next match to be played
+        """
+        fixture = self.fixtures_df.iloc[self.next_fixture_index]
+        stage = fixture.Stage
+        if stage == "Group":
+            group = find_group(fixture.Team_1, self.teams_df)
+            stage += f" {group}"
+            return {"team_1": fixture.Team_1,
+                    "team_2": fixture.Team_2,
+                    "date": fixture.Date,
+                    "stage": stage
+                    }
+        else:
+            return {"team_1":  self.aliases[fixture.Team_1],
+                    "team_1":  self.aliases[fixture.Team_1],
+                    "date": fixture.Date,
+                    "stage": fixture.Stage
+                    }
+
+
+    def play_next_match(self,
+                        wc_pred: WCPred,
+                        seed: Optional[int] = None,
+                        verbose: bool = False) -> Dict:
+        """
+        Using the next_fixture_index, play a game
+        """
+        fixture = self.fixtures_df.iloc[self.next_fixture_index]
+        self.next_fixture_index += 1
+        if fixture.Stage == "Group":
+            group = find_group(fixture.Team_1, self.teams_df)
+            self.groups[group].play_match(wc_pred, fixture, seed)
+            return self.groups[group].results[-1]
+        else:
+            self.aliases[fixture.Team_1+fixture.Team_2] = predict_knockout_match(
+                wc_pred = wc_pred,
+                team_1 = self.aliases[f.Team_1],
+                team_2 = self.aliases[f.Team_2],
+                seed = seed
+            )
+            return {"winner": self.aliases[fixture.Team_1+fixture.Team_2]}
+
+
 
     def play_group_stage(self,
                          wc_pred: WCPred,

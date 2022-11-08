@@ -1,7 +1,7 @@
 """
 Assorted functions to get the BPL model, and predict results.
 """
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List, Tuple, Dict
 
 from .data_loader import (
     get_results_data,
@@ -110,3 +110,23 @@ def predict_group_match(wc_pred: WCPred,
         fixture_teams = [(team_1, team_2)],
         seed = seed
     )[1][0]
+
+
+def predict_score_probabilities(wc_pred: WCPred,
+                                team_1: str,
+                                team_2: str,
+                                seed: Optional[int] = None) -> Dict:
+    """
+    Parameters
+    ==========
+    team_1, team_2: both str, names of two teams
+
+    Returns:
+    ========
+    dict, {team_1:{0: <prob>, 1: <prob>, ...}, team_2:{0: <prob>, 1: <prob>, ...}}
+
+    """
+    return wc_pred.get_fixture_goal_probabilities(
+        fixture_teams = [(team_1, team_2)],
+        seed = seed
+    )[0][0]

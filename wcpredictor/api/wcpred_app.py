@@ -18,6 +18,7 @@ from wcpredictor import (
     get_and_train_model,
     predict_group_match,
     predict_knockout_match,
+    predict_score_probabilities,
     Tournament
 )
 
@@ -190,6 +191,23 @@ def get_fixtures_for_group(group):
                              "date": row.Date
                              })
     return create_response(fixture_list)
+
+@blueprint.route("/matches/next", methods=["GET", "POST"])
+def next_match():
+    """
+    Find the next fixture to be played.
+    """
+    if not "tournament" in session.keys():
+        create_tournament()
+    if request.method == "GET":
+        match = session["tournament"].get_next_match()
+        return create_response(match)
+    else:
+        if not "model" in session.keys():
+            get_model()
+        result = session["tournament"].play_next_match(session["model"])
+        return create_response(result)
+
 
 
 def create_app(name=__name__):
