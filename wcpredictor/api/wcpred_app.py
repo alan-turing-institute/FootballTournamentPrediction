@@ -115,6 +115,49 @@ def get_team_list_for_group(group):
     return create_response(team_list)
 
 
+def get_ordered_table(group, tournament):
+    """
+    combine 'standings' and 'table' to get an ordered table
+    """
+    tournament.groups[group].calc_standings()
+    standings = tournament.groups[group].standings
+    table = tournament.groups[group].table
+    print("TABLE", table)
+    ordered_table = [
+        {
+            "position": k,
+            "team": v,
+            "points": table[v]["points"],
+            "gs": table[v]["goals_for"],
+            "ga": table[v]["goals_against"]
+        } for k,v in standings.items()
+    ]
+    return ordered_table
+
+@blueprint.route("/group/<group>", methods=["GET"])
+def get_group_table(group):
+    """
+    Return the standings for a group
+    """
+    if not "tournament" in session.keys():
+        create_tournament()
+    ordered_table = get_ordered_table(group, session["tournament"])
+    return create_response(ordered_table)
+
+
+@blueprint.route("/groups", methods=["GET"])
+def get_all_group_tables():
+    """
+    Return the standings for all groups
+    """
+    if not "tournament" in session.keys():
+        create_tournament()
+    tables = {}
+    for group in ["A","B","C","D","E","F","G","H"]:
+        tables[group] = get_ordered_table(group, session["tournament"])
+    return create_response(tables)
+
+
 @blueprint.route("/fixtures", methods=["GET"])
 def get_fixtures():
     """
