@@ -51,3 +51,13 @@ def get_results_data(
                             (results_df.away_team.isin(fifa_teams))]
     results_df.reset_index(drop=True)
     return results_df
+
+
+def get_wcresults_data(year: str) -> pd.DataFrame:
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(
+        current_dir, "..","data",
+        f"wcresults_{year}.csv"
+    )
+    wcresults_df = pd.read_csv(csv_path)
+    return wcresults_df

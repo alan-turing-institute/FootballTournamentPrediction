@@ -122,3 +122,24 @@ def predict_group_match(wc_pred: WCPred,
         fixture_teams = [(team_1, team_2)],
         seed = seed
     )[1][0]
+
+
+def get_difference_in_stages(stage_1:str, stage_2:str) -> int:
+    """
+    Give an integer value to the differences between two
+    'stages' i.e. how far a team got in the tournament.
+    This can be used to calculate a loss function, i.e. difference
+    between predicted and actual results for past tournaments.
+
+    Parameters
+    ==========
+    stage_1, stage_2: both str, can be "G","R16","QF","SF","RU","W"
+
+    Returns
+    =======
+    diff: int, how far apart the two stages are.
+    """
+    stages = ["G","R16","QF","SF","RU","W"]
+    if not stage_1 in stages and stage_2 in stages:
+        raise RuntimeError(f"Unknown value for stage - must be in {stages}")
+    return abs(stages.index(stage_1) - stages.index(stage_2))
