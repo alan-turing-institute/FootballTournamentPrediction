@@ -1,10 +1,18 @@
 import React from 'react';
- 
-const Fixture = () => {
+import Table from 'react-bootstrap/Table';
+
+const Fixture = (props) => {
    return (
-       <header>
-           <h1>World Cup Predicto-o-matic</h1>
-       </header>
+    <Table striped bordered hover>
+        <tbody>
+            <tr>
+            <th>{props.date}</th>
+            <th>{props.stage}</th>
+            <th>{props.team_1} vs {props.team_2}</th>
+            <th>{props.session}</th>
+            </tr>
+        </tbody>
+    </Table>
    );
 };
  

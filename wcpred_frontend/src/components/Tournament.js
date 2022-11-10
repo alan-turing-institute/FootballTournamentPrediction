@@ -10,12 +10,13 @@ function simulateNetworkRequest() {
 } 
 
 const Tournament = (props) => {
-    const [isLoading, setLoading] = useState(true);
+ 
+    // useEffect to update group tables
+    const [isLoadingGroups, setLoadingGroups] = useState(true);
     const [groupData, setGroupData] = useState({});
-
     useEffect(() => {
         const url = getBaseURL() + "/groups";
-        if (isLoading) {
+        if (isLoadingGroups) {
             const fetchData = async () => {
                 try {
                   const response = await fetch(url);
@@ -28,31 +29,94 @@ const Tournament = (props) => {
             };
           
             fetchData().then(() => {
-                setLoading(false);
+                setLoadingGroups(false);
             });
         }
-    }, [isLoading]);
+    }, [isLoadingGroups]);
 
-    const handleClick = () => setLoading(true);
+    // useEffect to update next fixture
+    const [nextFixture, setNextFixture] = useState({});
+    const [isLoadingFixture, setLoadingFixture] = useState(true);
+    useEffect(() => {
+        const url = getBaseURL() + "/matches/next";
+        if (isLoadingFixture) {
+            const fetchData = async () => {
+                try {
+                  const response = await fetch(url);
+                  const json = await response.json();
+                  console.log(json);
+                  setNextFixture(json);
+                } catch (error) {
+                  console.log("error fetching fixture data", error);
+                }
+            };
+            fetchData().then(() => {
+                setLoadingFixture(false);
+            });
+        }
+    }, [isLoadingFixture]);
+
+    // play next match
+    const [latestResult, setLatestResult] = useState({});
+    const [isLoadingResult, setLoadingResult] = useState(true);
+    function playMatch() {
+        console.log("Play match!");
+        const url = getBaseURL() + "/matches/next";
+        if (isLoadingResult) {
+            const fetchData = async () => {
+                try {
+                const response = await fetch(url, {method: 'POST'});
+                const json = await response.json();
+                console.log(json);
+                setLatestResult(json);
+                } catch (error) {
+                console.log("error fetching result data", error);
+                }
+            };
+            fetchData().then(() => {
+                setLoadingResult(false);
+            });
+        }
+    };
+
+
+
+    const handleMatchClick = () => playMatch();
     return (
         <div>
-            { isLoading ? "loading..." : (
-                //<GroupTable groupName="A" groupData={groupData.A} />
+            <div>
+            { isLoadingGroups ? "loading..." : (
                 Object.entries(groupData).map(([k,v]) => { 
                     return (
                         <GroupTable groupName={k} groupData={v} />
                     )
                 })
             )}
-
+            </div>
+            <div>
+                Next fixture:
+            { isLoadingFixture ? "loading..." : (
+                <Fixture 
+                date={nextFixture.date}
+                stage={nextFixture.stage}
+                team_1={nextFixture.team_1}
+                team_2={nextFixture.team_2}
+                session={nextFixture.sessionid}
+                />
+            )}                
+            </div>
         
             <Button 
             variant="primary"
-            disabled={isLoading}
-            onClick={!isLoading ? handleClick : null}
+            disabled={isLoadingFixture}
+            onClick={!isLoadingFixture ? handleMatchClick : null}
             >
-            {isLoading ? 'Loading…' : 'Click to run tournament'}
+            {isLoadingFixture ? 'Loading…' : 'Play next match'}
             </Button>
+            <div>
+                Latest result:
+            
+            </div>
         </div>
     );
 };

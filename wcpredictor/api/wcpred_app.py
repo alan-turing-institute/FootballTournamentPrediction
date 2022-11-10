@@ -197,17 +197,33 @@ def next_match():
     """
     Find the next fixture to be played.
     """
+    print("SESSION KEYS", session.keys())
+    print("SESSION ID", session.sid)
     if not "tournament" in session.keys():
         create_tournament()
     if request.method == "GET":
         match = session["tournament"].get_next_match()
+        match["sessionid"] = session.sid
         return create_response(match)
     else:
         if not "model" in session.keys():
             get_model()
         result = session["tournament"].play_next_match(session["model"])
+        # convert from np.int64 to int
+        result = {k: int(v) for k,v in result.items()}
         return create_response(result)
 
+
+@blueprint.route("/tournament/reset", methods=["POST"])
+def reset_tournament():
+    """
+    Remove all results
+    """
+    print("SESSION KEYS", session.keys())
+    if not "tournament" in session.keys():
+        create_tournament()
+    session["tournament"].reset()
+    return create_response("reset tournament")
 
 
 def create_app(name=__name__):
