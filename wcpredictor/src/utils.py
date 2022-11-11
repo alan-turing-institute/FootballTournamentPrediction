@@ -14,9 +14,21 @@ from .bpl_interface import WCPred
 def get_and_train_model(only_wc_teams: bool = True,
                         use_ratings: bool = True,
                         start_date: str = "2018-06-01",
-                        end_date: str = "2022-11-20"
+                        end_date: str = "2022-11-20",
+                        competitions: List[str] = ["W","C1","WQ","CQ","C2","F"]
                         ) -> WCPred:
-    results = get_results_data(start_date, end_date)
+    """
+    Use 'competitions' argument to specify which rows to include in training data.
+    Key for competitions:
+    "W": world cup finals,
+    "C1": top-level continental cup,
+    "WQ": world cup qualifiers",
+    "CQ": continental cup qualifiers"
+    "C2": 2nd-tier continental, e.g. UEFA Nations League,
+    "F": friendly/other.
+    """
+    results = get_results_data(start_date, end_date, competitions=competitions)
+    print(f"Using {len(results)} rows in training data")
     # if we are getting results up to 2018, maybe we are simulating
     # the 2018 world cup?
     if "2018" in end_date:
