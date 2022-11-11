@@ -34,12 +34,13 @@ def get_cmd_line_args():
     parser.add_argument("--output_loss_txt",
                         help="Path to output txt file of loss function vals",
                         default="sim_results_loss.txt")
-    parser.add_argument("--only_wc_teams",
-                        help="If set, only fits model to teams playing in the World Cup",
-                        action="store_true")
     parser.add_argument("--dont_use_ratings",
                         help="If set, model is fitted without using the Fifa rankings of each team",
                         action="store_true")
+    parser.add_argument("--ratings_source",
+                        choices=["game","org"],
+                        default="game",
+                        help="if 'game' use FIFA video game ratings for prior, if 'org', use FIFA organization ratings")
     parser.add_argument("--include_competitions",
                         help="comma-separated list of competitions to include in training data",
                         default="W,C1,WQ,CQ,C2,F")
@@ -52,18 +53,17 @@ def get_cmd_line_args():
 def main():
     args = get_cmd_line_args()
     # use the fifa ratings as priors?
-    use_ratings = False if args.dont_use_ratings else True
+    ratings_src = None if args.dont_use_ratings else args.ratings_source
     # list of competitions to include
     comps = args.include_competitions.split(",")
     if args.exclude_competitions:
         exclude_comps = args.exclude_competitions.split(",")
         for comp in exclude_comps:
             comps.remove(comp)
-    model = get_and_train_model(only_wc_teams = args.only_wc_teams,
-                                use_ratings = use_ratings,
-                                start_date = args.training_data_start,
+    model = get_and_train_model(start_date = args.training_data_start,
                                 end_date = args.training_data_end,
-                                competitions = comps)
+                                competitions = comps,
+                                rankings_source=ratings_src)
     teams_df = get_teams_data(args.tournament_year)
     teams = list(teams_df.Team.values)
     team_results = {
