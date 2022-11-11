@@ -11,11 +11,10 @@ from .data_loader import (
 from .bpl_interface import WCPred
 
 
-def get_and_train_model(only_wc_teams: bool = True,
-                        use_ratings: bool = True,
-                        start_date: str = "2018-06-01",
+def get_and_train_model(start_date: str = "2018-06-01",
                         end_date: str = "2022-11-20",
-                        competitions: List[str] = ["W","C1","WQ","CQ","C2","F"]
+                        competitions: List[str] = ["W","C1","WQ","CQ","C2","F"],
+                        rankings_source: str = "game",
                         ) -> WCPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
@@ -26,7 +25,11 @@ def get_and_train_model(only_wc_teams: bool = True,
     "CQ": continental cup qualifiers"
     "C2": 2nd-tier continental, e.g. UEFA Nations League,
     "F": friendly/other.
+
+    rankings_source determines whether we use the FIFA video game rankings for prior values
+    for the covariates ("game"), or use the FIFA organisation ones ("org"), or neither (None).
     """
+    print("in get_and_train_model")
     results = get_results_data(start_date, end_date, competitions=competitions)
     print(f"Using {len(results)} rows in training data")
     # if we are getting results up to 2018, maybe we are simulating
@@ -39,14 +42,11 @@ def get_and_train_model(only_wc_teams: bool = True,
     else:
         tournament_year = "2022"
     teams = list(get_teams_data(tournament_year).Team)
-    ratings = get_fifa_rankings_data()
-    if (only_wc_teams and use_ratings):
+
+    if rankings_source:
+        ratings = get_fifa_rankings_data(rankings_source)
         wc_pred = WCPred(results=results,
-                        teams=teams,
                         ratings=ratings)
-    elif only_wc_teams and not use_ratings:
-        wc_pred = WCPred(results=results,
-                        teams=teams)
     else:
         wc_pred = WCPred(results=results)
     wc_pred.set_training_data()
