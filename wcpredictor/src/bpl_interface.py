@@ -6,9 +6,10 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from bpl import NeutralDixonColesMatchPredictor
+from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from jax.numpy import DeviceArray
 
+from wcpredictor.src.data_loader import get_confederations_data
 
 class WCPred:
     def __init__(
@@ -35,6 +36,8 @@ class WCPred:
             ]
         if years is not None:
             self.results = self.results[self.results.date.dt.year.isin(years)]
+        confed = get_confederations_data()
+        self.confed_dict = dict(zip(confed["Team"], confed["Confederation"]))
         self.training_data = None
         self.model = None
 
@@ -45,6 +48,10 @@ class WCPred:
         return {
             "home_team": np.array(self.results.home_team),
             "away_team": np.array(self.results.away_team),
+            "home_conf": np.array([self.confed_dict[team]
+                                   for team in self.results.home_team]),
+            "away_conf": np.array([self.confed_dict[team]
+                                   for team in self.results.away_team]),
             "home_goals": np.array(self.results.home_score),
             "away_goals": np.array(self.results.away_score),
             "neutral_venue": np.array(self.results.neutral),
@@ -100,7 +107,7 @@ class WCPred:
         if self.training_data is None:
             self.set_training_data()
         print("[MODEL FITTING] Fitting the model")
-        self.model = NeutralDixonColesMatchPredictor().fit(
+        self.model = NeutralDixonColesMatchPredictorWC().fit(
             self.training_data, **fit_args
         )
 
@@ -128,8 +135,10 @@ class WCPred:
         if fixture_teams is None:
             fixture_teams = self.get_fixture_teams()
         Team_1, Team_2 = zip(*fixture_teams)
+        Team_1_conference = [self.confed_dict[team] for team in Team_1]
+        Team_2_conference = [self.confed_dict[team] for team in Team_2]
         venue = np.ones(len(Team_1))
-        p = self.model.predict_outcome_proba(Team_1, Team_2, venue)
+        p = self.model.predict_outcome_proba(Team_1, Team_2, Team_1_conference, Team_2_conference, venue)
         # predict outcome of the game
         simulated_outcome = []
         for i in range(len(fixture_teams)):
@@ -177,13 +186,15 @@ class WCPred:
         if fixture_teams is None:
             fixture_teams = self.get_fixture_teams()
         Team_1, Team_2 = zip(*fixture_teams)
+        Team_1_conference = [self.confed_dict[team] for team in Team_1]
+        Team_2_conference = [self.confed_dict[team] for team in Team_2]
         venue = np.ones(len(Team_1))
         for i in range(len(fixture_teams)):
             home_team_goal_prob = self.model.predict_score_n_proba(
-                goals, Team_1[i], Team_2[i], home=False, neutral_venue=venue[i]
+                goals, Team_1[i], Team_2[i], Team_1_conference[i], Team_2_conference[i], home=False, neutral_venue=venue[i]
             )
             away_team_goal_prob = self.model.predict_score_n_proba(
-                goals, Team_2[i], Team_1[i], home=False, neutral_venue=venue[i]
+                goals, Team_2[i], Team_1[i], Team_2_conference[i], Team_1_conference[i], home=False, neutral_venue=venue[i]
             )
             probs[i] = {
                 Team_1[i]: {g: p for g, p in zip(goals, home_team_goal_prob)},

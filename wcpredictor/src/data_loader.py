@@ -34,6 +34,14 @@ def get_fifa_rankings_data() -> pd.DataFrame:
     return pd.read_csv(csv_path)
 
 
+def get_confederations_data() -> pd.DataFrame:
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(
+        current_dir, "..","data",
+        "confederations.csv"
+    )
+    return pd.read_csv(csv_path)
+
 def get_results_data(
         start_date: str = "2018-06-01",
         end_date: str = "2022-11-20",

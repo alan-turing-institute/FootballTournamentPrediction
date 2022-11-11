@@ -4,6 +4,7 @@ from .src.data_loader import (
     get_fixture_data,
     get_results_data,
     get_fifa_rankings_data,
+    get_confederations_data,
     get_wcresults_data
 )
 from .src.tournament import Tournament, Group
