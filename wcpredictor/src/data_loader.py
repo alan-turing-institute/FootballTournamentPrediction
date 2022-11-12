@@ -47,24 +47,46 @@ def load_game_rankings() -> pd.DataFrame:
         filename
     )
     df =  pd.read_csv(csv_path)
-    # assign default values to teams not otherwise covered, use the same as Qatar
-    default_row = df.loc[df.Team=="Qatar"]
-    all_teams = get_confederations_data().Team.unique()
+    # assign default values to teams not otherwise covered
+    confederations = get_confederations_data()
+    confed_dict = dict(zip(confederations.Team,
+                           confederations.Confederation))
+    all_teams = confederations.Team.unique()
     current_teams = df.Team.unique()
     new_teams = list(set(all_teams) - set(current_teams))
-    attacks = len(new_teams)*[default_row.Attack.values[0]]
-    midfields = len(new_teams)*[default_row.Midfield.values[0]]
-    defences = len(new_teams)*[default_row.Defence.values[0]]
-    overalls = len(new_teams)*[default_row.Overall.values[0]]
+    teams = []
+    attacks = []
+    midfields = []
+    defences = []
+    overalls = []
+    for conf in set(confederations.Confederation):
+        # define default value for Fifa ratings conditional on their confederation
+        if conf == "AFC":
+            default = 60
+        elif conf == "CAF":
+            default = 60
+        elif conf == "CONCACAF":
+            default = 60
+        elif conf == "CONMEBOL":
+            default = 65
+        elif conf == "OFC":
+            default = 50
+        elif conf == "UEFA":
+            default = 65
+        new_teams_in_conf = [team for team in new_teams if confed_dict[team] == conf]
+        teams += new_teams_in_conf
+        attacks += len(new_teams_in_conf) * [default]
+        midfields += len(new_teams_in_conf) * [default]
+        defences += len(new_teams_in_conf) * [default]
+        overalls += len(new_teams_in_conf) * [default]
     new_df = pd.DataFrame(
-        {"Team":new_teams,
+        {"Team": teams,
         "Attack": attacks,
         "Midfield": midfields,
         "Defence": defences,
         "Overall": overalls}
     )
-    df = pd.concat([df, new_df])
-    df = df.reset_index(drop=True)
+    df = pd.concat([df, new_df]).reset_index(drop=True)
     return df
 
 def load_org_rankings() -> pd.DataFrame:
