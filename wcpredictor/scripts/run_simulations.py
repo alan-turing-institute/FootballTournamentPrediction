@@ -23,23 +23,27 @@ def get_cmd_line_args():
                         choices={"2014","2018","2022"},
                         default="2022")
     parser.add_argument("--training_data_start",
-                        help="earliest date for training data",
-                        default="2018-06-30")
+                        help="earliest date for training data")
     parser.add_argument("--training_data_end",
-                        help="latest date for training data",
-                        default="2022-11-20")
+                        help="latest date for training data")
+    parser.add_argument("--years_training_data",
+                        help="how many years of training data, before tournament start",
+                        type=int,
+                        default=6
+                        )
     parser.add_argument("--output_csv",
                         help="Path to output CSV file",
                         default="sim_results.csv")
     parser.add_argument("--output_loss_txt",
                         help="Path to output txt file of loss function vals",
                         default="sim_results_loss.txt")
-    parser.add_argument("--only_wc_teams",
-                        help="If set, only fits model to teams playing in the World Cup",
-                        action="store_true")
     parser.add_argument("--dont_use_ratings",
                         help="If set, model is fitted without using the Fifa rankings of each team",
                         action="store_true")
+    parser.add_argument("--ratings_source",
+                        choices=["game","org","both"],
+                        default="game",
+                        help="if 'game' use FIFA video game ratings for prior, if 'org', use FIFA organization ratings")
     parser.add_argument("--include_competitions",
                         help="comma-separated list of competitions to include in training data",
                         default="W,C1,WQ,CQ,C2,F")
@@ -49,21 +53,44 @@ def get_cmd_line_args():
     args = parser.parse_args()
     return args
 
+
+def get_start_end_dates(args):
+    """
+    Based on the command line args, define what period of training data to use.
+    """
+    if args.training_data_start:
+        start_date = args.training_data_start
+    else:
+        start_year = int(args.tournament_year) - args.years_training_data
+        # always start at 1st June, to capture the summer tournament
+        start_date = f"{start_year}-06-01"
+    if args.training_data_end:
+        end_date = args.training_data_end
+    else:
+        end_year = int(args.tournament_year)
+        # end at 1st June if tournament year is 2014 or 2018, or 1st Nov for 2022
+        if args.tournament_year == "2022":
+            end_date = "2022-11-01"
+        else:
+            end_date = f"{args.tournament_year}-06-01"
+    print(f"Start/End dates for training data are {start_date}, {end_date}")
+    return start_date, end_date
+
 def main():
     args = get_cmd_line_args()
     # use the fifa ratings as priors?
-    use_ratings = False if args.dont_use_ratings else True
+    ratings_src = None if args.dont_use_ratings else args.ratings_source
     # list of competitions to include
     comps = args.include_competitions.split(",")
     if args.exclude_competitions:
         exclude_comps = args.exclude_competitions.split(",")
         for comp in exclude_comps:
             comps.remove(comp)
-    model = get_and_train_model(only_wc_teams = args.only_wc_teams,
-                                use_ratings = use_ratings,
-                                start_date = args.training_data_start,
-                                end_date = args.training_data_end,
-                                competitions = comps)
+    start_date, end_date = get_start_end_dates(args)
+    model = get_and_train_model(start_date = start_date,
+                                end_date = end_date,
+                                competitions = comps,
+                                rankings_source=ratings_src)
     teams_df = get_teams_data(args.tournament_year)
     teams = list(teams_df.Team.values)
     team_results = {
