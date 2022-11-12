@@ -38,47 +38,91 @@ def get_confederations_data() -> pd.DataFrame:
     df =  pd.read_csv(csv_path)
     return df
 
-
-def get_fifa_rankings_data(source: str = "game") -> pd.DataFrame:
-    """
-    Get the FIFA rankings, either from FIFA (the organisation), if source != 'game'
-    or from the FIFA video game (with default values for teams not in the game)
-    if source == 'game'
-    """
-    # should we use the videogame rankings over the official FIFA (organisation) ones?
-    game_rankings = source == "game"
+def load_game_rankings() -> pd.DataFrame:
+    print("Using FIFA videogame rankings")
     current_dir = os.path.dirname(__file__)
-    filename = "fifa_game_rankings.csv" if game_rankings else "fifa_rankings.csv"
+    filename = "fifa_game_rankings.csv"
     csv_path = os.path.join(
         current_dir, "..","data",
         filename
     )
     df =  pd.read_csv(csv_path)
-    if game_rankings:
-        print("Using FIFA videogame rankings")
-        # assign default values to teams not otherwise covered, use the same as Qatar
-        default_row = df.loc[df.Team=="Qatar"]
-        all_teams = get_confederations_data().Team.unique()
-        current_teams = df.Team.unique()
-        new_teams = list(set(all_teams) - set(current_teams))
-        attacks = len(new_teams)*[default_row.Attack.values[0]]
-        midfields = len(new_teams)*[default_row.Midfield.values[0]]
-        defences = len(new_teams)*[default_row.Defence.values[0]]
-        overalls = len(new_teams)*[default_row.Overall.values[0]]
-        new_df = pd.DataFrame(
-            {"Team":new_teams,
-             "Attack": attacks,
-             "Midfield": midfields,
-             "Defence": defences,
-             "Overall": overalls}
-        )
-        df = pd.concat([df, new_df])
-        df = df.reset_index(drop=True)
-    else:
-        print("Using FIFA organisation rankings")
+    # assign default values to teams not otherwise covered
+    confederations = get_confederations_data()
+    confed_dict = dict(zip(confederations.Team,
+                           confederations.Confederation))
+    all_teams = confederations.Team.unique()
+    current_teams = df.Team.unique()
+    new_teams = list(set(all_teams) - set(current_teams))
+    teams = []
+    attacks = []
+    midfields = []
+    defences = []
+    overalls = []
+    for conf in set(confederations.Confederation):
+        # define default value for Fifa ratings conditional on their confederation
+        if conf == "AFC":
+            default = 60
+        elif conf == "CAF":
+            default = 60
+        elif conf == "CONCACAF":
+            default = 60
+        elif conf == "CONMEBOL":
+            default = 65
+        elif conf == "OFC":
+            default = 50
+        elif conf == "UEFA":
+            default = 65
+        new_teams_in_conf = [team for team in new_teams if confed_dict[team] == conf]
+        teams += new_teams_in_conf
+        attacks += len(new_teams_in_conf) * [default]
+        midfields += len(new_teams_in_conf) * [default]
+        defences += len(new_teams_in_conf) * [default]
+        overalls += len(new_teams_in_conf) * [default]
+    new_df = pd.DataFrame(
+        {"Team": teams,
+        "Attack": attacks,
+        "Midfield": midfields,
+        "Defence": defences,
+        "Overall": overalls}
+    )
+    df = pd.concat([df, new_df]).reset_index(drop=True)
     return df
 
+def load_org_rankings() -> pd.DataFrame:
+    print("Using FIFA organisation rankings")
+    current_dir = os.path.dirname(__file__)
+    filename = "fifa_rankings.csv"
+    csv_path = os.path.join(
+        current_dir, "..","data",
+        filename
+    )
+    df =  pd.read_csv(csv_path)
+    return df
 
+def get_fifa_rankings_data(source: str = "game") -> pd.DataFrame:
+    """
+    Get the FIFA rankings, either from FIFA (the organisation), if source == 'org'
+    or from the FIFA video game (with default values for teams not in the game)
+    if source == 'game', or combine both if source == 'both'
+    """
+    if source == "game":
+        return load_game_rankings()
+    elif source == "org":
+        return load_org_rankings()
+    elif source == "both":
+        return pd.merge(load_game_rankings(),
+                        load_org_rankings(),
+                        how = "inner",
+                        on = "Team")
+
+def get_confederations_data() -> pd.DataFrame:
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(
+        current_dir, "..","data",
+        "confederations.csv"
+    )
+    return pd.read_csv(csv_path)
 
 def get_results_data(
         start_date: str = "2018-06-01",

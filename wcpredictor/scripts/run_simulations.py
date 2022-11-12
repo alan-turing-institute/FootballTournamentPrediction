@@ -41,7 +41,7 @@ def get_cmd_line_args():
                         help="If set, model is fitted without using the Fifa rankings of each team",
                         action="store_true")
     parser.add_argument("--ratings_source",
-                        choices=["game","org"],
+                        choices=["game","org","both"],
                         default="game",
                         help="if 'game' use FIFA video game ratings for prior, if 'org', use FIFA organization ratings")
     parser.add_argument("--include_competitions",
