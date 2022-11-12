@@ -6,7 +6,8 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from bpl import NeutralDixonColesMatchPredictor
+from bpl import NeutralDixonColesMatchPredictorWC
+from bpl.base import BaseMatchPredictor
 from jax.numpy import DeviceArray
 
 
@@ -18,6 +19,7 @@ class WCPred:
         ratings: Optional[pd.DataFrame] = None,
         teams: Optional[List[str]] = None,
         years: Optional[List[int]] = None,
+        model: BaseMatchPredictor = None,
     ):
         self.results = results
         self.fixtures = fixtures
@@ -36,7 +38,7 @@ class WCPred:
         if years is not None:
             self.results = self.results[self.results.date.dt.year.isin(years)]
         self.training_data = None
-        self.model = None
+        self.model = model
 
     def get_result_dict(self) -> dict[str, np.array]:
         """
@@ -92,17 +94,19 @@ class WCPred:
                 training_data["team_covariates"] = self.get_ratings_dict()
         self.training_data = training_data
 
-    def fit_model(self, **fit_args) -> None:
+    def fit_model(self, model=None, **fit_args) -> None:
         """
         Get the team-level stan model, which can give probabilities of
         each potential scoreline in a given fixture.
         """
+        if model is not None:
+            self.model = model
+        if self.model is None:
+            self.model = NeutralDixonColesMatchPredictorWC()
         if self.training_data is None:
             self.set_training_data()
         print("[MODEL FITTING] Fitting the model")
-        self.model = NeutralDixonColesMatchPredictor().fit(
-            self.training_data, **fit_args
-        )
+        self.model = self.model.fit(self.training_data, **fit_args)
 
     def get_fixture_teams(self) -> List[Tuple[str, str]]:
         if self.fixtures is None:
@@ -116,15 +120,15 @@ class WCPred:
         seed: Optional[int] = None,
     ) -> pd.DataFrame:
         """
-        Returns probabilities and predictions for all fixtures in a given gameweek and season, as a data
-        frame with a row for each fixture and columns being home_team,
+        Returns probabilities and predictions for all fixtures in a given gameweek and
+        season, as a data frame with a row for each fixture and columns being home_team,
         away_team, home_win_probability, draw_probability, away_win_probability.
         """
         if seed is not None:
             np.random.seed(seed)
         if self.model is None:
             self.fit_model()
-        # if fixture_teams is not passed, we just predict for all games in self.fixtures by default
+        # if fixture_teams not passed, predict for all games in self.fixtures by default
         if fixture_teams is None:
             fixture_teams = self.get_fixture_teams()
         Team_1, Team_2 = zip(*fixture_teams)
