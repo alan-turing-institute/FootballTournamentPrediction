@@ -3,19 +3,16 @@ Assorted functions to get the BPL model, and predict results.
 """
 from typing import Optional, Union, List, Tuple
 
-from .data_loader import (
-    get_results_data,
-    get_teams_data,
-    get_fifa_rankings_data
-)
+from .data_loader import get_results_data, get_teams_data, get_fifa_rankings_data
 from .bpl_interface import WCPred
 
 
-def get_and_train_model(start_date: str = "2018-06-01",
-                        end_date: str = "2022-11-20",
-                        competitions: List[str] = ["W","C1","WQ","CQ","C2","F"],
-                        rankings_source: str = "game",
-                        ) -> WCPred:
+def get_and_train_model(
+    start_date: str = "2018-06-01",
+    end_date: str = "2022-11-20",
+    competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    rankings_source: str = "game",
+) -> WCPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
     Key for competitions:
@@ -45,8 +42,7 @@ def get_and_train_model(start_date: str = "2018-06-01",
 
     if rankings_source:
         ratings = get_fifa_rankings_data(rankings_source)
-        wc_pred = WCPred(results=results,
-                        ratings=ratings)
+        wc_pred = WCPred(results=results, ratings=ratings)
     else:
         wc_pred = WCPred(results=results)
     wc_pred.set_training_data()
@@ -90,17 +86,16 @@ def sort_teams_by(table_dict, metric):
     team_list: list of dicts, [{"team": "abc","points": x},...], ordered
                according to metric
     """
-    if not metric in ["points","goal_difference","goals_for","goals_against"]:
+    if not metric in ["points", "goal_difference", "goals_for", "goals_against"]:
         raise RuntimeError(f"unknown metric for sorting: {metric}")
-    team_list = [{"team": k, **v} for k,v in table_dict.items()]
-    team_list = sorted(team_list, key=lambda t: t[metric],reverse=True)
+    team_list = [{"team": k, **v} for k, v in table_dict.items()]
+    team_list = sorted(team_list, key=lambda t: t[metric], reverse=True)
     return team_list
 
 
-def predict_knockout_match(wc_pred: WCPred,
-                           team_1: str,
-                           team_2: str,
-                           seed: Optional[int] = None) -> str:
+def predict_knockout_match(
+    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
+) -> str:
     """
     Parameters
     ==========
@@ -111,16 +106,13 @@ def predict_knockout_match(wc_pred: WCPred,
     winning_team: str, one of team_1 or team_2
     """
     return wc_pred.get_fixture_probabilities(
-        fixture_teams = [(team_1, team_2)],
-        knockout = True,
-        seed = seed
+        fixture_teams=[(team_1, team_2)], knockout=True, seed=seed
     )["simulated_outcome"][0]
 
 
-def predict_group_match(wc_pred: WCPred,
-                        team_1: str,
-                        team_2: str,
-                        seed: Optional[int] = None) -> Tuple[int, int]:
+def predict_group_match(
+    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
+) -> Tuple[int, int]:
     """
     Parameters
     ==========
@@ -131,12 +123,11 @@ def predict_group_match(wc_pred: WCPred,
     score_1, score_2: both int, score for each team
     """
     return wc_pred.get_fixture_goal_probabilities(
-        fixture_teams = [(team_1, team_2)],
-        seed = seed
+        fixture_teams=[(team_1, team_2)], seed=seed
     )[1][0]
 
 
-def get_difference_in_stages(stage_1:str, stage_2:str) -> int:
+def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
     """
     Give an integer value to the differences between two
     'stages' i.e. how far a team got in the tournament.
@@ -151,7 +142,7 @@ def get_difference_in_stages(stage_1:str, stage_2:str) -> int:
     =======
     diff: int, how far apart the two stages are.
     """
-    stages = ["G","R16","QF","SF","RU","W"]
+    stages = ["G", "R16", "QF", "SF", "RU", "W"]
     if not stage_1 in stages and stage_2 in stages:
         raise RuntimeError(f"Unknown value for stage - must be in {stages}")
     return abs(stages.index(stage_1) - stages.index(stage_2))
