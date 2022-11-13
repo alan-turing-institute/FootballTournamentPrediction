@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-import os
-from re import U
-import pandas as pd
 import argparse
 
+import pandas as pd
+
 from wcpredictor import (
-    get_teams_data,
-    get_wcresults_data,
     Tournament,
     get_and_train_model,
     get_difference_in_stages,
+    get_teams_data,
+    get_wcresults_data,
 )
 
 
@@ -47,9 +46,12 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--ratings_source",
-        choices=["game", "org"],
+        choices=["game", "org", "both"],
         default="game",
-        help="if 'game' use FIFA video game ratings for prior, if 'org', use FIFA organization ratings",
+        help=(
+            "if 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
+            "organization ratings"
+        ),
     )
     parser.add_argument(
         "--include_competitions",
@@ -95,7 +97,6 @@ def get_start_end_dates(args):
         )
     print(f"Start/End dates for training data are {start_date}, {end_date}")
     return start_date, end_date
-
 
 def run_sims(
     tournament_year,

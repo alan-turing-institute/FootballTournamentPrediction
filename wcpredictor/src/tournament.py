@@ -3,22 +3,18 @@ Code to run the World Cup tournament, from group stages through the
 knockout stages, to the final, and produce a winner.
 """
 
-import os
-import pandas as pd
 import random
-from typing import Optional, Union, List, Tuple
+from typing import List, Optional, Tuple
+
+import pandas as pd
+
 from .bpl_interface import WCPred
-from .data_loader import (
-    get_teams_data,
-    get_fixture_data,
-    get_fifa_rankings_data,
-    get_results_data,
-)
+from .data_loader import get_fixture_data, get_teams_data
 from .utils import (
     find_group,
-    sort_teams_by,
-    predict_knockout_match,
     predict_group_match,
+    predict_knockout_match,
+    sort_teams_by,
 )
 
 
@@ -131,7 +127,8 @@ class Group:
         """
         if len(self.results) < 6:
             print(
-                f"Group {self.name} not finished yet - only {len(self.results)} matches played"
+                f"Group {self.name} not finished yet - only {len(self.results)} "
+                "matches played"
             )
             return
         self.calc_standings()
@@ -174,7 +171,8 @@ class Group:
     ) -> None:
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(
-                f"Can't fill {len(positions_to_fill)} positions with {len(teams_to_sort)} teams"
+                f"Can't fill {len(positions_to_fill)} positions with "
+                f"{len(teams_to_sort)} teams"
             )
         if verbose:
             print(
@@ -402,8 +400,11 @@ class Group:
         output = f"Position |  Team{' '*(max_team_name_length-8)}| Points | GS |  GA \n"
         self.calc_standings()
         for k, v in self.standings.items():
-
-            output += f"   {k}    {v}{' '*(max_team_name_length-len(v))}   {self.table[v]['points']}      {self.table[v]['goals_for']}     {self.table[v]['goals_against']} \n"
+            output += (
+                f"   {k}    {v}{' '*(max_team_name_length-len(v))}   "
+                f"{self.table[v]['points']}      {self.table[v]['goals_for']}     "
+                f"{self.table[v]['goals_against']} \n"
+            )
         return output
 
 
@@ -473,7 +474,8 @@ class Tournament:
                     )
                     if verbose:
                         print(
-                            f"{stage}: {f.Team_1} vs {f.Team_2}: Winner: {self.aliases[f.Team_1+f.Team_2]}"
+                            f"{stage}: {f.Team_1} vs {f.Team_2}: "
+                            f"Winner: {self.aliases[f.Team_1+f.Team_2]}"
                         )
         for k, v in self.aliases.items():
             if len(k) == 32:

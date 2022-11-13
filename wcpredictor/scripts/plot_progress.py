@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import matplotlib
+import argparse
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import argparse
+
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
             row.RU.values[0],
             row.W.values[0],
         ]
-        rect = ax.bar(x - offset + i * width, stages, width, label=team)
+        _ = ax.bar(x - offset + i * width, stages, width, label=team)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel("Number of tournaments")
