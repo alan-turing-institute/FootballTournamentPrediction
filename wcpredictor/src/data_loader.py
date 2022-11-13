@@ -131,7 +131,7 @@ def get_results_data(
     competitions_index = json.load(open(json_path))
     # filter by date
     results_df = results_df[
-        (results_df.date > start_date) & (results_df.date < end_date)
+        (results_df.date >= start_date) & (results_df.date <= end_date)
     ]
     # replace any names that we have written differently elsewhere
     results_df.replace("United States", "USA", inplace=True)
@@ -140,7 +140,7 @@ def get_results_data(
     )
     # filter matches with non-fifa recognised teams
     if rankings_source:
-        rankings_df = get_fifa_rankings_data("org")
+        rankings_df = get_fifa_rankings_data(rankings_source)
         fifa_teams = rankings_df.Team.values
         results_df = results_df[
             (results_df.home_team.isin(fifa_teams))
