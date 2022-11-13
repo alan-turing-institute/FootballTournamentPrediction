@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="plot how far teams got in the tournament"

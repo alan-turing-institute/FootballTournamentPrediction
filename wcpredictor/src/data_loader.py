@@ -5,7 +5,6 @@ from typing import List
 import pandas as pd
 
 
-
 def get_teams_data(year: str = "2022") -> pd.DataFrame:
     if year not in ["2014", "2018", "2022"]:
         raise RuntimeError("Unknown year " + year)
@@ -106,6 +105,7 @@ def get_fifa_rankings_data(source: str = "game") -> pd.DataFrame:
         return pd.merge(
             load_game_rankings(), load_org_rankings(), how="inner", on="Team"
         )
+
 
 def get_results_data(
     start_date: str = "2018-06-01",

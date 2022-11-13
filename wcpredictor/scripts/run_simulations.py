@@ -98,6 +98,7 @@ def get_start_end_dates(args):
     print(f"Start/End dates for training data are {start_date}, {end_date}")
     return start_date, end_date
 
+
 def run_sims(
     tournament_year,
     num_simulations,
