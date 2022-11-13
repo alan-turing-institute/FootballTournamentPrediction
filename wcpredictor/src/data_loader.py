@@ -63,6 +63,8 @@ def load_game_rankings() -> pd.DataFrame:
             default = 50
         elif conf == "UEFA":
             default = 65
+        else:
+            default = 50
         new_teams_in_conf = [team for team in new_teams if confed_dict[team] == conf]
         teams += new_teams_in_conf
         attacks += len(new_teams_in_conf) * [default]
