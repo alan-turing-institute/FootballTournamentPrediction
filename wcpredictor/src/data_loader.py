@@ -135,6 +135,9 @@ def get_results_data(
     ]
     # replace any names that we have written differently elsewhere
     results_df.replace("United States", "USA", inplace=True)
+    results_df.replace(
+        "United States Virgin Islands", "USA Virgin Islands", inplace=True
+    )
     # filter matches with non-fifa recognised teams
     if rankings_source:
         rankings_df = get_fifa_rankings_data("org")
