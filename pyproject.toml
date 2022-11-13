@@ -19,6 +19,8 @@ seaborn = {version = "^0.12.1", optional = true}
 pytest = "^5.2"
 pytest-mock = "^3.10.0"
 black = "^22.1.0"
+flake8 = "^5.0.4"
+isort = "^5.10.1"
 
 [tool.poetry.extras]
 plot = ["jupyter", "seaborn"]
@@ -31,3 +33,6 @@ build-backend = "poetry.core.masonry.api"
 wcpred_run_simulations = "wcpredictor.scripts.run_simulations:main"
 wcpred_plot_winners = "wcpredictor.scripts.plot_winners:main"
 wcpred_plot_progress = "wcpredictor.scripts.plot_progress:main"
+
+[tool.isort]
+profile = "black"

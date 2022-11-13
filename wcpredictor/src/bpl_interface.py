@@ -2,11 +2,11 @@
 Interface to the NumPyro team model in bpl-next:
 https://github.com/anguswilliams91/bpl-next
 """
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from bpl import NeutralDixonColesMatchPredictorWC
+from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 from jax.numpy import DeviceArray
 
@@ -71,8 +71,8 @@ class WCPred:
         }
         if len(ratings_dict) != len(self.teams):
             raise ValueError(
-                f"Must have FIFA ratings and results for all teams. {len(ratings_dict)} "
-                + f"teams with FIFA ratings but {len(self.teams)} teams with results."
+                f"Must have FIFA ratings and results for all teams. {len(ratings_dict)}"
+                + f" teams with FIFA ratings but {len(self.teams)} teams with results."
             )
         return ratings_dict
 
@@ -83,8 +83,9 @@ class WCPred:
         print("---len(teams[~teams.isin(self.ratings.Team)])")
         if len(teams[~teams.isin(self.ratings.Team)]) > 0:
             raise ValueError(
-                "Must have FIFA ratings and results for all teams. "
-                + f"There are {len(teams[~teams.isin(self.ratings.Team)])} teams with no FIFA ratings:\n\n"
+                "Must have FIFA ratings and results for all teams. There are "
+                + f"{len(teams[~teams.isin(self.ratings.Team)])} "
+                + "teams with no FIFA ratings:\n\n"
                 + ", ".join(teams[~teams.isin(self.ratings.Team)])
             )
         return True
@@ -145,9 +146,16 @@ class WCPred:
         Team_1_conference = [self.confed_dict[team] for team in Team_1]
         Team_2_conference = [self.confed_dict[team] for team in Team_2]
         venue = np.ones(len(Team_1))
-        p = self.model.predict_outcome_proba(
-            Team_1, Team_2, Team_1_conference, Team_2_conference, venue
-        )
+
+        if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+            p = self.model.predict_outcome_proba(
+                Team_1, Team_2, Team_1_conference, Team_2_conference, venue
+            )
+        elif isinstance(self.model, NeutralDixonColesMatchPredictor):
+            p = self.model.predict_outcome_proba(Team_1, Team_2, venue)
+        else:
+            p = self.model.predict_outcome_proba(Team_1, Team_2)
+
         # predict outcome of the game
         simulated_outcome = []
         for i in range(len(fixture_teams)):
@@ -181,8 +189,8 @@ class WCPred:
         max_goals: int = 10,
     ) -> Tuple[dict[int, dict[str, DeviceArray]], List[Tuple[int, int]]]:
         """
-        Get the probability that each team in a fixture scores any number of goals up to max_goals,
-        and prediction of goals scored.
+        Get the probability that each team in a fixture scores any number of goals up to
+        max_goals, and prediction of goals scored.
         """
         if seed is not None:
             np.random.seed(seed)
@@ -191,7 +199,7 @@ class WCPred:
         goals = np.arange(0, max_goals + 1)
         probs = {}
         simulated_scores = []
-        # if fixture_teams is not passed, we just predict for all games in self.fixtures by default
+        # if fixture_teams not passed, predict for all games in self.fixtures by default
         if fixture_teams is None:
             fixture_teams = self.get_fixture_teams()
         Team_1, Team_2 = zip(*fixture_teams)
@@ -199,24 +207,54 @@ class WCPred:
         Team_2_conference = [self.confed_dict[team] for team in Team_2]
         venue = np.ones(len(Team_1))
         for i in range(len(fixture_teams)):
-            home_team_goal_prob = self.model.predict_score_n_proba(
-                goals,
-                Team_1[i],
-                Team_2[i],
-                Team_1_conference[i],
-                Team_2_conference[i],
-                home=False,
-                neutral_venue=venue[i],
-            )
-            away_team_goal_prob = self.model.predict_score_n_proba(
-                goals,
-                Team_2[i],
-                Team_1[i],
-                Team_2_conference[i],
-                Team_1_conference[i],
-                home=False,
-                neutral_venue=venue[i],
-            )
+            if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+                home_team_goal_prob = self.model.predict_score_n_proba(
+                    goals,
+                    Team_1[i],
+                    Team_2[i],
+                    Team_1_conference[i],
+                    Team_2_conference[i],
+                    home=False,
+                    neutral_venue=venue[i],
+                )
+                away_team_goal_prob = self.model.predict_score_n_proba(
+                    goals,
+                    Team_2[i],
+                    Team_1[i],
+                    Team_2_conference[i],
+                    Team_1_conference[i],
+                    home=False,
+                    neutral_venue=venue[i],
+                )
+            elif isinstance(self.model, NeutralDixonColesMatchPredictor):
+                home_team_goal_prob = self.model.predict_score_n_proba(
+                    goals,
+                    Team_1[i],
+                    Team_2[i],
+                    home=False,
+                    neutral_venue=venue[i],
+                )
+                away_team_goal_prob = self.model.predict_score_n_proba(
+                    goals,
+                    Team_2[i],
+                    Team_1[i],
+                    home=False,
+                    neutral_venue=venue[i],
+                )
+            else:
+                home_team_goal_prob = self.model.predict_score_n_proba(
+                    goals,
+                    Team_1[i],
+                    Team_2[i],
+                    home=False,
+                )
+                away_team_goal_prob = self.model.predict_score_n_proba(
+                    goals,
+                    Team_2[i],
+                    Team_1[i],
+                    home=False,
+                )
+
             probs[i] = {
                 Team_1[i]: {g: p for g, p in zip(goals, home_team_goal_prob)},
                 Team_2[i]: {g: p for g, p in zip(goals, away_team_goal_prob)},
