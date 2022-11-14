@@ -15,6 +15,7 @@ def get_and_train_model(start_date: str = "2018-06-01",
                         end_date: str = "2022-11-20",
                         competitions: List[str] = ["W","C1","WQ","CQ","C2","F"],
                         rankings_source: str = "game",
+                        epsilon: float = 0,
                         ) -> WCPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
@@ -46,7 +47,8 @@ def get_and_train_model(start_date: str = "2018-06-01",
     if rankings_source:
         ratings = get_fifa_rankings_data(rankings_source)
         wc_pred = WCPred(results=results,
-                        ratings=ratings)
+                         ratings=ratings,
+                         epsilon=epsilon)
     else:
         wc_pred = WCPred(results=results)
     wc_pred.set_training_data()

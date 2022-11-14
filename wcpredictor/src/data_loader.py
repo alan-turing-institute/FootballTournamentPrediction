@@ -13,7 +13,6 @@ def get_teams_data(year: str = "2022") -> pd.DataFrame:
     )
     return pd.read_csv(csv_path)
 
-
 def get_fixture_data(year: str = "2022") -> pd.DataFrame:
     if year not in ["2014","2018","2022"]:
         raise RuntimeError("Unknown year "+year)
@@ -23,7 +22,6 @@ def get_fixture_data(year: str = "2022") -> pd.DataFrame:
         f"fixtures_{year}.csv"
     )
     return pd.read_csv(csv_path)
-
 
 def get_confederations_data() -> pd.DataFrame:
     """
@@ -166,10 +164,13 @@ def get_results_data(
     # flatten this nested list
     comp_filter = [comp for complist in comp_filter for comp in complist]
     results_df = results_df[results_df.tournament.isin(comp_filter)]
+    # obtain time difference to the latest date in the dataframe
+    # number of years back from end_date as a fraction
+    end_date = pd.Timestamp(end_date)
+    results_df["time_diff"] = (end_date-results_df.date) / pd.Timedelta(days=365)
 
     results_df = results_df.reset_index(drop=True)
     return results_df
-
 
 def get_wcresults_data(year: str) -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)

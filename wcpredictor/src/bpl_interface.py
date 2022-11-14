@@ -19,6 +19,7 @@ class WCPred:
         ratings: Optional[pd.DataFrame] = None,
         teams: Optional[List[str]] = None,
         years: Optional[List[int]] = None,
+        epsilon: float = 0,
     ):
         self.results = results
         self.fixtures = fixtures
@@ -39,6 +40,7 @@ class WCPred:
         confed = get_confederations_data()
         self.confed_dict = dict(zip(confed["Team"], confed["Confederation"]))
         self.training_data = None
+        self.epsilon = epsilon
         self.model = None
 
     def get_result_dict(self) -> dict[str, np.array]:
@@ -55,6 +57,7 @@ class WCPred:
             "home_goals": np.array(self.results.home_score),
             "away_goals": np.array(self.results.away_score),
             "neutral_venue": np.array(self.results.neutral),
+            "time_diff": np.array(self.results.time_diff),
         }
 
     def get_ratings_dict(self) -> dict:
