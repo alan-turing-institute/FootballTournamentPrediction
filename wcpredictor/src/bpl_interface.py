@@ -19,7 +19,9 @@ class WCPred:
         ratings: Optional[pd.DataFrame] = None,
         teams: Optional[List[str]] = None,
         years: Optional[List[int]] = None,
-        epsilon: float = 0,
+        epsilon: float = 0.0,
+        world_cup_weight: float = 1.0,
+        weights_dict: Optional[dict[str, float]] = None,
     ):
         self.results = results
         self.fixtures = fixtures
@@ -41,6 +43,8 @@ class WCPred:
         self.confed_dict = dict(zip(confed["Team"], confed["Confederation"]))
         self.training_data = None
         self.epsilon = epsilon
+        self.world_cup_weight = world_cup_weight
+        self.weights_dict = weights_dict
         self.model = None
 
     def get_result_dict(self) -> dict[str, np.array]:
@@ -58,6 +62,7 @@ class WCPred:
             "away_goals": np.array(self.results.away_score),
             "neutral_venue": np.array(self.results.neutral),
             "time_diff": np.array(self.results.time_diff),
+            "game_weights": np.array(self.results.game_weight),
         }
 
     def get_ratings_dict(self) -> dict:
@@ -111,7 +116,7 @@ class WCPred:
             self.set_training_data()
         print("[MODEL FITTING] Fitting the model")
         self.model = NeutralDixonColesMatchPredictorWC().fit(
-            self.training_data, **fit_args
+            self.training_data, self.epsilon, **fit_args
         )
 
     def get_fixture_teams(self) -> List[Tuple[str, str]]:

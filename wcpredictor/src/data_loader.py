@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 import pandas as pd
 from typing import Optional, Union, List, Tuple, Dict
 
@@ -125,8 +126,9 @@ def get_confederations_data() -> pd.DataFrame:
 def get_results_data(
         start_date: str = "2018-06-01",
         end_date: str = "2022-11-20",
-        competitions:List[str] = ["W","C1","WQ","CQ","C2","F"]
-) -> pd.DataFrame:
+        competitions: List[str] = ["W","C1","WQ","CQ","C2","F"],
+        world_cup_weight: float = 1.0,
+) -> Tuple[pd.DataFrame, dict[str, float]]:
     """
     filter the results dataframe by date and competition.
     Key for competitions:
@@ -168,9 +170,16 @@ def get_results_data(
     # number of years back from end_date as a fraction
     end_date = pd.Timestamp(end_date)
     results_df["time_diff"] = (end_date-results_df.date) / pd.Timedelta(days=365)
+    # compute game weights
+    weight_dict = dict(zip(["F", "C2", "CQ", "WQ", "C1", "W"],
+                           np.linspace(1, world_cup_weight, 6)))
+    reverse_competitions_index = {comp: key for key,value in competitions_index.items()
+                                  for comp in value}
+    comp_quality = [reverse_competitions_index[comp] for comp in results_df["tournament"]]
+    results_df["game_weight"] = [weight_dict[comp] for comp in comp_quality]
 
     results_df = results_df.reset_index(drop=True)
-    return results_df
+    return results_df, weight_dict
 
 def get_wcresults_data(year: str) -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)

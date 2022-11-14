@@ -49,6 +49,14 @@ def get_cmd_line_args():
                         default="W,C1,WQ,CQ,C2,F")
     parser.add_argument("--exclude_competitions",
                         help="comma-separated list of competitions to exclude from training data")
+    parser.add_argument("--epsilon",
+                        help="how much to downweight games by in exponential time weighting",
+                        type=float,
+                        default=0.0)
+    parser.add_argument("--world_cup_weight",
+                        help="how much more to weight World Cup games in the data",
+                        type=float,
+                        default=1.0)
 
     args = parser.parse_args()
     return args
@@ -90,7 +98,9 @@ def main():
     model = get_and_train_model(start_date = start_date,
                                 end_date = end_date,
                                 competitions = comps,
-                                rankings_source=ratings_src)
+                                rankings_source=ratings_src,
+                                epsilon=args.epsilon,
+                                world_cup_weight=args.world_cup_weight)
     teams_df = get_teams_data(args.tournament_year)
     teams = list(teams_df.Team.values)
     team_results = {

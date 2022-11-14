@@ -15,7 +15,8 @@ def get_and_train_model(start_date: str = "2018-06-01",
                         end_date: str = "2022-11-20",
                         competitions: List[str] = ["W","C1","WQ","CQ","C2","F"],
                         rankings_source: str = "game",
-                        epsilon: float = 0,
+                        epsilon: float = 0.0,
+                        world_cup_weight: float = 1.0,
                         ) -> WCPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
@@ -31,7 +32,10 @@ def get_and_train_model(start_date: str = "2018-06-01",
     for the covariates ("game"), or use the FIFA organisation ones ("org"), or neither (None).
     """
     print("in get_and_train_model")
-    results = get_results_data(start_date, end_date, competitions=competitions)
+    results, weights_dict = get_results_data(start_date,
+                                             end_date,
+                                             competitions,
+                                             world_cup_weight)
     print(f"Using {len(results)} rows in training data")
     # if we are getting results up to 2018, maybe we are simulating
     # the 2018 world cup?
@@ -48,9 +52,14 @@ def get_and_train_model(start_date: str = "2018-06-01",
         ratings = get_fifa_rankings_data(rankings_source)
         wc_pred = WCPred(results=results,
                          ratings=ratings,
-                         epsilon=epsilon)
+                         epsilon=epsilon,
+                         world_cup_weight=world_cup_weight,
+                         weights_dict=weights_dict)
     else:
-        wc_pred = WCPred(results=results)
+        wc_pred = WCPred(results=results,
+                         epsilon=epsilon,
+                         world_cup_weight=world_cup_weight,
+                         weights_dict=weights_dict)
     wc_pred.set_training_data()
     wc_pred.fit_model()
     return wc_pred
