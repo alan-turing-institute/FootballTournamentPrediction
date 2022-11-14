@@ -227,7 +227,7 @@ class WCPred:
                     Team_2[i],
                     Team_1_conference[i],
                     Team_2_conference[i],
-                    home=False,
+                    home=True,
                     neutral_venue=venue[i],
                 )
                 away_team_goal_prob = self.model.predict_score_n_proba(
@@ -244,7 +244,7 @@ class WCPred:
                     goals,
                     Team_1[i],
                     Team_2[i],
-                    home=False,
+                    home=True,
                     neutral_venue=venue[i],
                 )
                 away_team_goal_prob = self.model.predict_score_n_proba(
@@ -259,7 +259,7 @@ class WCPred:
                     goals,
                     Team_1[i],
                     Team_2[i],
-                    home=False,
+                    home=True,
                 )
                 away_team_goal_prob = self.model.predict_score_n_proba(
                     goals,
