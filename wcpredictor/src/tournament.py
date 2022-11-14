@@ -480,7 +480,6 @@ class Tournament:
         for k, v in self.aliases.items():
             if len(k) == 32:
                 self.winner = v
-        print(f"====== WINNER: {self.winner} =======")
         self.is_complete = True
 
     def get_furthest_position_for_team(self, team_name):

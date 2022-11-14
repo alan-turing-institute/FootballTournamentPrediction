@@ -28,8 +28,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 wcpred_run_simulations = "wcpredictor.scripts.run_simulations:main"
+wcpred_scan_hyperparameters = "wcpredictor.scripts.hyperparameter_scan:main"
 wcpred_plot_winners = "wcpredictor.scripts.plot_winners:main"
 wcpred_plot_progress = "wcpredictor.scripts.plot_progress:main"
+wcpred_plot_hyperparameter_scan = "wcpredictor.scripts.plot_hyperparameter_scan:main"
 
 [tool.isort]
 profile = "black"
