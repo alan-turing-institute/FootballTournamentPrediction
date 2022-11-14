@@ -55,6 +55,9 @@ def test_model(
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
 ) -> float:
     """
+    Compute the log likelihood of real match scores for a model (to use like a loss
+    function)
+
     Use 'competitions' argument to specify which rows to include in training data.
     Key for competitions:
     "W": world cup finals,
@@ -63,10 +66,6 @@ def test_model(
     "CQ": continental cup qualifiers"
     "C2": 2nd-tier continental, e.g. UEFA Nations League,
     "F": friendly/other.
-
-    rankings_source determines whether we use the FIFA video game rankings for prior
-    values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
-    neither (None).
     """
     results = get_results_data(
         start_date, end_date, competitions=competitions, rankings_source=None
