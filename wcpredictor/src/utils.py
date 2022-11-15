@@ -4,6 +4,7 @@ Assorted functions to get the BPL model, and predict results.
 from typing import List, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
@@ -68,6 +69,9 @@ def test_model(
     start_date: str = "2018-06-01",
     end_date: str = "2022-11-20",
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    epsilon=0,
+    world_cup_weight=1,
+    train_end_date=None,
 ) -> float:
     """
     Compute the log likelihood of real match scores for a model (to use like a loss
@@ -99,6 +103,7 @@ def test_model(
         "home_goals": np.array(results.home_score),
         "away_goals": np.array(results.away_score),
         "neutral": np.array(results.neutral),
+        "game_weight": np.array(results.game_weight),
     }
 
     if isinstance(model, NeutralDixonColesMatchPredictorWC):
@@ -126,7 +131,20 @@ def test_model(
             test_data["home_goals"],
             test_data["away_goals"],
         )
-    return np.log(proba).sum() / len(proba)  # log likelihood
+
+    if epsilon != 0 or world_cup_weight != 1:
+        # obtain time difference to last date model was trained on, or test start date
+        # if not given
+        if train_end_date is None:
+            ref_date = pd.Timestamp(start_date)
+        else:
+            ref_date = pd.Timestamp(train_end_date)
+        time_diff = (results.date - ref_date) / pd.Timedelta(days=365)
+        weight = test_data["game_weight"] * np.exp(-epsilon * time_diff)
+    else:
+        weight = np.ones(len(proba))
+
+    return (weight * np.log(proba)).sum() / weight.sum()  # weighted mean log likelihood
 
 
 def find_group(team, teams_df):

@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from multiprocessing import Process, Queue
 
+import jsonpickle
 import numpy as np
 from bpl import NeutralDixonColesMatchPredictorWC
 
@@ -19,6 +20,7 @@ def run_wrapper(
     competitions,
     rankings_source,
     model,
+    test_with_weights,
     output_dir,
 ):
     print("In run_wrapper")
@@ -39,18 +41,29 @@ def run_wrapper(
             world_cup_weight,
             model,
         )
+
         test_competitions = {
             "likelihood_W_to_F": ["W", "C1", "WQ", "CQ", "C2", "F"],
             "likelihood_W_to_C2": ["W", "C1", "WQ", "CQ", "C2"],
             "likelihood_W_to_CQ": ["W", "C1", "WQ", "CQ"],
             "likelihood_W_to_C1": ["W", "C1"],
         }
+        if test_with_weights:
+            test_epsilon = epsilon
+            test_world_cup_weight = world_cup_weight
+        else:
+            test_epsilon = 0
+            test_world_cup_weight = 1.0
+
         likelihood = {
             name: test_model(
                 wc_pred.model,
                 test_start,
                 test_end,
                 comps,
+                epsilon=test_epsilon,
+                world_cup_weight=test_world_cup_weight,
+                train_end_date=train_end,
             )
             for name, comps in test_competitions.items()
         }
@@ -58,6 +71,8 @@ def run_wrapper(
             f"{int(datetime.now().timestamp())}_"
             f"epsilon_{epsilon}_worldcupweight_{world_cup_weight}"
         )
+        with open(f"{filename}.model", "w") as f:
+            f.write(jsonpickle.encode(wc_pred))
         with open(os.path.join(output_dir, filename), "w") as f:
             f.write(f"epsilon,world_cup_weight,{','.join(likelihood)}\n")
             f.write(
@@ -77,8 +92,9 @@ def main():
     epsilon = [0.0, 0.01, 0.05, 0.1, 0.2]
     world_cup_weight = [1.0, 2.0, 3.0, 4.0, 5.0]
     model = NeutralDixonColesMatchPredictorWC()
-    num_thread = 12
+    test_with_weights = True
     output_dir = f"likelihood_scan_{int(datetime.now().timestamp())}"
+    num_thread = 8
 
     # create output dir if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
@@ -107,6 +123,7 @@ def main():
                 competitions,
                 rankings_source,
                 model,
+                test_with_weights,
                 output_dir,
             ),
         )
