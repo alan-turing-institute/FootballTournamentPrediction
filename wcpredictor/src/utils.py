@@ -10,6 +10,7 @@ from bpl.base import BaseMatchPredictor
 from .bpl_interface import WCPred
 from .data_loader import (
     get_confederations_data,
+    get_confederations_rankings_data,
     get_fifa_rankings_data,
     get_results_data,
 )
@@ -20,6 +21,7 @@ def get_and_train_model(
     end_date: str = "2022-11-20",
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
+    use_conf_rankings: bool = True,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
 ) -> WCPred:
     """
@@ -42,7 +44,8 @@ def get_and_train_model(
     )
     print(f"Using {len(results)} rows in training data")
     ratings = get_fifa_rankings_data(rankings_source) if rankings_source else None
-    wc_pred = WCPred(results=results, ratings=ratings, model=model)
+    conf_ratings = get_confederations_rankings_data() if use_conf_rankings else None
+    wc_pred = WCPred(results=results, ratings=ratings, conf_ratings=conf_ratings, model=model)
     wc_pred.set_training_data()
     wc_pred.fit_model()
     return wc_pred

@@ -32,6 +32,16 @@ def get_confederations_data() -> pd.DataFrame:
     return df
 
 
+def get_confederations_rankings_data() -> pd.DataFrame:
+    """
+    Relative strengths of the different confederations
+    """
+    current_dir = os.path.dirname(__file__)
+    filename = "confederation_ratings.csv"
+    csv_path = os.path.join(current_dir, "..", "data", filename)
+    df = pd.read_csv(csv_path)
+    return df
+
 def load_game_rankings() -> pd.DataFrame:
     print("Using FIFA videogame rankings")
     current_dir = os.path.dirname(__file__)

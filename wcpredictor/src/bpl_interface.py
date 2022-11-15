@@ -19,6 +19,7 @@ class WCPred:
         results: pd.DataFrame,
         fixtures: Optional[pd.DataFrame] = None,
         ratings: Optional[pd.DataFrame] = None,
+        conf_ratings: Optional[pd.DataFrame] = None,
         teams: Optional[List[str]] = None,
         years: Optional[List[int]] = None,
         model: BaseMatchPredictor = None,
@@ -26,6 +27,7 @@ class WCPred:
         self.results = results
         self.fixtures = fixtures
         self.ratings = ratings
+        self.conf_ratings = conf_ratings
         if teams is None:
             # teams is just every team that has played in results
             self.teams = list(
@@ -90,6 +92,14 @@ class WCPred:
             )
         return True
 
+    def get_conf_ratings_dict(self) -> dict:
+        """Dictionary of confederations ratings"""
+        conf_ratings_dict = {
+            row.Confederation: np.array(row.drop("Confederation").values.astype(float))
+            for _, row in self.conf_ratings.iterrows()
+        }
+        return conf_ratings_dict
+
     def set_training_data(self) -> None:
         """Get training data for team model including FIFA ratings as covariates.
         Data returned is for all matches up to specified gameweek and season.
@@ -103,6 +113,8 @@ class WCPred:
                 )
             if self.check_teams_in_ratings:
                 training_data["team_covariates"] = self.get_ratings_dict()
+        if self.conf_ratings is not None:
+            training_data["confederation_covariates"] = self.get_conf_ratings_dict()
         self.training_data = training_data
 
     def fit_model(self, model=None, **fit_args) -> None:
