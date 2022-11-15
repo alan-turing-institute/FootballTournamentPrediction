@@ -46,28 +46,16 @@ def get_and_train_model(
         rankings_source=rankings_source,
         world_cup_weight=world_cup_weight,
     )
-    print(f"Using {len(results)} rows in training data")
-
-    if rankings_source:
-        ratings = get_fifa_rankings_data(rankings_source)
-        wc_pred = WCPred(
-            results=results,
-            ratings=ratings,
-            epsilon=epsilon,
-            world_cup_weight=world_cup_weight,
-            weights_dict=weights_dict,
-        )
-    else:
-        wc_pred = WCPred(
-            results=results,
-            epsilon=epsilon,
-            world_cup_weight=world_cup_weight,
-            weights_dict=weights_dict,
-        )
 
     print(f"Using {len(results)} rows in training data")
     ratings = get_fifa_rankings_data(rankings_source) if rankings_source else None
-    wc_pred = WCPred(results=results, ratings=ratings, model=model)
+    wc_pred = WCPred(
+        results=results,
+        ratings=ratings,
+        epsilon=epsilon,
+        world_cup_weight=world_cup_weight,
+        model=model,
+    )
     wc_pred.set_training_data()
     wc_pred.fit_model()
 

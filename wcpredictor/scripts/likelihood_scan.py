@@ -78,7 +78,7 @@ def main():
     world_cup_weight = [1.0, 2.0, 3.0, 4.0, 5.0]
     model = NeutralDixonColesMatchPredictorWC()
     num_thread = 12
-    output_dir = "likelihood_scan"
+    output_dir = f"likelihood_scan_{int(datetime.now().timestamp())}"
 
     # create output dir if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
