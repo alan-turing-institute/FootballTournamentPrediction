@@ -168,7 +168,7 @@ scipy = "^1.8.0"
 type = "git"
 url = "https://github.com/anguswilliams91/bpl-next"
 reference = "feature/neutral-dixon-coles"
-resolved_reference = "21976a7b09e28ee21abe950edc57f3f6c83f7c67"
+resolved_reference = "e346afde6dfebab8bfc0e6f23351eab7584ac5c5"
 
 [[package]]
 name = "certifi"
@@ -587,7 +587,7 @@ qtconsole = "*"
 
 [[package]]
 name = "jupyter-client"
-version = "7.4.5"
+version = "7.4.6"
 description = "Jupyter protocol implementation and client libraries"
 category = "main"
 optional = false
@@ -642,8 +642,8 @@ test = ["ipykernel", "pre-commit", "pytest", "pytest-cov", "pytest-timeout"]
 
 [[package]]
 name = "jupyter-server"
-version = "1.23.1"
-description = "=?utf-8?q?The_backend=E2=80=94i=2Ee=2E_core_services=2C_APIs=2C_and_REST_endpoints=E2=80=94to_Jupyter_web_applications=2E?="
+version = "1.23.2"
+description = "The backend—i.e. core services, APIs, and REST endpoints—to Jupyter web applications."
 category = "main"
 optional = false
 python-versions = ">=3.7"
@@ -827,7 +827,7 @@ test = ["black", "check-manifest", "flake8", "ipykernel", "ipython", "ipywidgets
 
 [[package]]
 name = "nbconvert"
-version = "7.2.4"
+version = "7.2.5"
 description = "Converting Jupyter Notebooks"
 category = "main"
 optional = false

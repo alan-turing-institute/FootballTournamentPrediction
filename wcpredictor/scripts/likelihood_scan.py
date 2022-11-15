@@ -71,7 +71,7 @@ def run_wrapper(
             f"{int(datetime.now().timestamp())}_"
             f"epsilon_{epsilon}_worldcupweight_{world_cup_weight}"
         )
-        with open(f"{filename}.model", "w") as f:
+        with open(os.path.join(output_dir, f"{filename}.model"), "w") as f:
             f.write(jsonpickle.encode(wc_pred))
         with open(os.path.join(output_dir, filename), "w") as f:
             f.write(f"epsilon,world_cup_weight,{','.join(likelihood)}\n")
@@ -89,8 +89,8 @@ def main():
     test_end = "2022-12-31"
     competitions = ["W", "C1", "WQ", "CQ", "C2", "F"]
     rankings_source = "org"
-    epsilon = [0.0, 0.01, 0.05, 0.1, 0.2]
-    world_cup_weight = [1.0, 2.0, 3.0, 4.0, 5.0]
+    epsilon = [0.0, 0.1, 0.2, 0.3, 0.4]
+    world_cup_weight = [1.0, 1.5, 2.0, 2.5, 3.0]
     model = NeutralDixonColesMatchPredictorWC()
     test_with_weights = True
     output_dir = f"likelihood_scan_{int(datetime.now().timestamp())}"
