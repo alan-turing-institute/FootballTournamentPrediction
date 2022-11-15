@@ -3,6 +3,7 @@ Assorted functions to get the BPL model, and predict results.
 """
 from typing import List, Optional, Tuple
 
+import math
 import numpy as np
 import jax.numpy as jnp
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
@@ -150,6 +151,8 @@ def forecast_evaluation(
     "C2": 2nd-tier continental, e.g. UEFA Nations League,
     "F": friendly/other.
     """
+    if method not in ["rps", "brier"]:
+        raise ValueError("method must be either 'brier' or 'rps'")
     results, _ = get_results_data(
         start_date, end_date, competitions=competitions, rankings_source=None
     )
@@ -193,15 +196,22 @@ def forecast_evaluation(
     outcome = [jnp.array([1,0,0]) if game["home_score"] > game["away_score"] else 
                jnp.array([0,1,0]) if game["home_score"] == game["away_score"] else 
                jnp.array([0,0,1]) for index, game in results.iterrows()]
-    # compute metric
-    if method == "brier":
-        metrics = [((outcome_probs[i,:]-outcome[i])**2).sum().item()
-                   for i in range(len(results))]
-    elif method == "rps":
-        metrics = [((outcome_probs[i,:].cumsum()-outcome[i].cumsum())**2)[:2].sum().item() / 2
-                   for i in range(len(results))]
-    else:
-        raise ValueError("method must be either 'brier' or 'rps'")
+    
+    metrics = []
+    for i in range(len(results)):
+        # fix any nans (happens when have two very lobsided teams - computational underflow)
+        prediction = outcome_probs[i,:]
+        if math.isnan(prediction[0].item()):
+            prediction = prediction.at[0].set(1-(prediction[1]+prediction[2]))
+        elif math.isnan(prediction[1].item()):
+            prediction = prediction.at[1].set(1-(prediction[0]+prediction[2]))
+        elif math.isnan(prediction[2].item()):
+            prediction = prediction.at[2].set(1-(prediction[0]+prediction[1]))
+        # compute metric
+        if method == "brier":
+            metrics.append(((prediction-outcome[i])**2).sum().item())
+        elif method == "rps":
+            metrics.append(((prediction.cumsum()-outcome[i].cumsum())**2)[:2].sum().item() / 2)
         
     return metrics
 

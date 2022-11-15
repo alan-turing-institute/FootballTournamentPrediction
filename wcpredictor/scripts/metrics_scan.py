@@ -126,6 +126,8 @@ def main():
         # convert to string
         train_end = str(train_end.date())
         test_start = str(test_start.date())
+        print(test_start)
+        print(test_end)
         for r in ratings:
             if r == "none":
                 r = None
