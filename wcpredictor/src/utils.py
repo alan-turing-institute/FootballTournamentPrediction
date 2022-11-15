@@ -4,6 +4,7 @@ Assorted functions to get the BPL model, and predict results.
 from typing import List, Optional, Tuple
 
 import numpy as np
+import jax.numpy as jnp
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 

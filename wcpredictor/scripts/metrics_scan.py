@@ -75,7 +75,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
         else:
             comptxt = "no_friendlies"
         
-        model = get_and_train_model(
+        wc_pred = get_and_train_model(
             start_date=train_start,
             end_date=train_end,
             competitions=comps,
@@ -84,7 +84,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
             world_cup_weight=wc_weight,
         )
         
-        metrics = forecast_evaluation(model=model,
+        metrics = forecast_evaluation(model=wc_pred.model,
                                       start_date=test_start,
                                       end_date=test_end,
                                       competitions=comps,
@@ -92,11 +92,11 @@ def run_metrics_wrapper(queue, pid, output_dir):
         
         metrics_filename = f"{metric}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.txt"
         metrics_filename = os.path.join(output_dir, metrics_filename)
-        
-        with open(output_txt, "w") as outfile:
+
+        with open(metrics_filename, "w") as outfile:
             for val in metrics:
                 outfile.write(f"{val}\n")
-        print(f"Process {pid} Wrote file {csv_filename}")
+        print(f"Process {pid} Wrote file {metrics_filename}")
 
 def main():
     args = get_cmd_line_args()
