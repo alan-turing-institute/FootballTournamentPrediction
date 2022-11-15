@@ -1,9 +1,11 @@
 import os
 import argparse
+import pandas as pd
 
 from multiprocessing import Process, Queue
 
 from wcpredictor.src.utils import get_and_train_model, forecast_evaluation
+from .run_simulations import get_dates_from_years_training
 
 def get_cmd_line_args():
     parser = argparse.ArgumentParser(description="scan hyperparameters")
@@ -60,7 +62,7 @@ def get_cmd_line_args():
     return args
 
 def run_metrics_wrapper(queue, pid, output_dir):
-    print("In run_sim_wrapper")
+    print("In run_metrics_wrapper")
     while True:
         status = queue.get()
         if status == "DONE":
@@ -100,9 +102,9 @@ def main():
     args = get_cmd_line_args()
     metric = args.metric
     train_years = args.years_training.split(",")
-    test_years = arg.years_testing
-    if test_years => train_years:
-        raise ValueError("years_testing must be less than years_training")
+    test_years = args.years_testing
+    if any([int(x) <= int(test_years) for x in train_years]):
+        raise ValueError("each year in years_training must be greater than years_testing")
     ratings = args.ratings_choices.split(",")
     competitions = [["W", "WQ", "C1", "CQ", "C2", "F"]]
     if args.exclude_friendlies:
@@ -119,8 +121,8 @@ def main():
         train_start, test_end = get_dates_from_years_training(
             2022, int(num_years)
         )
-        train_end = pd.Timestamp(test_end)-pd.DateOffset(years=test_years, days=1)
-        test_start = pd.Timestamp(test_end)-pd.DateOffset(years=test_years)
+        train_end = pd.Timestamp(test_end)-pd.DateOffset(years=int(test_years), days=1)
+        test_start = pd.Timestamp(test_end)-pd.DateOffset(years=int(test_years))
         # convert to string
         train_end = str(train_end.date())
         test_start = str(test_start.date())
@@ -136,7 +138,7 @@ def main():
                                    train_start,
                                    train_end,
                                    test_start,
-                                   test_end
+                                   test_end,
                                    r,
                                    comps,
                                    ep,
@@ -156,7 +158,7 @@ def main():
     for i in range(args.num_thread):
         p = Process(
             target=run_metrics_wrapper,
-            args=(queue, i, args.num_simulations, args.output_dir),
+            args=(queue, i, args.output_dir),
         )
         p.daemon = True
         p.start()
