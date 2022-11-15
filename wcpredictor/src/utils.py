@@ -129,6 +129,82 @@ def test_model(
     return np.log(proba).sum() / len(proba)  # log likelihood
 
 
+def forecast_evaluation(
+    model: BaseMatchPredictor,
+    start_date: str = "2018-06-01",
+    end_date: str = "2022-11-20",
+    competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    method: str = "rps",
+) -> List[float]:
+    """
+    Compute the Brier score, or Rank Probability score (RPS) to evaluate the model against
+    real match scores for a model (to use like a loss function). By default computes the RPS
+
+    Use 'competitions' argument to specify which rows to include in training data.
+    Key for competitions:
+    "W": world cup finals,
+    "C1": top-level continental cup,
+    "WQ": world cup qualifiers",
+    "CQ": continental cup qualifiers"
+    "C2": 2nd-tier continental, e.g. UEFA Nations League,
+    "F": friendly/other.
+    """
+    results, _ = get_results_data(
+        start_date, end_date, competitions=competitions, rankings_source=None
+    )
+    results = results[  # only include matches where model knows about both teams
+        (results["home_team"].isin(model.teams))
+        & (results["away_team"].isin(model.teams))
+    ]
+    confed = get_confederations_data()
+    confed_dict = dict(zip(confed["Team"], confed["Confederation"]))
+    test_data = {
+        "home_team": np.array(results.home_team),
+        "away_team": np.array(results.away_team),
+        "home_conf": np.array([confed_dict[team] for team in results.home_team]),
+        "away_conf": np.array([confed_dict[team] for team in results.away_team]),
+        "neutral": np.array(results.neutral),
+    }
+    # obtain match outcome probabilities from the model
+    if isinstance(model, NeutralDixonColesMatchPredictorWC):
+        proba = model.predict_outcome_proba(
+            test_data["home_team"],
+            test_data["away_team"],
+            test_data["home_conf"],
+            test_data["away_conf"],
+            test_data["neutral"],
+        )
+    elif isinstance(model, NeutralDixonColesMatchPredictor):
+        proba = model.predict_outcome_proba(
+            test_data["home_team"],
+            test_data["away_team"],
+            test_data["neutral"],
+        )
+    else:
+        proba = model.predict_outcome_proba(
+            test_data["home_team"],
+            test_data["away_team"],
+        )
+    # obtain len(results) x 3 array where each row is the outcome probabilities for each game
+    outcome_probs = jnp.concatenate(list(proba.values())).reshape([3, len(results)])
+    outcome_probs = outcome_probs.transpose()
+    # obtain actual match outcomes from the test data
+    outcome = [jnp.array([1,0,0]) if game["home_score"] > game["away_score"] else 
+               jnp.array([0,1,0]) if game["home_score"] == game["away_score"] else 
+               jnp.array([0,0,1]) for index, game in results.iterrows()]
+    # compute metric
+    if method == "brier":
+        metrics = [((outcome_probs[i,:]-outcome[i])**2).sum().item()
+                   for i in range(len(results))]
+    elif method == "rps":
+        metrics = [((outcome_probs[i,:].cumsum()-outcome[i].cumsum())**2)[:2].sum().item() / 2
+                   for i in range(len(results))]
+    else:
+        raise ValueError("method must be either 'brier' or 'rps'")
+        
+    return metrics
+
+
 def find_group(team, teams_df):
     """
     Look in teams_df and find the group for a given team

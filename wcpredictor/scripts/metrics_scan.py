@@ -3,21 +3,25 @@ import argparse
 
 from multiprocessing import Process, Queue
 
-from .run_simulations import run_sims, get_dates_from_years_training
-
+from wcpredictor.src.utils import get_and_train_model, forecast_evaluation
 
 def get_cmd_line_args():
     parser = argparse.ArgumentParser(description="scan hyperparameters")
     parser.add_argument(
-        "--tournaments",
-        help="comma-separated list of tournaments",
-        choices=["2014", "2018", "2014,2018"],
-        default="2018",
+        "--metric",
+        help="which metric to use",
+        choices=["brier", "rps"],
+        default="rps",
     )
     parser.add_argument(
         "--years_training",
         help="comma-separated list of num-years-training-data",
-        default="4,5,6,7,8",
+        default="20",
+    )
+    parser.add_argument(
+        "--years_testing",
+        help="num-years-testing-data (must be less than years_training)",
+        default="2",
     )
     parser.add_argument(
         "--ratings_choices",
@@ -47,12 +51,6 @@ def get_cmd_line_args():
         default="2,5",
     )
     parser.add_argument(
-        "--num_simulations",
-        help="how many tournaments per point",
-        type=int,
-        default=100,
-    )
-    parser.add_argument(
         "--output_dir", help="where to put output", type=str, default="output"
     )
     parser.add_argument(
@@ -61,43 +59,50 @@ def get_cmd_line_args():
     args = parser.parse_args()
     return args
 
-
-def run_sim_wrapper(queue, pid, num_simulations, output_dir):
+def run_metrics_wrapper(queue, pid, output_dir):
     print("In run_sim_wrapper")
     while True:
         status = queue.get()
         if status == "DONE":
             print(f"Process {pid} finished all jobs!")
             break
-        tournament, num_years, start_date, end_date, ratings, comps, epsilon, wc_weight = status
+        metric, num_years, train_start, train_end, test_start, test_end, ratings, comps, epsilon, wc_weight = status
 
         if len(comps) == 6:
             comptxt = "all_comps"
         else:
             comptxt = "no_friendlies"
-        csv_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.csv"
-        loss_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}_loss.txt"
-        csv_filename = os.path.join(output_dir, csv_filename)
-        loss_filename = os.path.join(output_dir, loss_filename)
-        run_sims(
-            tournament_year=tournament,
-            num_simulations=num_simulations,
-            start_date=start_date,
-            end_date=end_date,
+        
+        model = get_and_train_model(
+            start_date=train_start,
+            end_date=train_end,
             competitions=comps,
-            rankings_src=ratings,
+            rankings_source=ratings,
             epsilon=epsilon,
             world_cup_weight=wc_weight,
-            output_csv=csv_filename,
-            output_txt=loss_filename,
         )
+        
+        metrics = forecast_evaluation(model=model,
+                                      start_date=test_start,
+                                      end_date=test_end,
+                                      competitions=comps,
+                                      method=metric)
+        
+        metrics_filename = f"{metric}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.txt"
+        metrics_filename = os.path.join(output_dir, metrics_filename)
+        
+        with open(output_txt, "w") as outfile:
+            for val in metrics:
+                outfile.write(f"{val}\n")
         print(f"Process {pid} Wrote file {csv_filename}")
-
 
 def main():
     args = get_cmd_line_args()
-    tournaments = args.tournaments.split(",")
+    metric = args.metric
     train_years = args.years_training.split(",")
+    test_years = arg.years_testing
+    if test_years => train_years:
+        raise ValueError("years_testing must be less than years_training")
     ratings = args.ratings_choices.split(",")
     competitions = [["W", "WQ", "C1", "CQ", "C2", "F"]]
     if args.exclude_friendlies:
@@ -110,32 +115,37 @@ def main():
 
     # first add items to our multiprocessing queue
     queue = Queue()
-    for tournament in tournaments:
-        for num_years in train_years:
-            start_date, end_date = get_dates_from_years_training(
-                tournament, int(num_years)
-            )
-            for r in ratings:
-                if r == "none":
-                    r = None
-                for comps in competitions:
-                    for ep in epsilons:
-                        for wc in wc_weights:        
-                            print("adding to queue")
-                            queue.put((tournament,
-                                       num_years,
-                                       start_date,
-                                       end_date,
-                                       r,
-                                       comps,
-                                       ep,
-                                       wc))
-                            pass # end of loop over world cup weight choices
-                        pass # end of loop over epsilon choices
-                    pass  # end of loop over competitions to exclude        
-                pass  # end of loop over ratings method
-            pass  # end of loop over num_years_training
-        pass  # end of loop over tournaments
+    for num_years in train_years:
+        train_start, test_end = get_dates_from_years_training(
+            2022, int(num_years)
+        )
+        train_end = pd.Timestamp(test_end)-pd.DateOffset(years=test_years, days=1)
+        test_start = pd.Timestamp(test_end)-pd.DateOffset(years=test_years)
+        # convert to string
+        train_end = str(train_end.date())
+        test_start = str(test_start.date())
+        for r in ratings:
+            if r == "none":
+                r = None
+            for comps in competitions:
+                for ep in epsilons:
+                    for wc in wc_weights:        
+                        print("adding to queue")
+                        queue.put((metric,
+                                   num_years,
+                                   train_start,
+                                   train_end,
+                                   test_start,
+                                   test_end
+                                   r,
+                                   comps,
+                                   ep,
+                                   wc))
+                        pass # end of loop over world cup weight choices
+                    pass # end of loop over epsilon choices
+                pass  # end of loop over competitions to exclude        
+            pass  # end of loop over ratings method
+        pass  # end of loop over num_years_training
 
     # add some items to the queue to make the target function exit
     for i in range(args.num_thread):
@@ -145,7 +155,7 @@ def main():
     procs = []
     for i in range(args.num_thread):
         p = Process(
-            target=run_sim_wrapper,
+            target=run_metrics_wrapper,
             args=(queue, i, args.num_simulations, args.output_dir),
         )
         p.daemon = True

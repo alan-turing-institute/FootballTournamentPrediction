@@ -5,6 +5,7 @@ import pandas as pd
 
 from wcpredictor import (
     Tournament,
+    get_results_data,
     get_and_train_model,
     get_difference_in_stages,
     get_teams_data,
@@ -84,9 +85,9 @@ def get_dates_from_years_training(tournament_year, years):
     # always start at 1st June, to capture the summer tournament
     start_date = f"{start_year}-06-01"
     end_year = int(tournament_year)
-    # end at 1st June if tournament year is 2014 or 2018, or 1st Nov for 2022
+    # end at 1st June if tournament year is 2014 or 2018, or 20th Nov for 2022
     if tournament_year == "2022":
-        end_date = "2022-11-01"
+        end_date = "2022-11-20"
     else:
         end_date = f"{tournament_year}-06-01"
     return start_date, end_date
@@ -126,16 +127,18 @@ def run_sims(
 ):
     print(
         f"""
-Running simulations with
-tournament_year: {tournament_year}
-num_simulations: {num_simulations}
-start_date: {start_date}
-end_date: {end_date}
-comps: {competitions}
-rankings: {rankings_src}
-{output_csv}
-{output_txt}
-"""
+        Running simulations with
+        tournament_year: {tournament_year}
+        num_simulations: {num_simulations}
+        start_date: {start_date}
+        end_date: {end_date}
+        comps: {competitions}
+        rankings: {rankings_src}
+        epsilon: {epsilon}
+        world_cup_weight: {world_cup_weight}
+        output_csv: {output_csv}
+        output_txt: {output_txt}
+        """
     )
     model = get_and_train_model(
         start_date=start_date,
