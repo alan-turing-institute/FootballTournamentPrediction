@@ -93,7 +93,7 @@ def test_model(
     "C2": 2nd-tier continental, e.g. UEFA Nations League,
     "F": friendly/other.
     """
-    results = get_results_data(
+    results, _ = get_results_data(
         start_date, end_date, competitions=competitions, rankings_source=None
     )
     results = results[  # only include matches where model knows about both teams
