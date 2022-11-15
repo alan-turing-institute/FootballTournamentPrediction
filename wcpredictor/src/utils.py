@@ -54,6 +54,7 @@ def get_and_train_model(
         ratings=ratings,
         epsilon=epsilon,
         world_cup_weight=world_cup_weight,
+        weights_dict=weights_dict,
         model=model,
     )
     wc_pred.set_training_data()
