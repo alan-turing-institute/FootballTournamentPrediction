@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import argparse
 import random
+from datetime import datetime
+from glob import glob
+from multiprocessing import Process, Queue
 from uuid import uuid4
 
 import pandas as pd
@@ -9,7 +12,6 @@ from wcpredictor import (
     Tournament,
     get_and_train_model,
     get_difference_in_stages,
-    get_results_data,
     get_teams_data,
     get_wcresults_data,
 )
@@ -19,6 +21,9 @@ def get_cmd_line_args():
     parser = argparse.ArgumentParser("Simulate multiple World Cups")
     parser.add_argument(
         "--num_simulations", help="How many simulations to run", type=int
+    )
+    parser.add_argument(
+        "--num_thread", help="How many simulations to run", type=int, default=4
     )
     parser.add_argument(
         "--tournament_year",
@@ -77,12 +82,9 @@ def get_cmd_line_args():
         type=float,
         default=1.0,
     )
-    parser.add_argument(
-        "--seed", help="seed value for simulations", type=int, default=42
-    )
+    parser.add_argument("--seed", help="seed value for simulations", type=int)
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def get_dates_from_years_training(tournament_year, years):
@@ -115,6 +117,12 @@ def get_start_end_dates(args):
         )
     print(f"Start/End dates for training data are {start_date}, {end_date}")
     return start_date, end_date
+
+
+def merge_csv_outputs(output_csv):
+    files = glob(f"*_{output_csv}")
+    df = pd.concat([pd.read_csv(f) for f in files])
+    df.groupby("team").sum().to_csv(f"merged_{output_csv}")
 
 
 def run_sims(
@@ -164,6 +172,33 @@ def run_sims(
                 outfile.write(f"{val}\n")
 
 
+def run_wrapper(
+    queue,
+    pid,
+    tournament_year,
+    num_simulations,
+    model,
+    output_csv,
+    output_txt,
+    print_winner,
+):
+    print("In run_wrapper")
+    while True:
+        status = queue.get()
+        if status == "DONE":
+            print(f"Process {pid} finished all jobs!")
+            break
+
+        run_sims(
+            tournament_year,
+            num_simulations,
+            model,
+            output_csv,
+            output_txt,
+            print_winner,
+        )
+
+
 def main():
     args = get_cmd_line_args()
     # use the fifa ratings as priors?
@@ -175,7 +210,9 @@ def main():
         for comp in exclude_comps:
             comps.remove(comp)
     start_date, end_date = get_start_end_dates(args)
-
+    timestamp = int(datetime.now().timestamp())
+    output_csv = f"{timestamp}_{args.output_csv}"
+    output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
     print(
         f"""
 Running simulations with
@@ -185,11 +222,13 @@ start_date: {start_date}
 end_date: {end_date}
 comps: {comps}
 rankings: {ratings_src}
-{args.output_csv}
-{args.output_txt}
+{output_csv}
+{output_loss_txt}
     """
     )
-    random.seed(args.seed)
+    if args.seed:
+        random.seed(args.seed)
+
     model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
@@ -199,15 +238,41 @@ rankings: {ratings_src}
         world_cup_weight=args.world_cup_weight,
     )
 
-    run_sims(
-        tournament_year=args.tournament_year,
-        num_simulations=args.num_simulations,
-        model=model,
-        output_csv=args.output_csv,
-        output_txt=args.output_loss_txt,
-        seed=args.seed,
-        print_winner=True,
-    )
+    # first add items to our multiprocessing queue
+    queue = Queue()
+    for i in range(args.num_thread):
+        queue.put(i)
+
+    # add some items to the queue to make the target function exit
+    for _ in range(args.num_thread):
+        queue.put("DONE")
+
+    # define processes for running the jobs
+    procs = []
+    for i in range(args.num_thread):
+        p = Process(
+            target=run_wrapper,
+            args=(
+                queue,
+                i,
+                args.tournament_year,
+                args.num_simulations,
+                model,
+                output_csv,
+                output_loss_txt,
+                args.seed,
+                True,
+            ),
+        )
+        p.daemon = True
+        p.start()
+        procs.append(p)
+
+    # finally start the processes
+    for i in range(args.num_thread):
+        procs[i].join()
+
+    merge_csv_outputs(output_csv)
 
 
 if __name__ == "__main__":
