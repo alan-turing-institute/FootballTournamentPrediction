@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+from uuid import uuid4
 
 import pandas as pd
 
@@ -114,37 +115,11 @@ def get_start_end_dates(args):
 def run_sims(
     tournament_year,
     num_simulations,
-    start_date,
-    end_date,
-    competitions,
-    rankings_src,
-    epsilon,
-    world_cup_weight,
+    model,
     output_csv,
     output_txt,
     print_winner=False,
 ):
-    print(
-        f"""
-Running simulations with
-tournament_year: {tournament_year}
-num_simulations: {num_simulations}
-start_date: {start_date}
-end_date: {end_date}
-comps: {competitions}
-rankings: {rankings_src}
-{output_csv}
-{output_txt}
-"""
-    )
-    model = get_and_train_model(
-        start_date=start_date,
-        end_date=end_date,
-        competitions=competitions,
-        rankings_source=rankings_src,
-        epsilon=epsilon,
-        world_cup_weight=world_cup_weight,
-    )
     teams_df = get_teams_data(tournament_year)
     teams = list(teams_df.Team.values)
     team_results = {
@@ -172,11 +147,14 @@ rankings: {rankings_src}
                 total_loss += loss
         loss_values.append(total_loss)
     team_records = [{"team": k, **v} for k, v in team_results.items()]
+
+    runid = str(uuid4())
+
     df = pd.DataFrame(team_records)
-    df.to_csv(output_csv)
+    df.to_csv(f"{runid}_{output_csv}")
     # output txt file containing loss function values
     if tournament_year != "2022":
-        with open(output_txt, "w") as outfile:
+        with open(f"{runid}_{output_txt}", "w") as outfile:
             for val in loss_values:
                 outfile.write(f"{val}\n")
 
@@ -193,15 +171,32 @@ def main():
             comps.remove(comp)
     start_date, end_date = get_start_end_dates(args)
 
-    run_sims(
-        tournament_year=args.tournament_year,
-        num_simulations=args.num_simulations,
+    print(
+        f"""
+Running simulations with
+tournament_year: {args.tournament_year}
+num_simulations: {args.num_simulations}
+start_date: {start_date}
+end_date: {end_date}
+comps: {comps}
+rankings: {ratings_src}
+{args.output_csv}
+{args.output_txt}
+    """
+    )
+    model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
         competitions=comps,
-        rankings_src=ratings_src,
+        rankings_source=ratings_src,
         epsilon=args.epsilon,
         world_cup_weight=args.world_cup_weight,
+    )
+
+    run_sims(
+        tournament_year=args.tournament_year,
+        num_simulations=args.num_simulations,
+        model=model,
         output_csv=args.output_csv,
         output_txt=args.output_loss_txt,
         print_winner=True,
