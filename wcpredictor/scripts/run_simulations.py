@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import os
 import random
 from datetime import datetime
 from glob import glob
@@ -121,8 +122,15 @@ def get_start_end_dates(args):
 
 def merge_csv_outputs(output_csv):
     files = glob(f"*_{output_csv}")
-    df = pd.concat([pd.read_csv(f) for f in files])
-    df.groupby("team").sum().to_csv(f"merged_{output_csv}")
+    df = pd.concat(
+        [
+            pd.read_csv(f, usecols=["team", "G", "R16", "QF", "SF", "RU", "W"])
+            for f in files
+        ]
+    )
+    df = df.groupby("team").sum().to_csv(f"merged_{output_csv}")
+    for f in files:
+        os.remove(f)
 
 
 def run_sims(
@@ -260,7 +268,6 @@ rankings: {ratings_src}
                 model,
                 output_csv,
                 output_loss_txt,
-                args.seed,
                 True,
             ),
         )
