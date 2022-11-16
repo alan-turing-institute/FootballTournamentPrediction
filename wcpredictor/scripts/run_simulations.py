@@ -47,7 +47,7 @@ def get_cmd_line_args():
     parser.add_argument(
         "--ratings_source",
         choices=["game", "org", "both"],
-        default="game",
+        default="org",
         help=(
             "if 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
             "organization ratings"
