@@ -2,6 +2,7 @@
 import argparse
 
 import pandas as pd
+import random
 
 from wcpredictor import (
     Tournament,
@@ -75,6 +76,12 @@ def get_cmd_line_args():
         type=float,
         default=1.0,
     )
+    parser.add_argument(
+        "--seed",
+        help="seed value for simulations",
+        type=int,
+        default=42
+    )
 
     args = parser.parse_args()
     return args
@@ -123,6 +130,7 @@ def run_sims(
     world_cup_weight,
     output_csv,
     output_txt,
+    seed=42,
     print_winner=False,
 ):
     print(
@@ -140,6 +148,7 @@ def run_sims(
         output_txt: {output_txt}
         """
     )
+    random.seed(seed)
     model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
@@ -207,6 +216,7 @@ def main():
         world_cup_weight=args.world_cup_weight,
         output_csv=args.output_csv,
         output_txt=args.output_loss_txt,
+        seed=args.seed,
         print_winner=True,
     )
 
