@@ -1,11 +1,12 @@
 """
 Assorted functions to get the BPL model, and predict results.
 """
+import math
 from typing import List, Optional, Tuple
 
-import math
-import numpy as np
 import jax.numpy as jnp
+import numpy as np
+import pandas as pd
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
@@ -70,6 +71,9 @@ def test_model(
     start_date: str = "2018-06-01",
     end_date: str = "2022-11-20",
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    epsilon=0,
+    world_cup_weight=1,
+    train_end_date=None,
 ) -> float:
     """
     Compute the log likelihood of real match scores for a model (to use like a loss
@@ -101,6 +105,7 @@ def test_model(
         "home_goals": np.array(results.home_score),
         "away_goals": np.array(results.away_score),
         "neutral": np.array(results.neutral),
+        "game_weight": np.array(results.game_weight),
     }
 
     if isinstance(model, NeutralDixonColesMatchPredictorWC):
@@ -128,7 +133,20 @@ def test_model(
             test_data["home_goals"],
             test_data["away_goals"],
         )
-    return np.log(proba).sum() / len(proba)  # log likelihood
+
+    if epsilon != 0 or world_cup_weight != 1:
+        # obtain time difference to last date model was trained on, or test start date
+        # if not given
+        if train_end_date is None:
+            ref_date = pd.Timestamp(start_date)
+        else:
+            ref_date = pd.Timestamp(train_end_date)
+        time_diff = (results.date - ref_date) / pd.Timedelta(days=365)
+        weight = test_data["game_weight"] * np.exp(-epsilon * time_diff)
+    else:
+        weight = np.ones(len(proba))
+
+    return (weight * np.log(proba)).sum() / weight.sum()  # weighted mean log likelihood
 
 
 def forecast_evaluation(
@@ -193,26 +211,33 @@ def forecast_evaluation(
     outcome_probs = jnp.concatenate(list(proba.values())).reshape([3, len(results)])
     outcome_probs = outcome_probs.transpose()
     # obtain actual match outcomes from the test data
-    outcome = [jnp.array([1,0,0]) if game["home_score"] > game["away_score"] else 
-               jnp.array([0,1,0]) if game["home_score"] == game["away_score"] else 
-               jnp.array([0,0,1]) for index, game in results.iterrows()]
-    
+    outcome = [
+        jnp.array([1, 0, 0])
+        if game["home_score"] > game["away_score"]
+        else jnp.array([0, 1, 0])
+        if game["home_score"] == game["away_score"]
+        else jnp.array([0, 0, 1])
+        for index, game in results.iterrows()
+    ]
+
     metrics = []
     for i in range(len(results)):
         # fix any nans (happens when have two very lobsided teams - computational underflow)
-        prediction = outcome_probs[i,:]
+        prediction = outcome_probs[i, :]
         if math.isnan(prediction[0].item()):
-            prediction = prediction.at[0].set(1-(prediction[1]+prediction[2]))
+            prediction = prediction.at[0].set(1 - (prediction[1] + prediction[2]))
         elif math.isnan(prediction[1].item()):
-            prediction = prediction.at[1].set(1-(prediction[0]+prediction[2]))
+            prediction = prediction.at[1].set(1 - (prediction[0] + prediction[2]))
         elif math.isnan(prediction[2].item()):
-            prediction = prediction.at[2].set(1-(prediction[0]+prediction[1]))
+            prediction = prediction.at[2].set(1 - (prediction[0] + prediction[1]))
         # compute metric
         if method == "brier":
-            metrics.append(((prediction-outcome[i])**2).sum().item())
+            metrics.append(((prediction - outcome[i]) ** 2).sum().item())
         elif method == "rps":
-            metrics.append(((prediction.cumsum()-outcome[i].cumsum())**2)[:2].sum().item() / 2)
-        
+            metrics.append(
+                ((prediction.cumsum() - outcome[i].cumsum()) ** 2)[:2].sum().item() / 2
+            )
+
     return metrics
 
 

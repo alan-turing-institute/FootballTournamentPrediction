@@ -1,8 +1,10 @@
 import itertools
+import json
 import os
 from datetime import datetime
 from multiprocessing import Process, Queue
 
+import jsonpickle
 import numpy as np
 from bpl import NeutralDixonColesMatchPredictorWC
 
@@ -19,6 +21,7 @@ def run_wrapper(
     competitions,
     rankings_source,
     model,
+    test_with_weights,
     output_dir,
 ):
     print("In run_wrapper")
@@ -39,18 +42,32 @@ def run_wrapper(
             world_cup_weight,
             model,
         )
+
+        # test_competitions = {
+        #     "likelihood_W_to_F": ["W", "C1", "WQ", "CQ", "C2", "F"],
+        #     "likelihood_W_to_C2": ["W", "C1", "WQ", "CQ", "C2"],
+        #     "likelihood_W_to_CQ": ["W", "C1", "WQ", "CQ"],
+        #     "likelihood_W_to_C1": ["W", "C1"],
+        # }
         test_competitions = {
-            "likelihood_W_to_F": ["W", "C1", "WQ", "CQ", "C2", "F"],
-            "likelihood_W_to_C2": ["W", "C1", "WQ", "CQ", "C2"],
-            "likelihood_W_to_CQ": ["W", "C1", "WQ", "CQ"],
-            "likelihood_W_to_C1": ["W", "C1"],
+            "likelihood_W": ["W"],
         }
+        if test_with_weights:
+            test_epsilon = epsilon
+            test_world_cup_weight = world_cup_weight
+        else:
+            test_epsilon = 0
+            test_world_cup_weight = 1.0
+
         likelihood = {
             name: test_model(
                 wc_pred.model,
                 test_start,
                 test_end,
                 comps,
+                epsilon=test_epsilon,
+                world_cup_weight=test_world_cup_weight,
+                train_end_date=train_end,
             )
             for name, comps in test_competitions.items()
         }
@@ -58,6 +75,8 @@ def run_wrapper(
             f"{int(datetime.now().timestamp())}_"
             f"epsilon_{epsilon}_worldcupweight_{world_cup_weight}"
         )
+        with open(os.path.join(output_dir, f"{filename}.model"), "w") as f:
+            f.write(jsonpickle.encode(wc_pred))
         with open(os.path.join(output_dir, filename), "w") as f:
             f.write(f"epsilon,world_cup_weight,{','.join(likelihood)}\n")
             f.write(
@@ -68,20 +87,39 @@ def run_wrapper(
 
 
 def main():
-    train_start = "1982-1-1"
-    train_end = "2020-12-31"
-    test_start = "2021-1-1"
-    test_end = "2022-12-31"
+    train_start = "1994-1-1"  # 2018 WC: 1998-1-1, 2014 WC: 1994-1-1, 2010 WC: 1990-1-1
+    train_end = "2014-6-10"  # 2018 WC: 2018-6-12, 2014 WC: 2014-6-10, 2010 WC: 2010-6-9
+    test_start = "2014-6-11"  # 2018WC: 2018-6-13, 2014WC: 2014-6-11, 2010WC: 2010-6-10
+    test_end = "2014-7-14"  # 2018 WC: 2018-7-16, 2014 WC: 2014-7-14, 2010 WC: 2010-7-12
     competitions = ["W", "C1", "WQ", "CQ", "C2", "F"]
-    rankings_source = "org"
-    epsilon = [0.0, 0.01, 0.05, 0.1, 0.2]
-    world_cup_weight = [1.0, 2.0, 3.0, 4.0, 5.0]
+    rankings_source = None
+    epsilon = [0.6, 0.8, 1.0, 1.25, 1.5]
+    world_cup_weight = [1, 2, 3, 4, 5, 6]
     model = NeutralDixonColesMatchPredictorWC()
-    num_thread = 12
+    test_with_weights = False
     output_dir = f"likelihood_scan_{int(datetime.now().timestamp())}"
+    num_thread = 12
 
     # create output dir if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
+    with open(f"{output_dir}/params.json", "w") as f:
+        json.dump(
+            {
+                "train_start": train_start,
+                "train_end": train_end,
+                "test_start": test_start,
+                "test_end": test_end,
+                "competitions": competitions,
+                "rankings_source": rankings_source,
+                "epsilon": epsilon,
+                "world_cup_weight": world_cup_weight,
+                "model": str(model),
+                "test_with_weights": test_with_weights,
+                "output_dir": output_dir,
+                "num_thread": num_thread,
+            },
+            f,
+        )
 
     # first add items to our multiprocessing queue
     queue = Queue()
@@ -107,6 +145,7 @@ def main():
                 competitions,
                 rankings_source,
                 model,
+                test_with_weights,
                 output_dir,
             ),
         )
