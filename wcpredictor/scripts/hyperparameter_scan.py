@@ -37,6 +37,16 @@ def get_cmd_line_args():
         "--exclude_friendlies", help="exclude friendlies", action="store_true"
     )
     parser.add_argument(
+        "--epsilon_choices",
+        help="what value of epsilon to choose in weightings - comma-separated list",
+        default="0.05,0.1,0.2",
+    )
+    parser.add_argument(
+        "--world_cup_weight_choices",
+        help="how much to weight the World Cup games and other competitions - comma-separated list",
+        default="2,5",
+    )
+    parser.add_argument(
         "--num_simulations",
         help="how many tournaments per point",
         type=int,
@@ -59,14 +69,14 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
         if status == "DONE":
             print(f"Process {pid} finished all jobs!")
             break
-        tournament, num_years, start_date, end_date, ratings, comps = status
+        tournament, num_years, start_date, end_date, ratings, comps, epsilon, wc_weight = status
 
         if len(comps) == 6:
             comptxt = "all_comps"
         else:
             comptxt = "no_friendlies"
-        csv_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}.csv"
-        loss_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_loss.txt"
+        csv_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.csv"
+        loss_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}_loss.txt"
         csv_filename = os.path.join(output_dir, csv_filename)
         loss_filename = os.path.join(output_dir, loss_filename)
         run_sims(
@@ -76,6 +86,8 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
             end_date=end_date,
             competitions=comps,
             rankings_src=ratings,
+            epsilon=epsilon,
+            world_cup_weight=wc_weight,
             output_csv=csv_filename,
             output_txt=loss_filename,
         )
@@ -90,7 +102,8 @@ def main():
     competitions = [["W", "WQ", "C1", "CQ", "C2", "F"]]
     if args.exclude_friendlies:
         competitions.append(["W", "WQ", "C1", "CQ", "C2"])
-
+    epsilons = [float(x) for x in args.epsilon_choices.split(",")]
+    wc_weights = [float(x) for x in args.world_cup_weight_choices.split(",")]
     # create output dir if it doesn't exist
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir, exist_ok=True)
@@ -106,9 +119,20 @@ def main():
                 if r == "none":
                     r = None
                 for comps in competitions:
-                    print("adding to queue")
-                    queue.put((tournament, num_years, start_date, end_date, r, comps))
-                    pass  # end of loop over competitions to exclude
+                    for ep in epsilons:
+                        for wc in wc_weights:        
+                            print("adding to queue")
+                            queue.put((tournament,
+                                       num_years,
+                                       start_date,
+                                       end_date,
+                                       r,
+                                       comps,
+                                       ep,
+                                       wc))
+                            pass # end of loop over world cup weight choices
+                        pass # end of loop over epsilon choices
+                    pass  # end of loop over competitions to exclude        
                 pass  # end of loop over ratings method
             pass  # end of loop over num_years_training
         pass  # end of loop over tournaments

@@ -21,6 +21,9 @@ class WCPred:
         ratings: Optional[pd.DataFrame] = None,
         teams: Optional[List[str]] = None,
         years: Optional[List[int]] = None,
+        epsilon: float = 0.0,
+        world_cup_weight: float = 1.0,
+        weights_dict: Optional[dict[str, float]] = None,
         model: BaseMatchPredictor = None,
     ):
         self.results = results
@@ -42,6 +45,9 @@ class WCPred:
         confed = get_confederations_data()
         self.confed_dict = dict(zip(confed["Team"], confed["Confederation"]))
         self.training_data = None
+        self.epsilon = epsilon
+        self.world_cup_weight = world_cup_weight
+        self.weights_dict = weights_dict
         self.model = model
 
     def get_result_dict(self) -> dict[str, np.array]:
@@ -60,6 +66,8 @@ class WCPred:
             "home_goals": np.array(self.results.home_score),
             "away_goals": np.array(self.results.away_score),
             "neutral_venue": np.array(self.results.neutral),
+            "time_diff": np.array(self.results.time_diff),
+            "game_weights": np.array(self.results.game_weight),
         }
 
     def get_ratings_dict(self) -> dict:
@@ -117,6 +125,11 @@ class WCPred:
         if self.training_data is None:
             self.set_training_data()
         print("[MODEL FITTING] Fitting the model")
+        if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+            if not fit_args:
+                fit_args = {}
+            fit_args["epsilon"] = self.epsilon
+
         self.model = self.model.fit(self.training_data, **fit_args)
 
     def get_fixture_teams(self) -> List[Tuple[str, str]]:
@@ -214,7 +227,7 @@ class WCPred:
                     Team_2[i],
                     Team_1_conference[i],
                     Team_2_conference[i],
-                    home=False,
+                    home=True,
                     neutral_venue=venue[i],
                 )
                 away_team_goal_prob = self.model.predict_score_n_proba(
@@ -231,7 +244,7 @@ class WCPred:
                     goals,
                     Team_1[i],
                     Team_2[i],
-                    home=False,
+                    home=True,
                     neutral_venue=venue[i],
                 )
                 away_team_goal_prob = self.model.predict_score_n_proba(
@@ -246,7 +259,7 @@ class WCPred:
                     goals,
                     Team_1[i],
                     Team_2[i],
-                    home=False,
+                    home=True,
                 )
                 away_team_goal_prob = self.model.predict_score_n_proba(
                     goals,
