@@ -190,7 +190,6 @@ def run_wrapper(
     output_txt,
     print_winner,
 ):
-    print("In run_wrapper")
     while True:
         status = queue.get()
         if status == "DONE":
