@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import random
 from uuid import uuid4
 
 import pandas as pd
@@ -8,6 +9,7 @@ from wcpredictor import (
     Tournament,
     get_and_train_model,
     get_difference_in_stages,
+    get_results_data,
     get_teams_data,
     get_wcresults_data,
 )
@@ -75,6 +77,9 @@ def get_cmd_line_args():
         type=float,
         default=1.0,
     )
+    parser.add_argument(
+        "--seed", help="seed value for simulations", type=int, default=42
+    )
 
     args = parser.parse_args()
     return args
@@ -85,9 +90,9 @@ def get_dates_from_years_training(tournament_year, years):
     # always start at 1st June, to capture the summer tournament
     start_date = f"{start_year}-06-01"
     end_year = int(tournament_year)
-    # end at 1st June if tournament year is 2014 or 2018, or 1st Nov for 2022
+    # end at 1st June if tournament year is 2014 or 2018, or 20th Nov for 2022
     if tournament_year == "2022":
-        end_date = "2022-11-01"
+        end_date = "2022-11-20"
     else:
         end_date = f"{tournament_year}-06-01"
     return start_date, end_date
@@ -184,6 +189,7 @@ rankings: {ratings_src}
 {args.output_txt}
     """
     )
+    random.seed(args.seed)
     model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
@@ -199,6 +205,7 @@ rankings: {ratings_src}
         model=model,
         output_csv=args.output_csv,
         output_txt=args.output_loss_txt,
+        seed=args.seed,
         print_winner=True,
     )
 
