@@ -26,6 +26,7 @@ def get_and_train_model(
     epsilon: float = 0.0,
     world_cup_weight: float = 1.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
+    **fit_args,
 ) -> WCPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
@@ -61,7 +62,7 @@ def get_and_train_model(
         model=model,
     )
     wc_pred.set_training_data()
-    wc_pred.fit_model()
+    wc_pred.fit_model(**fit_args)
 
     return wc_pred
 

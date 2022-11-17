@@ -128,7 +128,7 @@ def merge_csv_outputs(output_csv):
             for f in files
         ]
     )
-    df = df.groupby("team").sum().to_csv(f"merged_{output_csv}")
+    df = df.groupby("team").sum().to_csv(output_csv)
     for f in files:
         os.remove(f)
 
@@ -236,14 +236,19 @@ rankings: {ratings_src}
     if args.seed:
         random.seed(args.seed)
 
-    model = get_and_train_model(
-        start_date=start_date,
-        end_date=end_date,
-        competitions=comps,
-        rankings_source=ratings_src,
-        epsilon=args.epsilon,
-        world_cup_weight=args.world_cup_weight,
-    )
+    # model = get_and_train_model(
+    #     start_date=start_date,
+    #     end_date=end_date,
+    #     competitions=comps,
+    #     rankings_source=ratings_src,
+    #     epsilon=args.epsilon,
+    #     world_cup_weight=args.world_cup_weight,
+    # )
+
+    import jsonpickle
+
+    with open("test.model", "rb") as f:
+        model = jsonpickle.decode(f.read())
 
     # first add items to our multiprocessing queue
     queue = Queue()

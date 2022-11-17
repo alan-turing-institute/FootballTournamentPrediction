@@ -6,6 +6,7 @@ knockout stages, to the final, and produce a winner.
 import random
 from typing import List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 from .bpl_interface import WCPred
@@ -22,21 +23,31 @@ class Group:
     def __init__(self, name: str, teams: List[str]):
         self.name = name
         self.teams = teams
+
         # "table" is a dictionary keyed by team name, with the points, gf,ga
-        self.table = {}
-        for t in self.teams:
-            self.table[t] = {
+        self.table = {
+            t: {
                 "points": 0,
                 "goals_for": 0,
                 "goals_against": 0,
                 "goal_difference": 0,
             }
+            for t in self.teams
+        }
+
         # "standings" is a dictionary with keys "1st", "2nd", "3rd", "4th"
         # and values being the team names.
         self.standings = {"1st": None, "2nd": None, "3rd": None, "4th": None}
-        # results is a list of played matches, where each entry is a
-        # dict {"<team1_name>": <score>, "<team2_name>" <score>}
-        self.results = []
+
+        # results is a dict of played matches
+        # dict {
+        # "home_team": <team_name>,
+        # "away_team": <team_name>,
+        # "home_score": <score>,"
+        # away_score": <score>"
+        # }
+        self.results = None
+
         # order of criteria for deciding group order
         self.metrics = [
             "points",
@@ -46,79 +57,56 @@ class Group:
             "random",
         ]
 
-    def play_match(
-        self, wc_pred: WCPred, fixture: pd.Series, seed=None
-    ) -> dict[str, int]:
-        """
-        Play a simulated group match.
-
-        Parameters
-        ==========
-        fixture: row from a pandas DataFrame, has Team_1 and Team_2 columns
-
-        Returns
-        =======
-        result: dict, where keys are the team names,
-                and values are the goals for that team
-        """
-        goals_1, goals_2 = predict_group_match(
-            wc_pred=wc_pred, team_1=fixture.Team_1, team_2=fixture.Team_2, seed=seed
-        )
-        result = {fixture.Team_1: goals_1, fixture.Team_2: goals_2}
-        self.results.append(result)
-        return result
-
-    def play_all_matches(
-        self,
-        wc_pred: WCPred,
-        fixture_df: pd.DataFrame,
-        seed: Optional[int] = None,
-        verbose: bool = False,
-    ) -> None:
-        """
-        Given the full DataFrame full of fixtures, find the ones that correspond
-        to this group, and use them to fill our list of results
-
-        Parameters
-        ==========
-        fixture_df: pandas DataFrame of all fixtures, with Team_1 and Team_2 columns
-        """
-        for _, fixture in fixture_df.iterrows():
-            if fixture.Team_1 in self.teams and fixture.Team_2 in self.teams:
-                if verbose:
-                    print(f"{fixture.Team_1} vs {fixture.Team_2}")
-                result = self.play_match(wc_pred, fixture, seed)
-                if verbose:
-                    print(
-                        f"{fixture.Team_1} vs {fixture.Team_2}: "
-                        + f"{result[fixture.Team_1]}-{result[fixture.Team_2]}"
-                    )
-
     def calc_table(self) -> None:
         """
         Go through the results, and add points and goals to the table
         """
-        # reset the table, in case we previously ran this function
-        for t in self.teams:
-            self.table[t]["points"] = 0
-            self.table[t]["goals_for"] = 0
-            self.table[t]["goals_against"] = 0
-        for result in self.results:
-            teams = list(result.keys())
-            if result[teams[0]] > result[teams[1]]:
-                self.table[teams[0]]["points"] += 3
-            elif result[teams[0]] < result[teams[1]]:
-                self.table[teams[1]]["points"] += 3
-            else:
-                self.table[teams[0]]["points"] += 1
-                self.table[teams[1]]["points"] += 1
-            for i, t in enumerate(teams):
-                self.table[t]["goals_for"] += result[t]
-                self.table[teams[(i + 1) % 2]]["goals_against"] += result[t]
-        # loop through teams again to fill in goal difference
-        for t in self.teams:
-            self.table[t]["goal_difference"] = (
-                self.table[t]["goals_for"] - self.table[t]["goals_against"]
+        home_pts = 3 * (self.results["home_score"] > self.results["away_score"])
+        away_pts = 3 * (self.results["home_score"] < self.results["away_score"])
+        draw = self.results["home_score"] == self.results["away_score"]
+        home_pts[draw] = 1
+        away_pts[draw] = 1
+
+        self.table = {
+            "points": np.full(
+                (len(self.teams), self.results["home_score"].shape[1]), np.nan
+            ),
+            "goals_for": np.full(
+                (len(self.teams), self.results["home_score"].shape[1]), np.nan
+            ),
+            "goals_against": np.full(
+                (len(self.teams), self.results["home_score"].shape[1]), np.nan
+            ),
+            "goal_difference": np.full(
+                (len(self.teams), self.results["home_score"].shape[1]), np.nan
+            ),
+        }
+
+        for team_idx, team in enumerate(self.teams):
+            team_home_idx = self.results["home_team"] == team
+            team_home_pts = home_pts[team_home_idx].sum(axis=0)
+            team_home_goals_for = self.results["home_score"][team_home_idx].sum(axis=0)
+            team_home_goals_against = self.results["away_score"][team_home_idx].sum(
+                axis=0
+            )
+
+            team_away_idx = self.results["away_team"] == team
+            team_away_pts = away_pts[team_away_idx].sum(axis=0)
+            team_away_goals_for = self.results["away_score"][team_away_idx].sum(axis=0)
+            team_away_goals_against = self.results["home_score"][team_away_idx].sum(
+                axis=0
+            )
+
+            self.table["points"][team_idx, :] = team_home_pts + team_away_pts
+            self.table["goals_for"][team_idx, :] = (
+                team_home_goals_for + team_away_goals_for
+            )
+            self.table["goals_against"][team_idx, :] = (
+                team_home_goals_against + team_away_goals_against
+            )
+            self.table["goal_difference"][team_idx, :] = (
+                self.table["goals_for"][team_idx, :]
+                - self.table["goals_against"][team_idx, :]
             )
 
     def get_qualifiers(self) -> Tuple:
@@ -378,18 +366,22 @@ class Group:
                 return True
         return False
 
-    def add_result(self, team_1, team_2, score_1, score_2):
+    def add_results(self, results):
         """
         Add a result for a group-stage match.
         Parameters
         ==========
-        team_1, team_2: both str, team names, as in teams.csv
-        score_1, score_2: both int, number of goals scored by each team.
+        fixtures: dict of results (with keys 'home_team', 'away_team', 'home_score',
+        'away_score')
+        results: Simulated match scores for all fixtures in df
         """
-        if not self.check_if_result_exists(team_1, team_2):
-            result = {team_1: score_1, team_2: score_2}
-            self.results.append(result)
-        return
+        group_mask = results["home_team"].isin(self.teams)
+        self.results = {
+            "home_team": results["home_team"][group_mask],
+            "away_team": results["away_team"][group_mask],
+            "home_score": np.array(results["home_score"])[group_mask],
+            "away_score": np.array(results["away_score"])[group_mask],
+        }
 
     def __str__(self) -> str:
         max_team_name_length = 0
@@ -409,7 +401,7 @@ class Group:
 
 
 class Tournament:
-    def __init__(self, year: str = "2022"):
+    def __init__(self, year: str = "2022", num_samples=1):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -419,6 +411,7 @@ class Tournament:
             self.groups[n] = g
         self.aliases = {}
         self.is_complete = False
+        self.num_samples = num_samples
 
     def add_result(
         self, team_1: str, team_2: str, score_1: int, score_2: int, stage: str
@@ -443,12 +436,19 @@ class Tournament:
                     self.groups[group].add_result(team_1, team_2, score_1, score_2)
 
     def play_group_stage(
-        self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
+        self,
+        wc_pred: WCPred,
+        seed: Optional[int] = None,
     ) -> None:
+        group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
+        results = wc_pred.simulate_score(
+            group_fixtures["Team_1"],
+            group_fixtures["Team_2"],
+            seed=seed,
+            num_samples=self.num_samples,
+        )
         for g in self.groups.values():
-            g.play_all_matches(
-                wc_pred=wc_pred, fixture_df=self.fixtures_df, seed=seed, verbose=verbose
-            )
+            g.add_results(results)
 
     def play_knockout_stages(
         self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False

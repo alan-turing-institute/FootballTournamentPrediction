@@ -25,6 +25,7 @@ class WCPred:
         world_cup_weight: float = 1.0,
         weights_dict: Optional[dict[str, float]] = None,
         model: BaseMatchPredictor = None,
+        host="Qatar",
     ):
         self.results = results
         self.fixtures = fixtures
@@ -49,6 +50,7 @@ class WCPred:
         self.world_cup_weight = world_cup_weight
         self.weights_dict = weights_dict
         self.model = model
+        self.host = "Qatar"
 
     def get_result_dict(self) -> dict[str, np.array]:
         """
@@ -194,6 +196,52 @@ class WCPred:
                 "simulated_outcome": simulated_outcome,
             }
         )
+
+    def simulate_score(self, home_team, away_team, num_samples=1, seed=None):
+        if isinstance(home_team, str):
+            home_team = np.array([home_team])
+        if isinstance(away_team, str):
+            away_team = np.array([away_team])
+        home_conference = [self.confed_dict[team] for team in home_team]
+        away_conference = [self.confed_dict[team] for team in away_team]
+
+        # ensure host nation always the home team
+        venue = np.ones(len(home_team))
+        away_team_host = away_team == self.host
+        away_team.loc[away_team_host] = home_team.loc[away_team_host]
+        home_team.loc[away_team_host] = self.host
+        venue[home_team == self.host] = 0
+
+        if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+            result = self.model.simulate_score(
+                home_team,
+                away_team,
+                home_conference,
+                away_conference,
+                venue,
+                num_samples,
+                seed,
+            )
+
+        elif isinstance(self.model, NeutralDixonColesMatchPredictor):
+            result = self.model.simulate_score(
+                home_team,
+                away_team,
+                venue,
+                num_samples,
+                seed,
+            )
+
+        else:
+            result = self.model.simulate_score(
+                home_team,
+                away_team,
+                num_samples,
+                seed,
+            )
+        result["home_team"] = home_team
+        result["away_team"] = away_team
+        return result
 
     def get_fixture_goal_probabilities(
         self,
