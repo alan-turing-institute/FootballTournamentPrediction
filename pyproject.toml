@@ -33,7 +33,7 @@ wcpred_forecast_evaluation = "wcpredictor.scripts.metrics_scan:main"
 wcpred_scan_hyperparameters = "wcpredictor.scripts.hyperparameter_scan:main"
 wcpred_plot_winners = "wcpredictor.scripts.plot_winners:main"
 wcpred_plot_progress = "wcpredictor.scripts.plot_progress:main"
-wcpred_plot_hyperparameter_scan = "wcpredictor.scripts.plot_hyperparameter_scan:main"
+wcpred_show_match_predictions = "wcpredictor.scripts.get_most_probable_scores:main"
 
 [tool.isort]
 profile = "black"
