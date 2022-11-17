@@ -7,6 +7,7 @@ from multiprocessing import Process, Queue
 from wcpredictor.src.utils import get_and_train_model, forecast_evaluation
 from .run_simulations import get_dates_from_years_training
 
+
 def get_cmd_line_args():
     parser = argparse.ArgumentParser(description="scan hyperparameters")
     parser.add_argument(
@@ -61,6 +62,7 @@ def get_cmd_line_args():
     args = parser.parse_args()
     return args
 
+
 def run_metrics_wrapper(queue, pid, output_dir):
     print("In run_metrics_wrapper")
     while True:
@@ -68,13 +70,24 @@ def run_metrics_wrapper(queue, pid, output_dir):
         if status == "DONE":
             print(f"Process {pid} finished all jobs!")
             break
-        metric, num_years, train_start, train_end, test_start, test_end, ratings, comps, epsilon, wc_weight = status
+        (
+            metric,
+            num_years,
+            train_start,
+            train_end,
+            test_start,
+            test_end,
+            ratings,
+            comps,
+            epsilon,
+            wc_weight,
+        ) = status
 
         if len(comps) == 6:
             comptxt = "all_comps"
         else:
             comptxt = "no_friendlies"
-        
+
         wc_pred = get_and_train_model(
             start_date=train_start,
             end_date=train_end,
@@ -83,14 +96,18 @@ def run_metrics_wrapper(queue, pid, output_dir):
             epsilon=epsilon,
             world_cup_weight=wc_weight,
         )
-        
-        metrics = forecast_evaluation(model=wc_pred.model,
-                                      start_date=test_start,
-                                      end_date=test_end,
-                                      competitions=comps,
-                                      method=metric)
-        
-        metrics_filename = f"{metric}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.txt"
+
+        metrics = forecast_evaluation(
+            model=wc_pred.model,
+            start_date=test_start,
+            end_date=test_end,
+            competitions=comps,
+            method=metric,
+        )
+
+        metrics_filename = (
+            f"{metric}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.txt"
+        )
         metrics_filename = os.path.join(output_dir, metrics_filename)
 
         with open(metrics_filename, "w") as outfile:
@@ -98,13 +115,16 @@ def run_metrics_wrapper(queue, pid, output_dir):
                 outfile.write(f"{val}\n")
         print(f"Process {pid} Wrote file {metrics_filename}")
 
+
 def main():
     args = get_cmd_line_args()
     metric = args.metric
     train_years = args.years_training.split(",")
     test_years = args.years_testing
     if any([int(x) <= int(test_years) for x in train_years]):
-        raise ValueError("each year in years_training must be greater than years_testing")
+        raise ValueError(
+            "each year in years_training must be greater than years_testing"
+        )
     ratings = args.ratings_choices.split(",")
     competitions = [["W", "WQ", "C1", "CQ", "C2", "F"]]
     if args.exclude_friendlies:
@@ -118,11 +138,11 @@ def main():
     # first add items to our multiprocessing queue
     queue = Queue()
     for num_years in train_years:
-        train_start, test_end = get_dates_from_years_training(
-            2022, int(num_years)
+        train_start, test_end = get_dates_from_years_training(2022, int(num_years))
+        train_end = pd.Timestamp(test_end) - pd.DateOffset(
+            years=int(test_years), days=1
         )
-        train_end = pd.Timestamp(test_end)-pd.DateOffset(years=int(test_years), days=1)
-        test_start = pd.Timestamp(test_end)-pd.DateOffset(years=int(test_years))
+        test_start = pd.Timestamp(test_end) - pd.DateOffset(years=int(test_years))
         # convert to string
         train_end = str(train_end.date())
         test_start = str(test_start.date())
@@ -133,21 +153,25 @@ def main():
                 r = None
             for comps in competitions:
                 for ep in epsilons:
-                    for wc in wc_weights:        
+                    for wc in wc_weights:
                         print("adding to queue")
-                        queue.put((metric,
-                                   num_years,
-                                   train_start,
-                                   train_end,
-                                   test_start,
-                                   test_end,
-                                   r,
-                                   comps,
-                                   ep,
-                                   wc))
-                        pass # end of loop over world cup weight choices
-                    pass # end of loop over epsilon choices
-                pass  # end of loop over competitions to exclude        
+                        queue.put(
+                            (
+                                metric,
+                                num_years,
+                                train_start,
+                                train_end,
+                                test_start,
+                                test_end,
+                                r,
+                                comps,
+                                ep,
+                                wc,
+                            )
+                        )
+                        pass  # end of loop over world cup weight choices
+                    pass  # end of loop over epsilon choices
+                pass  # end of loop over competitions to exclude
             pass  # end of loop over ratings method
         pass  # end of loop over num_years_training
 
