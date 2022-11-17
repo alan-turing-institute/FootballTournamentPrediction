@@ -1,9 +1,12 @@
 """
 Assorted functions to get the BPL model, and predict results.
 """
+import math
 from typing import List, Optional, Tuple
 
+import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
@@ -20,6 +23,8 @@ def get_and_train_model(
     end_date: str = "2022-11-20",
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
+    epsilon: float = 0.0,
+    world_cup_weight: float = 1.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
 ) -> WCPred:
     """
@@ -37,14 +42,27 @@ def get_and_train_model(
     neither (None).
     """
     print("in get_and_train_model")
-    results = get_results_data(
-        start_date, end_date, competitions=competitions, rankings_source=rankings_source
+    results, weights_dict = get_results_data(
+        start_date=start_date,
+        end_date=end_date,
+        competitions=competitions,
+        rankings_source=rankings_source,
+        world_cup_weight=world_cup_weight,
     )
+
     print(f"Using {len(results)} rows in training data")
     ratings = get_fifa_rankings_data(rankings_source) if rankings_source else None
-    wc_pred = WCPred(results=results, ratings=ratings, model=model)
+    wc_pred = WCPred(
+        results=results,
+        ratings=ratings,
+        epsilon=epsilon,
+        world_cup_weight=world_cup_weight,
+        weights_dict=weights_dict,
+        model=model,
+    )
     wc_pred.set_training_data()
     wc_pred.fit_model()
+
     return wc_pred
 
 
@@ -53,6 +71,9 @@ def test_model(
     start_date: str = "2018-06-01",
     end_date: str = "2022-11-20",
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    epsilon=0,
+    world_cup_weight=1,
+    train_end_date=None,
 ) -> float:
     """
     Compute the log likelihood of real match scores for a model (to use like a loss
@@ -67,7 +88,7 @@ def test_model(
     "C2": 2nd-tier continental, e.g. UEFA Nations League,
     "F": friendly/other.
     """
-    results = get_results_data(
+    results, _ = get_results_data(
         start_date, end_date, competitions=competitions, rankings_source=None
     )
     results = results[  # only include matches where model knows about both teams
@@ -84,6 +105,7 @@ def test_model(
         "home_goals": np.array(results.home_score),
         "away_goals": np.array(results.away_score),
         "neutral": np.array(results.neutral),
+        "game_weight": np.array(results.game_weight),
     }
 
     if isinstance(model, NeutralDixonColesMatchPredictorWC):
@@ -111,7 +133,112 @@ def test_model(
             test_data["home_goals"],
             test_data["away_goals"],
         )
-    return np.log(proba).sum() / len(proba)  # log likelihood
+
+    if epsilon != 0 or world_cup_weight != 1:
+        # obtain time difference to last date model was trained on, or test start date
+        # if not given
+        if train_end_date is None:
+            ref_date = pd.Timestamp(start_date)
+        else:
+            ref_date = pd.Timestamp(train_end_date)
+        time_diff = (results.date - ref_date) / pd.Timedelta(days=365)
+        weight = test_data["game_weight"] * np.exp(-epsilon * time_diff)
+    else:
+        weight = np.ones(len(proba))
+
+    return (weight * np.log(proba)).sum() / weight.sum()  # weighted mean log likelihood
+
+
+def forecast_evaluation(
+    model: BaseMatchPredictor,
+    start_date: str = "2018-06-01",
+    end_date: str = "2022-11-20",
+    competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    method: str = "rps",
+) -> List[float]:
+    """
+    Compute the Brier score, or Rank Probability score (RPS) to evaluate the model against
+    real match scores for a model (to use like a loss function). By default computes the RPS
+
+    Use 'competitions' argument to specify which rows to include in training data.
+    Key for competitions:
+    "W": world cup finals,
+    "C1": top-level continental cup,
+    "WQ": world cup qualifiers",
+    "CQ": continental cup qualifiers"
+    "C2": 2nd-tier continental, e.g. UEFA Nations League,
+    "F": friendly/other.
+    """
+    if method not in ["rps", "brier"]:
+        raise ValueError("method must be either 'brier' or 'rps'")
+    results, _ = get_results_data(
+        start_date, end_date, competitions=competitions, rankings_source=None
+    )
+    results = results[  # only include matches where model knows about both teams
+        (results["home_team"].isin(model.teams))
+        & (results["away_team"].isin(model.teams))
+    ]
+    confed = get_confederations_data()
+    confed_dict = dict(zip(confed["Team"], confed["Confederation"]))
+    test_data = {
+        "home_team": np.array(results.home_team),
+        "away_team": np.array(results.away_team),
+        "home_conf": np.array([confed_dict[team] for team in results.home_team]),
+        "away_conf": np.array([confed_dict[team] for team in results.away_team]),
+        "neutral": np.array(results.neutral),
+    }
+    # obtain match outcome probabilities from the model
+    if isinstance(model, NeutralDixonColesMatchPredictorWC):
+        proba = model.predict_outcome_proba(
+            test_data["home_team"],
+            test_data["away_team"],
+            test_data["home_conf"],
+            test_data["away_conf"],
+            test_data["neutral"],
+        )
+    elif isinstance(model, NeutralDixonColesMatchPredictor):
+        proba = model.predict_outcome_proba(
+            test_data["home_team"],
+            test_data["away_team"],
+            test_data["neutral"],
+        )
+    else:
+        proba = model.predict_outcome_proba(
+            test_data["home_team"],
+            test_data["away_team"],
+        )
+    # obtain len(results) x 3 array where each row is the outcome probabilities for each game
+    outcome_probs = jnp.concatenate(list(proba.values())).reshape([3, len(results)])
+    outcome_probs = outcome_probs.transpose()
+    # obtain actual match outcomes from the test data
+    outcome = [
+        jnp.array([1, 0, 0])
+        if game["home_score"] > game["away_score"]
+        else jnp.array([0, 1, 0])
+        if game["home_score"] == game["away_score"]
+        else jnp.array([0, 0, 1])
+        for index, game in results.iterrows()
+    ]
+
+    metrics = []
+    for i in range(len(results)):
+        # fix any nans (happens when have two very lobsided teams - computational underflow)
+        prediction = outcome_probs[i, :]
+        if math.isnan(prediction[0].item()):
+            prediction = prediction.at[0].set(1 - (prediction[1] + prediction[2]))
+        elif math.isnan(prediction[1].item()):
+            prediction = prediction.at[1].set(1 - (prediction[0] + prediction[2]))
+        elif math.isnan(prediction[2].item()):
+            prediction = prediction.at[2].set(1 - (prediction[0] + prediction[1]))
+        # compute metric
+        if method == "brier":
+            metrics.append(((prediction - outcome[i]) ** 2).sum().item())
+        elif method == "rps":
+            metrics.append(
+                ((prediction.cumsum() - outcome[i].cumsum()) ** 2)[:2].sum().item() / 2
+            )
+
+    return metrics
 
 
 def find_group(team, teams_df):
