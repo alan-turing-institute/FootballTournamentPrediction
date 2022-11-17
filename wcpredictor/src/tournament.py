@@ -379,7 +379,7 @@ class Group:
         'away_score')
         results: Simulated match scores for all fixtures in df
         """
-        group_mask = results["home_team"].isin(self.teams)
+        group_mask = np.isin(results["home_team"], self.teams)
         self.results = {
             "home_team": results["home_team"][group_mask],
             "away_team": results["away_team"][group_mask],
@@ -469,31 +469,21 @@ class Tournament:
             self.aliases["2" + g.name] = t2
 
         for stage in ["R16", "QF", "SF", "F"]:
-            stage_fixtures = self.fixtures_df[self.fixture_df["Stage"] == stage]
+            print(stage)
+            stage_fixtures = self.fixtures_df[self.fixtures_df["Stage"] == stage]
+
             results = wc_pred.simulate_outcome(
-                self.aliases[stage_fixtures["Team_1"]],
-                self.aliases[stage_fixtures["Team_2"]],
+                self.aliases[stage_fixtures["Team_1"]].values.flatten(),
+                self.aliases[stage_fixtures["Team_2"]].values.flatten(),
                 seed=seed,
                 num_samples=1,
-            )
-            # TODO
-            self.aliases[stage_fixtures["Team_1"] + stage_fixtures["f.Team_2"]] = ...
-            for _, f in self.fixtures_df.iterrows():
-                if f.Stage == stage:
-                    self.aliases[f.Team_1 + f.Team_2] = predict_knockout_match(
-                        wc_pred=wc_pred,
-                        team_1=self.aliases[f.Team_1],
-                        team_2=self.aliases[f.Team_2],
-                        seed=seed,
-                    )
-                    if verbose:
-                        print(
-                            f"{stage}: {f.Team_1} vs {f.Team_2}: "
-                            f"Winner: {self.aliases[f.Team_1+f.Team_2]}"
-                        )
-        for k, v in self.aliases.items():
-            if len(k) == 32:
-                self.winner = v
+            ).reshape((self.num_samples, len(stage_fixtures)))
+
+            self.aliases[stage_fixtures["Team_1"] + stage_fixtures["Team_2"]] = results
+
+            if stage == "F":
+                self.winner = results.flatten()
+
         self.is_complete = True
 
     def get_furthest_position_for_team(self, team_name):

@@ -199,18 +199,23 @@ class WCPred:
 
     def _parse_sim_args(self, home_team, away_team):
         if isinstance(home_team, str):
-            home_team = np.array([home_team])
+            home_team = [home_team]
         if isinstance(away_team, str):
-            away_team = np.array([away_team])
-        home_conference = [self.confed_dict[team] for team in home_team]
-        away_conference = [self.confed_dict[team] for team in away_team]
+            away_team = [away_team]
+        home_team = np.array(home_team)
+        away_team = np.array(away_team)
+        home_conference = np.array([self.confed_dict[team] for team in home_team])
+        away_conference = np.array([self.confed_dict[team] for team in away_team])
 
         # ensure host nation always the home team
         venue = np.ones(len(home_team))
         away_team_host = away_team == self.host
-        away_team.loc[away_team_host] = home_team.loc[away_team_host]
-        home_team.loc[away_team_host] = self.host
+        away_team[away_team_host] = home_team[away_team_host]
+        away_conference[away_team_host] = home_conference[away_team_host]
+        home_team[away_team_host] = self.host
+        home_conference[away_team_host] = self.confed_dict[self.host]
         venue[home_team == self.host] = 0
+
         return home_team, away_team, home_conference, away_conference, venue
 
     def simulate_score(self, home_team, away_team, num_samples=1, seed=None):
