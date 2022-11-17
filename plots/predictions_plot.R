@@ -160,5 +160,6 @@ full_table <- prog_df %>%
   tab_source_note(
     source_note = md("The Alan Turing Institute (Nick Barlow, Jack Roberts, Ryan Chan)<br>Based on 100,000 simulations<br>Data: GitHub (martj42/international_results)<br>Country Images: Flaticon.com and GitHub (lbenz730/world_cup_2022)")
   )
+full_table
 gtsave(full_table, filename = 'predictions.png')
  
