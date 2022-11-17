@@ -22,22 +22,14 @@ from .utils import (
 class Group:
     def __init__(self, name: str, teams: List[str]):
         self.name = name
-        self.teams = teams
+        self.teams = np.array(teams)
 
         # "table" is a dictionary keyed by team name, with the points, gf,ga
-        self.table = {
-            t: {
-                "points": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goal_difference": 0,
-            }
-            for t in self.teams
-        }
+        self.table = None
 
         # "standings" is a dictionary with keys "1st", "2nd", "3rd", "4th"
         # and values being the team names.
-        self.standings = {"1st": None, "2nd": None, "3rd": None, "4th": None}
+        self.standings = None
 
         # results is a dict of played matches
         # dict {
@@ -113,15 +105,11 @@ class Group:
         """
         return the two teams that topped the group
         """
-        if len(self.results) < 6:
-            print(
-                f"Group {self.name} not finished yet - only {len(self.results)} "
-                "matches played"
-            )
-            return
-        self.calc_standings()
-
-        return self.standings["1st"], self.standings["2nd"]
+        if self.standings is None:
+            self.calc_standings()
+        first = np.nonzero(self.standings.T == 1)[1]
+        second = np.nonzero(self.standings.T == 2)[1]
+        return self.teams[first], self.teams[second]
 
     def fill_standings_position(
         self, team: str, position: int, verbose: bool = False
@@ -337,19 +325,35 @@ class Group:
                 )
             return
 
-    def calc_standings(self) -> None:
+    def calc_standings(self, head_to_head=False) -> None:
         """
         sort the table, and try and assign positions in the standings
+
+        if not head_to_head sort by points -> goal difference -> goals -> random
+        (i.e. don't consider head to head as a tiebreaker)
         """
-        self.calc_table()
-        # reset the standings table to start from scratch
-        for k in self.standings.keys():
-            self.standings[k] = None
-        # now calculate the standings again
-        self.set_positions_using_metric(
-            self.teams, ["1st", "2nd", "3rd", "4th"], "points"
-        )
-        return
+        if self.table is None:
+            self.calc_table()
+
+        if not head_to_head:
+            self.standings = len(self.teams) - np.lexsort(
+                (
+                    np.random.random(size=self.table["points"].shape),
+                    self.table["goals_for"],
+                    self.table["goal_difference"],
+                    self.table["points"],
+                ),
+                axis=0,
+            )
+        else:
+            raise NotImplementedError("Not updated head-to-head logic")
+            # reset the standings table to start from scratch
+            for k in self.standings.keys():
+                self.standings[k] = None
+            # now calculate the standings again
+            self.set_positions_using_metric(
+                self.teams, ["1st", "2nd", "3rd", "4th"], "points"
+            )
 
     def check_if_result_exists(self, team_1, team_2):
         """
@@ -409,7 +413,7 @@ class Tournament:
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
-        self.aliases = {}
+        self.aliases = pd.DataFrame(index=np.arange(num_samples))
         self.is_complete = False
         self.num_samples = num_samples
 
@@ -439,6 +443,7 @@ class Tournament:
         self,
         wc_pred: WCPred,
         seed: Optional[int] = None,
+        head_to_head: bool = False,
     ) -> None:
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
         results = wc_pred.simulate_score(
@@ -449,6 +454,7 @@ class Tournament:
         )
         for g in self.groups.values():
             g.add_results(results)
+            g.calc_standings(head_to_head=head_to_head)
 
     def play_knockout_stages(
         self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
@@ -458,12 +464,20 @@ class Tournament:
         from each group to the aliases e.g. "A1", "B2"
         """
         for g in self.groups.values():
-            if len(g.results) != 6:
-                print(f" Group {g.name} has played {len(g.results)} matches")
             t1, t2 = g.get_qualifiers()
             self.aliases["1" + g.name] = t1
             self.aliases["2" + g.name] = t2
+
         for stage in ["R16", "QF", "SF", "F"]:
+            stage_fixtures = self.fixtures_df[self.fixture_df["Stage"] == stage]
+            results = wc_pred.simulate_outcome(
+                self.aliases[stage_fixtures["Team_1"]],
+                self.aliases[stage_fixtures["Team_2"]],
+                seed=seed,
+                num_samples=1,
+            )
+            # TODO
+            self.aliases[stage_fixtures["Team_1"] + stage_fixtures["f.Team_2"]] = ...
             for _, f in self.fixtures_df.iterrows():
                 if f.Stage == stage:
                     self.aliases[f.Team_1 + f.Team_2] = predict_knockout_match(

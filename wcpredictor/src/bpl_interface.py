@@ -197,7 +197,7 @@ class WCPred:
             }
         )
 
-    def simulate_score(self, home_team, away_team, num_samples=1, seed=None):
+    def _parse_sim_args(self, home_team, away_team):
         if isinstance(home_team, str):
             home_team = np.array([home_team])
         if isinstance(away_team, str):
@@ -211,6 +211,16 @@ class WCPred:
         away_team.loc[away_team_host] = home_team.loc[away_team_host]
         home_team.loc[away_team_host] = self.host
         venue[home_team == self.host] = 0
+        return home_team, away_team, home_conference, away_conference, venue
+
+    def simulate_score(self, home_team, away_team, num_samples=1, seed=None):
+        (
+            home_team,
+            away_team,
+            home_conference,
+            away_conference,
+            venue,
+        ) = self._parse_sim_args(home_team, away_team)
 
         if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
             result = self.model.simulate_score(
@@ -242,6 +252,48 @@ class WCPred:
         result["home_team"] = home_team
         result["away_team"] = away_team
         return result
+
+    def simulate_outcome(
+        self, home_team, away_team, knockout=False, num_samples=1, seed=None
+    ):
+        (
+            home_team,
+            away_team,
+            home_conference,
+            away_conference,
+            venue,
+        ) = self._parse_sim_args(home_team, away_team)
+
+        if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+            return self.model.simulate_outcome(
+                home_team,
+                away_team,
+                home_conference,
+                away_conference,
+                venue,
+                knockout,
+                num_samples,
+                seed,
+            )
+
+        elif isinstance(self.model, NeutralDixonColesMatchPredictor):
+            return self.model.simulate_outcome(
+                home_team,
+                away_team,
+                venue,
+                knockout,
+                num_samples,
+                seed,
+            )
+
+        else:
+            return self.model.simulate_outcome(
+                home_team,
+                away_team,
+                knockout,
+                num_samples,
+                seed,
+            )
 
     def get_fixture_goal_probabilities(
         self,
