@@ -465,7 +465,6 @@ class Tournament:
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
-        print("G qualifiers")
         for g in self.groups.values():
             t1, t2 = g.get_qualifiers()
             self.bracket["1" + g.name] = t1
@@ -518,18 +517,3 @@ class Tournament:
         self.stage_counts["W"] = pd.Series(self.winner).value_counts()
         self.stage_counts["RU"] = self.stage_counts["W"] - self.stage_counts["F"]
         self.stage_counts = self.stage_counts[["Group", "R16", "QF", "SF", "F"]]
-
-        # # the length of the 'alias' string, e.g. "1A2B" shows how far a team got
-        # key_length_lookup = {2: "R16", 4: "QF", 8: "SF", 16: "RU"}
-        # # convert the aliases dict into a list, and sort by length of the key
-        # # (this will represent how far the team got - if we look in reverse order
-        # # of key length, we will find the latest stage a team got to first)
-        # alias_list = [(k, v) for k, v in self.aliases.items()]
-        # sorted_aliases = sorted(alias_list, key=lambda x: len(x[0]), reverse=True)
-        # for k, v in sorted_aliases:
-        #     if v == team_name:
-        #         return key_length_lookup[len(k)]
-        # # we should never get to here
-        # raise RuntimeError(f"Unable to find team {team_name} in aliases table")
-
-        self.stage_counts = ...
