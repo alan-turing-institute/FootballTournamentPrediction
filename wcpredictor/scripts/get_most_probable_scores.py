@@ -22,6 +22,9 @@ def get_cmd_line_args():
     parser.add_argument(
         "--sample", help="sample from the prob distribution?", action="store_true"
     )
+    parser.add_argument(
+        "--show_probs", help="print the probability of result", action="store_true"
+    )
     args = parser.parse_args()
     return args
 
@@ -54,17 +57,24 @@ def main():
         (fixture_df.index >= fixture_indices[0])
         & (fixture_df.index < fixture_indices[1])
     ]
+    current_date = ""
     for _, row in fixture_df.iterrows():
         team_1 = row.Team_1
         team_2 = row.Team_2
+        date = row.Date
+        if date != current_date:
+            print(f"\n{date}\n")
+            current_date = date
         if args.sample:
             score_1, score_2 = predict_group_match(model, team_1, team_2)
             print(f"{team_1} {score_1}:{score_2} {team_2}")
         else:
             score_1, score_2, prob = get_most_probable_scoreline(model, team_1, team_2)
-            print(
-                f"{team_1} {score_1}:{score_2} {team_2} with probability of {prob*100:.1f}%"
-            )
+            output_string = f"{team_1} {score_1}:{score_2} {team_2}"
+            if args.show_probs:
+                output_string += f" with probability of {prob*100:.1f}%"
+            print(output_string)
+    print("\n")
 
 
 if __name__ == "__main__":
