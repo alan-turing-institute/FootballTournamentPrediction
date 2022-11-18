@@ -475,6 +475,7 @@ class Tournament:
             results = wc_pred.simulate_outcome(
                 self.aliases[stage_fixtures["Team_1"]].values.flatten(),
                 self.aliases[stage_fixtures["Team_2"]].values.flatten(),
+                knockout=True,
                 seed=seed,
                 num_samples=1,
             ).reshape((self.num_samples, len(stage_fixtures)))

@@ -50,7 +50,7 @@ class WCPred:
         self.world_cup_weight = world_cup_weight
         self.weights_dict = weights_dict
         self.model = model
-        self.host = "Qatar"
+        self.host = host
 
     def get_result_dict(self) -> dict[str, np.array]:
         """
