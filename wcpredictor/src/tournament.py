@@ -413,9 +413,10 @@ class Tournament:
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
-        self.aliases = pd.DataFrame(index=np.arange(num_samples))
+        self.bracket = pd.DataFrame(index=np.arange(num_samples))
         self.is_complete = False
         self.num_samples = num_samples
+        self.stage_counts = None
 
     def add_result(
         self, team_1: str, team_2: str, score_1: int, score_2: int, stage: str
@@ -445,6 +446,7 @@ class Tournament:
         seed: Optional[int] = None,
         head_to_head: bool = False,
     ) -> None:
+        print("G")
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
         results = wc_pred.simulate_score(
             group_fixtures["Team_1"],
@@ -463,59 +465,71 @@ class Tournament:
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
+        print("G qualifiers")
         for g in self.groups.values():
             t1, t2 = g.get_qualifiers()
-            self.aliases["1" + g.name] = t1
-            self.aliases["2" + g.name] = t2
+            self.bracket["1" + g.name] = t1
+            self.bracket["2" + g.name] = t2
 
         for stage in ["R16", "QF", "SF", "F"]:
             print(stage)
             stage_fixtures = self.fixtures_df[self.fixtures_df["Stage"] == stage]
 
             results = wc_pred.simulate_outcome(
-                self.aliases[stage_fixtures["Team_1"]].values.flatten(),
-                self.aliases[stage_fixtures["Team_2"]].values.flatten(),
+                self.bracket[stage_fixtures["Team_1"]].values.flatten(),
+                self.bracket[stage_fixtures["Team_2"]].values.flatten(),
                 knockout=True,
                 seed=seed,
                 num_samples=1,
             ).reshape((self.num_samples, len(stage_fixtures)))
 
-            self.aliases[stage_fixtures["Team_1"] + stage_fixtures["Team_2"]] = results
+            self.bracket[stage_fixtures["Team_1"] + stage_fixtures["Team_2"]] = results
 
             if stage == "F":
                 self.winner = results.flatten()
 
         self.is_complete = True
 
-    def get_furthest_position_for_team(self, team_name):
+    def count_stages(self):
         """
-        Given a team name, see how far they got in the tournament.
-
-        Parameters
-        ==========
-        team_name: str, one of the team names, as defined in teams.csv
-
-        Returns
-        =======
-        "G", "R16", "QF", "SF", "RU", "W" depending on how far the team got.
+        Count how far teams got in the tournament.
         """
         if not self.is_complete:
-            print("Tournament is not yet complete")
-            return None
-        if self.winner == team_name:
-            return "W"
-        elif team_name not in self.aliases.values():
-            return "G"
-        else:
-            # the length of the 'alias' string, e.g. "1A2B" shows how far a team got
-            key_length_lookup = {2: "R16", 4: "QF", 8: "SF", 16: "RU"}
-            # convert the aliases dict into a list, and sort by length of the key
-            # (this will represent how far the team got - if we look in reverse order
-            # of key length, we will find the latest stage a team got to first)
-            alias_list = [(k, v) for k, v in self.aliases.items()]
-            sorted_aliases = sorted(alias_list, key=lambda x: len(x[0]), reverse=True)
-            for k, v in sorted_aliases:
-                if v == team_name:
-                    return key_length_lookup[len(k)]
-            # we should never get to here
-            raise RuntimeError(f"Unable to find team {team_name} in aliases table")
+            raise RuntimeError("Tournament is not yet complete")
+
+        stages = ["F", "SF", "QF", "R16", "Group"]
+        self.stage_counts = pd.DataFrame(columns=stages, index=self.teams_df["Team"])
+        self.stage_counts["Group"] = self.num_samples
+        for stage in stages[:-1]:
+            round_aliases = np.unique(
+                self.fixtures_df.loc[
+                    self.fixtures_df.Stage == stage, ["Team_1", "Team_2"]
+                ]
+            )
+            teams, counts = np.unique(self.bracket[round_aliases], return_counts=True)
+            self.stage_counts[stage] = pd.Series(counts, teams)
+
+        # 0 counts will appear as NaN, replace them
+        self.stage_counts = self.stage_counts.fillna(0).astype(int)
+        # exact round knocked out at (rather than cummulative progression)
+        self.stage_counts = self.stage_counts.diff(axis=1)
+        self.stage_counts["F"] = self.num_samples - self.stage_counts.sum(axis=1)
+
+        self.stage_counts["W"] = pd.Series(self.winner).value_counts()
+        self.stage_counts["RU"] = self.stage_counts["W"] - self.stage_counts["F"]
+        self.stage_counts = self.stage_counts[["Group", "R16", "QF", "SF", "F"]]
+
+        # # the length of the 'alias' string, e.g. "1A2B" shows how far a team got
+        # key_length_lookup = {2: "R16", 4: "QF", 8: "SF", 16: "RU"}
+        # # convert the aliases dict into a list, and sort by length of the key
+        # # (this will represent how far the team got - if we look in reverse order
+        # # of key length, we will find the latest stage a team got to first)
+        # alias_list = [(k, v) for k, v in self.aliases.items()]
+        # sorted_aliases = sorted(alias_list, key=lambda x: len(x[0]), reverse=True)
+        # for k, v in sorted_aliases:
+        #     if v == team_name:
+        #         return key_length_lookup[len(k)]
+        # # we should never get to here
+        # raise RuntimeError(f"Unable to find team {team_name} in aliases table")
+
+        self.stage_counts = ...
