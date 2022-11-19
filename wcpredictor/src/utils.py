@@ -19,12 +19,12 @@ from .data_loader import (
 
 
 def get_and_train_model(
-    start_date: str = "2018-06-01",
-    end_date: str = "2022-11-20",
+    start_date: str = "2002-06-01",
+    end_date: str = "2022-12-31",
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
-    epsilon: float = 0.0,
-    world_cup_weight: float = 1.0,
+    epsilon: float = 2.0,
+    world_cup_weight: float = 4.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
 ) -> WCPred:
     """
@@ -316,6 +316,28 @@ def predict_group_match(
     return wc_pred.get_fixture_goal_probabilities(
         fixture_teams=[(team_1, team_2)], seed=seed
     )[1][0]
+
+
+def get_most_probable_scoreline(
+    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
+) -> Tuple[int, int, float]:
+    """
+    Parameters
+    ==========
+    team_1, team_2: both str, names of two teams
+
+    Returns
+    =======
+    score_1:int, score_2:int,  prob:float, scores of each team, and prob
+                                           of that scoreline
+    """
+    probs = wc_pred.get_fixture_goal_probabilities(
+        fixture_teams=[(team_1, team_2)], seed=seed
+    )[0][0]
+    score_1 = max(probs[team_1], key=probs[team_1].get)
+    score_2 = max(probs[team_2], key=probs[team_2].get)
+    prob = probs[team_1][score_1] * probs[team_2][score_2]
+    return score_1, score_2, float(prob)
 
 
 def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
