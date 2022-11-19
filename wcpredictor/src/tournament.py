@@ -509,11 +509,14 @@ class Tournament:
             self.stage_counts[stage] = pd.Series(counts, teams)
 
         # 0 counts will appear as NaN, replace them
-        self.stage_counts = self.stage_counts.fillna(0).astype(int)
+        self.stage_counts = self.stage_counts.fillna(0)
         # exact round knocked out at (rather than cummulative progression)
         self.stage_counts = self.stage_counts.diff(axis=1)
         self.stage_counts["F"] = self.num_samples - self.stage_counts.sum(axis=1)
 
         self.stage_counts["W"] = pd.Series(self.winner).value_counts()
-        self.stage_counts["RU"] = self.stage_counts["W"] - self.stage_counts["F"]
-        self.stage_counts = self.stage_counts[["Group", "R16", "QF", "SF", "F"]]
+        self.stage_counts["W"] = self.stage_counts["W"].fillna(0)
+        self.stage_counts["RU"] = self.stage_counts["F"] - self.stage_counts["W"]
+        self.stage_counts = self.stage_counts[
+            ["Group", "R16", "QF", "SF", "RU", "W"]
+        ].astype(int)
