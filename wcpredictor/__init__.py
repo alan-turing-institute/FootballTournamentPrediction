@@ -8,14 +8,7 @@ from .src.data_loader import (
     get_wcresults_data,
 )
 from .src.tournament import Group, Tournament
-from .src.utils import (
-    find_group,
-    get_and_train_model,
-    get_difference_in_stages,
-    predict_group_match,
-    predict_knockout_match,
-    sort_teams_by,
-)
+from .src.utils import get_and_train_model, get_difference_in_stages, sort_teams_by
 
 __all__ = [
     "WCPred",
@@ -27,10 +20,7 @@ __all__ = [
     "get_wcresults_data",
     "Group",
     "Tournament",
-    "find_group",
     "get_and_train_model",
     "get_difference_in_stages",
-    "predict_group_match",
-    "predict_knockout_match",
     "sort_teams_by",
 ]

@@ -12,12 +12,7 @@ import pandas as pd
 
 from .bpl_interface import WCPred
 from .data_loader import get_fixture_data, get_teams_data
-from .utils import (
-    find_group,
-    predict_group_match,
-    predict_knockout_match,
-    sort_teams_by,
-)
+from .utils import sort_teams_by
 
 
 class Group:
@@ -366,10 +361,10 @@ class Group:
         =======
         True if result already stored, False otherwise
         """
-        for result in self.results:
-            if set([team_1, team_2]) == set(result.keys()):
-                return True
-        return False
+        return (
+            (self.results["home_team"] == team_1)
+            & (self.results["away_team"] == team_2)
+        ).sum() > 0
 
     def add_results(self, results):
         """
@@ -418,28 +413,6 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
-
-    def add_result(
-        self, team_1: str, team_2: str, score_1: int, score_2: int, stage: str
-    ) -> None:
-        """
-        Enter a match result explicitly
-
-        Parameters
-        ==========
-        team_1, team_2: both str, names of teams, as in teams.csv
-        score_1, score_2: both int, scores of respective teams
-        stage: str, must be "Group", "R16", "QF", "SF", "F"
-        """
-        # find the fixture
-        for idx, row in self.fixtures_df.iterrows():
-            if stage != row.Stage:
-                continue
-            if stage == "Group":
-                if set([row.Team_1, row.Team_2]) == set([team_1, team_2]):
-                    # find the group
-                    group = find_group(team_1, self.teams_df)
-                    self.groups[group].add_result(team_1, team_2, score_1, score_2)
 
     def play_group_stage(
         self,

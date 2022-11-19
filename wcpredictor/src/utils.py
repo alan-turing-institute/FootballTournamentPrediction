@@ -242,26 +242,6 @@ def forecast_evaluation(
     return metrics
 
 
-def find_group(team, teams_df):
-    """
-    Look in teams_df and find the group for a given team
-
-    Parameters
-    ==========
-    team: str, team name, as given in teams.csv
-    teams_df: Pandas dataframe
-
-    Returns
-    =======
-    group_name: str, "A"-"H", or None if team not found
-    """
-    for idx, row in teams_df.iterrows():
-        if row.Team == team:
-            return row.Group
-    print("Unable to find {} in teams.csv".format(team))
-    return None
-
-
 def sort_teams_by(table_dict, metric):
     """
     Given a dictionary in the same format as self.table (i.e. keyed by
@@ -283,40 +263,6 @@ def sort_teams_by(table_dict, metric):
     team_list = [{"team": k, **v} for k, v in table_dict.items()]
     team_list = sorted(team_list, key=lambda t: t[metric], reverse=True)
     return team_list
-
-
-def predict_knockout_match(
-    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
-) -> str:
-    """
-    Parameters
-    ==========
-    team_1, team_2: both str, names of two teams
-
-    Returns:
-    ========
-    winning_team: str, one of team_1 or team_2
-    """
-    return wc_pred.get_fixture_probabilities(
-        fixture_teams=[(team_1, team_2)], knockout=True, seed=seed
-    )["simulated_outcome"][0]
-
-
-def predict_group_match(
-    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
-) -> Tuple[int, int]:
-    """
-    Parameters
-    ==========
-    team_1, team_2: both str, names of two teams
-
-    Returns:
-    ========
-    score_1, score_2: both int, score for each team
-    """
-    return wc_pred.get_fixture_goal_probabilities(
-        fixture_teams=[(team_1, team_2)], seed=seed
-    )[1][0]
 
 
 def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
