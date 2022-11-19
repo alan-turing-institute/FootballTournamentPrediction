@@ -218,7 +218,7 @@ class WCPred:
 
         return home_team, away_team, home_conference, away_conference, venue
 
-    def simulate_score(self, home_team, away_team, num_samples=1, seed=None):
+    def sample_score(self, home_team, away_team, num_samples=1, seed=None):
         (
             home_team,
             away_team,
@@ -228,7 +228,7 @@ class WCPred:
         ) = self._parse_sim_args(home_team, away_team)
 
         if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
-            result = self.model.simulate_score(
+            result = self.model.sample_score(
                 home_team,
                 away_team,
                 home_conference,
@@ -239,7 +239,7 @@ class WCPred:
             )
 
         elif isinstance(self.model, NeutralDixonColesMatchPredictor):
-            result = self.model.simulate_score(
+            result = self.model.sample_score(
                 home_team,
                 away_team,
                 venue,
@@ -248,7 +248,7 @@ class WCPred:
             )
 
         else:
-            result = self.model.simulate_score(
+            result = self.model.sample_score(
                 home_team,
                 away_team,
                 num_samples,
@@ -258,7 +258,7 @@ class WCPred:
         result["away_team"] = away_team
         return result
 
-    def simulate_outcome(
+    def sample_outcome(
         self, home_team, away_team, knockout=False, num_samples=1, seed=None
     ):
         (
@@ -270,7 +270,7 @@ class WCPred:
         ) = self._parse_sim_args(home_team, away_team)
 
         if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
-            return self.model.simulate_outcome(
+            return self.model.sample_outcome(
                 home_team,
                 away_team,
                 home_conference,
@@ -282,7 +282,7 @@ class WCPred:
             )
 
         elif isinstance(self.model, NeutralDixonColesMatchPredictor):
-            return self.model.simulate_outcome(
+            return self.model.sample_outcome(
                 home_team,
                 away_team,
                 venue,
@@ -292,7 +292,7 @@ class WCPred:
             )
 
         else:
-            return self.model.simulate_outcome(
+            return self.model.sample_outcome(
                 home_team,
                 away_team,
                 knockout,

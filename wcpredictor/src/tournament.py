@@ -4,6 +4,7 @@ knockout stages, to the final, and produce a winner.
 """
 
 import random
+from time import time
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -447,8 +448,9 @@ class Tournament:
         head_to_head: bool = False,
     ) -> None:
         print("G")
+        t = time()
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
-        results = wc_pred.simulate_score(
+        results = wc_pred.sample_score(
             group_fixtures["Team_1"],
             group_fixtures["Team_2"],
             seed=seed,
@@ -457,6 +459,7 @@ class Tournament:
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
+        print(time() - t)
 
     def play_knockout_stages(
         self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
@@ -472,9 +475,10 @@ class Tournament:
 
         for stage in ["R16", "QF", "SF", "F"]:
             print(stage)
+            t = time()
             stage_fixtures = self.fixtures_df[self.fixtures_df["Stage"] == stage]
 
-            results = wc_pred.simulate_outcome(
+            results = wc_pred.sample_outcome(
                 self.bracket[stage_fixtures["Team_1"]].values.flatten(),
                 self.bracket[stage_fixtures["Team_2"]].values.flatten(),
                 knockout=True,
@@ -486,6 +490,7 @@ class Tournament:
 
             if stage == "F":
                 self.winner = results.flatten()
+            print(time() - t)
 
         self.is_complete = True
 
