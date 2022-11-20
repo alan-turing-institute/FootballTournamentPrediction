@@ -5,14 +5,13 @@ knockout stages, to the final, and produce a winner.
 
 import random
 from time import time
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
 from .bpl_interface import WCPred
 from .data_loader import get_fixture_data, get_teams_data
-from .utils import sort_teams_by
 
 
 class Group:
@@ -20,11 +19,13 @@ class Group:
         self.name = name
         self.teams = np.array(teams)
 
-        # "table" is a dictionary keyed by team name, with the points, gf,ga
+        # "table" is a dictionary keyed by points, goal_difference, goals_for,
+        # goals_against, and values arrays with shape (n_teams, n_samples)
         self.table = None
 
-        # "standings" is a dictionary with keys "1st", "2nd", "3rd", "4th"
-        # and values being the team names.
+        # "standings" is an array with shape (n_teams, n_samples) with values equal
+        # to each teams final group position in each simulation (teams in same order as
+        # self.teams)
         self.standings = None
 
         # results is a dict of played matches
@@ -108,39 +109,70 @@ class Group:
         return self.teams[first], self.teams[second]
 
     def fill_standings_position(
-        self, team: str, position: int, verbose: bool = False
+        self, sample, team_idx: int, position: int, verbose: bool = False
     ) -> None:
         """
         Fill specified slot in our team standings.
         """
-        if self.standings[position]:
-            raise RuntimeError(f"Position {position} is already filled!")
         if verbose:
-            print(f"Putting {team} in {position}")
-        self.standings[position] = team
+            print(f"Putting {self.teams[team_idx]} in {position}")
+        self.standings[team_idx, sample] = position
         return
 
-    def find_head_to_head_winner(self, team_A: str, team_B: str) -> Tuple[str, str]:
-        team_1 = None
-        team_2 = None
-        for result in self.results:
-            if set(result.keys()) == {team_A, team_B}:
-                if result[team_A] > result[team_B]:
-                    team_1 = team_A
-                    team_2 = team_B
-                elif result[team_B] > result[team_A]:
-                    team_1 = team_B
-                    team_2 = team_A
-                break
-        return team_1, team_2
+    def find_head_to_head_winner(
+        self, sample: int, team_A: int, team_B: int
+    ) -> Tuple[int, int]:
+        fixture_id = np.where(
+            (
+                (self.results["home_team"] == self.teams[team_A])
+                | (self.results["away_team"] == self.teams[team_A])
+            )
+            & (
+                (self.results["home_team"] == self.teams[team_B])
+                | (self.results["away_team"] == self.teams[team_B])
+            )
+        )[0]
+        if len(fixture_id) != 1:
+            raise KeyError(
+                f"No unique fixture between {self.teams[team_A]} and "
+                f"{self.teams[team_B]}"
+            )
+        if self.results["home_team"][fixture_id] == self.teams[team_A]:
+            # team_A is the home team
+            if (
+                self.results["home_score"][fixture_id, sample]
+                > self.results["away_score"][fixture_id, sample]
+            ):
+                return team_A, team_B
+            if (
+                self.results["home_score"][fixture_id, sample]
+                < self.results["away_score"][fixture_id, sample]
+            ):
+                return team_B, team_A
+        else:
+            # team_B is the home team
+            if (
+                self.results["home_score"][fixture_id, sample]
+                > self.results["away_score"][fixture_id, sample]
+            ):
+                return team_B, team_A
+            if (
+                self.results["home_score"][fixture_id, sample]
+                < self.results["away_score"][fixture_id, sample]
+            ):
+                return team_A, team_B
+
+        return None, None
 
     def set_positions_using_metric(
         self,
-        teams_to_sort: List[str],
-        positions_to_fill: List[str],
+        sample,
+        teams_to_sort: List[int],
+        positions_to_fill: List[int],
         metric: str,
         verbose: bool = False,
     ) -> None:
+        verbose = True  # TODO
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(
                 f"Can't fill {len(positions_to_fill)} positions with "
@@ -148,176 +180,175 @@ class Group:
             )
         if verbose:
             print(
-                f"Sorting {teams_to_sort} using {metric} to fill positions "
+                f"Sorting {self.teams[teams_to_sort]} using {metric} to fill positions "
                 f"{positions_to_fill}"
             )
 
-        # if random, just shuffle our list
         if metric == "head-to-head":
             if len(teams_to_sort) > 2:
                 print("Can't use head-to-head for more than 2 teams")
                 # skip ahead to random
                 self.set_positions_using_metric(
-                    teams_to_sort, positions_to_fill, "random"
+                    sample, teams_to_sort, positions_to_fill, "random"
                 )
             else:
                 team_1, team_2 = self.find_head_to_head_winner(
-                    teams_to_sort[0], teams_to_sort[1]
+                    sample, teams_to_sort[0], teams_to_sort[1]
                 )
-                if team_1 and team_2:  # not null if there was a winner
-                    self.fill_standings_position(team_1, positions_to_fill[0])
-                    self.fill_standings_position(team_2, positions_to_fill[1])
+                if (
+                    team_1 is not None and team_2 is not None
+                ):  # not null if there was a winner
+                    self.fill_standings_position(sample, team_1, positions_to_fill[0])
+                    self.fill_standings_position(sample, team_2, positions_to_fill[1])
                 else:
                     # go to random
                     self.set_positions_using_metric(
-                        teams_to_sort, positions_to_fill, "random"
+                        sample, teams_to_sort, positions_to_fill, "random"
                     )
             return
         elif metric == "random":
+            # if random, just shuffle our list
             random.shuffle(teams_to_sort)
             for i, pos in enumerate(positions_to_fill):
-                self.fill_standings_position(teams_to_sort[i], pos)
+                self.fill_standings_position(sample, teams_to_sort[i], pos)
             if verbose:
                 print(f"randomly assigned {len(teams_to_sort)} teams")
             return
-        # ok, otherwise we need to sort the table by the metric
-        team_dict = {t: self.table[t] for t in teams_to_sort}
-        team_scores = sort_teams_by(team_dict, metric)  # list of dicts of teams
-        team_list = [t["team"] for t in team_scores]  # ordered list of teams
+
+        # ok, otherwise we need to sort the table by the metric (minus sign to sort
+        # descending)
+        team_list = np.argsort(-self.table[metric][teams_to_sort, sample])
+        team_scores = self.table[metric][team_list, sample]
+
         # figure out the next metric, in case this one doesn't differentiate
         current_metric_index = self.metrics.index(metric)
         new_metric = self.metrics[current_metric_index + 1]
 
         # OK, let's get sorting!! Start with two-team case
         if len(team_list) == 2:
-            if team_scores[0][metric] > team_scores[1][metric]:  # one team is better
-                self.fill_standings_position(team_list[0], positions_to_fill[0])
-                self.fill_standings_position(team_list[1], positions_to_fill[1])
+            if team_scores[0] > team_scores[1]:  # one team is better
+                self.fill_standings_position(sample, team_list[0], positions_to_fill[0])
+                self.fill_standings_position(sample, team_list[1], positions_to_fill[1])
             else:
                 # they are equal - call this func again with the next metric
                 self.set_positions_using_metric(
-                    team_list, positions_to_fill, new_metric
+                    sample, team_list, positions_to_fill, new_metric
                 )
             return
         elif len(team_list) == 3:
             # 4 possible cases
-            if (
-                team_scores[0][metric] > team_scores[1][metric] > team_scores[2][metric]
-            ):  # 1st > 2nd > 3rd
-                self.fill_standings_position(team_list[0], positions_to_fill[0])
-                self.fill_standings_position(team_list[1], positions_to_fill[1])
-                self.fill_standings_position(team_list[2], positions_to_fill[2])
+            if team_scores[0] > team_scores[1] > team_scores[2]:  # 1st > 2nd > 3rd
+                self.fill_standings_position(sample, team_list[0], positions_to_fill[0])
+                self.fill_standings_position(sample, team_list[1], positions_to_fill[1])
+                self.fill_standings_position(sample, team_list[2], positions_to_fill[2])
                 return  # we are done!
             elif (
-                team_scores[0][metric] > team_scores[1][metric]
-                and team_scores[1][metric] == team_scores[2][metric]
+                team_scores[0] > team_scores[1] and team_scores[1] == team_scores[2]
             ):  # last two equal
-                self.fill_standings_position(team_list[0], positions_to_fill[0])
+                self.fill_standings_position(sample, team_list[0], positions_to_fill[0])
                 # call this func again with the last two, and the next metric
                 self.set_positions_using_metric(
-                    team_list[1:], positions_to_fill[1:], new_metric
+                    sample, team_list[1:], positions_to_fill[1:], new_metric
                 )
                 return
             elif (
-                team_scores[0][metric] == team_scores[1][metric]
-                and team_scores[1][metric] > team_scores[2][metric]
+                team_scores[0] == team_scores[1] and team_scores[1] > team_scores[2]
             ):  # first two equal
-                self.fill_standings_position(team_list[2], positions_to_fill[2])
+                self.fill_standings_position(sample, team_list[2], positions_to_fill[2])
                 # call this func again with the first two, and the next metric
                 self.set_positions_using_metric(
-                    team_list[:2], positions_to_fill[:2], new_metric
+                    sample, team_list[:2], positions_to_fill[:2], new_metric
                 )
             else:  # all three teams equal - just move onto the next metric
                 self.set_positions_using_metric(
-                    team_list, positions_to_fill, new_metric
+                    sample, team_list, positions_to_fill, new_metric
                 )
             return
         elif len(team_list) == 4:  # 8 possible cases.
             if verbose:
-                print("TEAM LIST", team_scores)
+                print("TEAM SCORES", team_scores)
             if (
-                team_scores[0][metric] > team_scores[1][metric]
-                and team_scores[1][metric] > team_scores[2][metric]
-                and team_scores[2][metric] > team_scores[3][metric]
+                team_scores[0] > team_scores[1]
+                and team_scores[1] > team_scores[2]
+                and team_scores[2] > team_scores[3]
             ):  # case 1) all in order
-                self.fill_standings_position(team_list[0], "1st")
-                self.fill_standings_position(team_list[1], "2nd")
-                self.fill_standings_position(team_list[2], "3rd")
-                self.fill_standings_position(team_list[3], "4th")
+                self.fill_standings_position(sample, team_list[0], 1)
+                self.fill_standings_position(sample, team_list[1], 2)
+                self.fill_standings_position(sample, team_list[2], 3)
+                self.fill_standings_position(sample, team_list[3], 4)
                 # we are done!
                 return
             elif (
-                team_scores[0][metric] == team_scores[1][metric]
-                and team_scores[1][metric] > team_scores[2][metric]
-                and team_scores[2][metric] > team_scores[3][metric]
+                team_scores[0] == team_scores[1]
+                and team_scores[1] > team_scores[2]
+                and team_scores[2] > team_scores[3]
             ):  # case 2) first two equal
-                self.fill_standings_position(team_list[2], "3rd")
-                self.fill_standings_position(team_list[3], "4th")
+                self.fill_standings_position(sample, team_list[2], 3)
+                self.fill_standings_position(sample, team_list[3], 4)
                 # call this func with the first two and the next metric
                 self.set_positions_using_metric(
-                    team_list[:2], positions_to_fill[:2], new_metric
+                    sample, team_list[:2], positions_to_fill[:2], new_metric
                 )
             elif (
-                team_scores[0][metric] > team_scores[1][metric]
-                and team_scores[1][metric] == team_scores[2][metric]
-                and team_scores[2][metric] > team_scores[3][metric]
+                team_scores[0] > team_scores[1]
+                and team_scores[1] == team_scores[2]
+                and team_scores[2] > team_scores[3]
             ):  # case 3) middle two equal
-                self.fill_standings_position(team_list[0], "1st")
-                self.fill_standings_position(team_list[3], "4th")
+                self.fill_standings_position(sample, team_list[0], 1)
+                self.fill_standings_position(sample, team_list[3], 4)
                 # call this func with the middle two and the next metric
                 self.set_positions_using_metric(
-                    team_list[1:3], positions_to_fill[1:3], new_metric
+                    sample, team_list[1:3], positions_to_fill[1:3], new_metric
                 )
             elif (
-                team_scores[0][metric] > team_scores[1][metric]
-                and team_scores[1][metric] > team_scores[2][metric]
-                and team_scores[2][metric] == team_scores[3][metric]
+                team_scores[0] > team_scores[1]
+                and team_scores[1] > team_scores[2]
+                and team_scores[2] == team_scores[3]
             ):  # case 4) last two equal
-                self.fill_standings_position(team_list[0], "1st")
-                self.fill_standings_position(team_list[1], "2nd")
+                self.fill_standings_position(sample, team_list[0], 1)
+                self.fill_standings_position(sample, team_list[1], 2)
                 # call this func with the last two and the next metric
                 self.set_positions_using_metric(
-                    team_list[2:], positions_to_fill[2:], new_metric
+                    sample, team_list[2:], positions_to_fill[2:], new_metric
                 )
             elif (
-                team_scores[0][metric] == team_scores[1][metric]
-                and team_scores[1][metric] == team_scores[2][metric]
-                and team_scores[2][metric] > team_scores[3][metric]
+                team_scores[0] == team_scores[1]
+                and team_scores[1] == team_scores[2]
+                and team_scores[2] > team_scores[3]
             ):  # case 5) all equal except last
-                self.fill_standings_position(team_list[3], "4th")
+                self.fill_standings_position(sample, team_list[3], 4)
                 # call this func with the first three and the next metric
                 self.set_positions_using_metric(
-                    team_list[:3], positions_to_fill[:3], new_metric
+                    sample, team_list[:3], positions_to_fill[:3], new_metric
                 )
             elif (
-                team_scores[0][metric] > team_scores[1][metric]
-                and team_scores[1][metric] == team_scores[2][metric]
-                and team_scores[2][metric] == team_scores[3][metric]
+                team_scores[0] > team_scores[1]
+                and team_scores[1] == team_scores[2]
+                and team_scores[2] == team_scores[3]
             ):  # case 6) all equal except first
-                self.fill_standings_position(team_list[0], "1st")
+                self.fill_standings_position(sample, team_list[0], 1)
                 # call this func with the last three and the next metric
                 self.set_positions_using_metric(
-                    team_list[1:], positions_to_fill[1:], new_metric
+                    sample, team_list[1:], positions_to_fill[1:], new_metric
                 )
             elif (
-                team_scores[0][metric] == team_scores[1][metric]
-                and team_scores[1][metric] > team_scores[2][metric]
-                and team_scores[2][metric] == team_scores[3][metric]
+                team_scores[0] == team_scores[1]
+                and team_scores[1] > team_scores[2]
+                and team_scores[2] == team_scores[3]
             ):  # case 7) nightmare scenario!!
                 # call func with first two and next metric
                 self.set_positions_using_metric(
-                    team_list[:2], positions_to_fill[:2], new_metric
+                    sample, team_list[:2], positions_to_fill[:2], new_metric
                 )
                 # call func with last two and next metric
                 self.set_positions_using_metric(
-                    team_list[2:], positions_to_fill[2:], new_metric
+                    sample, team_list[2:], positions_to_fill[2:], new_metric
                 )
             else:  # case 8) all equal - carry on to next metric
                 # call this func with the last three and the next metric
                 self.set_positions_using_metric(
-                    team_list, positions_to_fill, new_metric
+                    sample, team_list, positions_to_fill, new_metric
                 )
-            return
 
     def calc_standings(self, head_to_head=False) -> None:
         """
@@ -326,6 +357,7 @@ class Group:
         if not head_to_head sort by points -> goal difference -> goals -> random
         (i.e. don't consider head to head as a tiebreaker)
         """
+        head_to_head = True  # TODO
         if self.table is None:
             self.calc_table()
 
@@ -340,14 +372,14 @@ class Group:
                 axis=0,
             )
         else:
-            raise NotImplementedError("Not updated head-to-head logic")
+            # Include head_to_head tiebreaker between two teams (slower)
             # reset the standings table to start from scratch
-            for k in self.standings.keys():
-                self.standings[k] = None
+            self.standings = np.empty(self.table["points"].shape, dtype=int)
             # now calculate the standings again
-            self.set_positions_using_metric(
-                self.teams, ["1st", "2nd", "3rd", "4th"], "points"
-            )
+            for sample in range(self.table["points"].shape[1]):
+                self.set_positions_using_metric(
+                    sample, np.arange(len(self.teams)), [1, 2, 3, 4], "points"
+                )
 
     def check_if_result_exists(self, team_1, team_2):
         """
@@ -418,6 +450,7 @@ class Tournament:
         seed: Optional[int] = None,
         head_to_head: bool = False,
     ) -> None:
+        head_to_head = True  # TODO
         print("G")
         t = time()
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
