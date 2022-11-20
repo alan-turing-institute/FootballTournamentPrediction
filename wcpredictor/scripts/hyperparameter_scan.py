@@ -69,7 +69,16 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
         if status == "DONE":
             print(f"Process {pid} finished all jobs!")
             break
-        tournament, num_years, start_date, end_date, ratings, comps, epsilon, wc_weight = status
+        (
+            tournament,
+            num_years,
+            start_date,
+            end_date,
+            ratings,
+            comps,
+            epsilon,
+            wc_weight,
+        ) = status
 
         if len(comps) == 6:
             comptxt = "all_comps"
@@ -120,19 +129,23 @@ def main():
                     r = None
                 for comps in competitions:
                     for ep in epsilons:
-                        for wc in wc_weights:        
+                        for wc in wc_weights:
                             print("adding to queue")
-                            queue.put((tournament,
-                                       num_years,
-                                       start_date,
-                                       end_date,
-                                       r,
-                                       comps,
-                                       ep,
-                                       wc))
-                            pass # end of loop over world cup weight choices
-                        pass # end of loop over epsilon choices
-                    pass  # end of loop over competitions to exclude        
+                            queue.put(
+                                (
+                                    tournament,
+                                    num_years,
+                                    start_date,
+                                    end_date,
+                                    r,
+                                    comps,
+                                    ep,
+                                    wc,
+                                )
+                            )
+                            pass  # end of loop over world cup weight choices
+                        pass  # end of loop over epsilon choices
+                    pass  # end of loop over competitions to exclude
                 pass  # end of loop over ratings method
             pass  # end of loop over num_years_training
         pass  # end of loop over tournaments

@@ -5,6 +5,12 @@ Matches are predicted using a framework based on the team-level model in https:/
 This model is trained on international mens football results obtained from https://github.com/martj42/international_results.
 The original model is a version of [Dixon and Coles](https://rss.onlinelibrary.wiley.com/doi/10.1111/1467-9876.00065).
 
+## In the media
+
+There is some background information and description of the results [here](https://www.turing.ac.uk/blog/can-our-algorithm-predict-winner-2022-football-world-cup).
+
+The **[New Scientist](https://www.newscientist.com/article/2347699-brazil-picked-as-2022-world-cup-winners-by-alan-turing-institute-model/)** also has an article, as does **The Daily Mail**, which prompted one reader to enthuse: *"What an absolute load of rubbish, but typical of the anti-English establishment today!"*, and another to ponder: *"I have NEVER KNOW a Prediction from a Scientist to be Right Ever, But on this Prediction  I may be wrong."*.  High praise indeed!
+
 ## Installation
 
 The easiest way to use the code is via [poetry](https://python-poetry.org/).  If you have poetry installed, from this directory, you can do

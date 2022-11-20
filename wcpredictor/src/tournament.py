@@ -5,7 +5,7 @@ knockout stages, to the final, and produce a winner.
 
 import random
 from time import time
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -413,6 +413,50 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
+
+    def get_next_match(self) -> Dict:
+        """
+        Using next_fixture_index, return details of the next match to be played
+        """
+        fixture = self.fixtures_df.iloc[self.next_fixture_index]
+        stage = fixture.Stage
+        if stage == "Group":
+            group = find_group(fixture.Team_1, self.teams_df)
+            stage += f" {group}"
+            return {
+                "team_1": fixture.Team_1,
+                "team_2": fixture.Team_2,
+                "date": fixture.Date,
+                "stage": stage,
+            }
+        else:
+            return {
+                "team_1": self.aliases[fixture.Team_1],
+                "team_1": self.aliases[fixture.Team_1],
+                "date": fixture.Date,
+                "stage": fixture.Stage,
+            }
+
+    def play_next_match(
+        self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
+    ) -> Dict:
+        """
+        Using the next_fixture_index, play a game
+        """
+        fixture = self.fixtures_df.iloc[self.next_fixture_index]
+        self.next_fixture_index += 1
+        if fixture.Stage == "Group":
+            group = find_group(fixture.Team_1, self.teams_df)
+            self.groups[group].play_match(wc_pred, fixture, seed)
+            return self.groups[group].results[-1]
+        else:
+            self.aliases[fixture.Team_1 + fixture.Team_2] = predict_knockout_match(
+                wc_pred=wc_pred,
+                team_1=self.aliases[f.Team_1],
+                team_2=self.aliases[f.Team_2],
+                seed=seed,
+            )
+            return {"winner": self.aliases[fixture.Team_1 + fixture.Team_2]}
 
     def play_group_stage(
         self,
