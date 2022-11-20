@@ -42,7 +42,6 @@ def get_and_train_model(
     values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
     neither (None).
     """
-    print("in get_and_train_model")
     results, weights_dict = get_results_data(
         start_date=start_date,
         end_date=end_date,

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 round_labels = {
-    "G": "Group stage",
+    "Group": "Group stage",
     "R16": "Round of 16",
     "QF": "Quarter-final",
     "SF": "Semi-final",
@@ -28,7 +28,7 @@ def main():
     parser.add_argument(
         "--round",
         help="show progression to which round",
-        choices={"G", "R16", "QF", "SF", "RU", "W"},
+        choices={"Group", "R16", "QF", "SF", "RU", "W"},
         default="W",
     )
     parser.add_argument(
@@ -41,11 +41,11 @@ def main():
     )
     args = parser.parse_args()
     df = pd.read_csv(args.input_csv)
-    df.set_index("team", inplace=True)
+    df.set_index("Team", inplace=True)
     if not args.counts:
         df = 100 * df.div(df.sum(axis=1), axis=0)
     if not args.exact_round:
-        df = df[["W", "RU", "SF", "QF", "R16", "G"]].cumsum(axis=1)
+        df = df[["W", "RU", "SF", "QF", "R16", "Group"]].cumsum(axis=1)
     df.sort_values(by=args.round, inplace=True)
     # plot the top num_teams values
     df = df[-args.num_teams :]
