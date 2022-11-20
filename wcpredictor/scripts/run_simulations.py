@@ -235,9 +235,9 @@ rankings: {ratings_src}
     sim_time = time() - sim_start
     per_tournament = sim_time / args.num_simulations
     print(
-        f"{args.num_simulations} tournaments took {sim_time:.2f}s "
-        f"({per_tournament:.2f}s per tournament).\n(100,000 tournaments would take "
-        f"{per_tournament * 100000 / (60 * 60):.2f} hours)"
+        f"{args.num_simulations} tournaments took {sim_time:.3f}s "
+        f"({per_tournament:.3f}s per tournament)\n100,000 tournaments would take "
+        f"{per_tournament * 100000 / (60 * 60):.2f} hours"
     )
 
 
