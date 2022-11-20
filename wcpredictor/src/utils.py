@@ -277,13 +277,7 @@ def get_most_probable_scoreline(
     score_1:int, score_2:int,  prob:float, scores of each team, and prob
                                            of that scoreline
     """
-    probs = wc_pred.get_fixture_goal_probabilities(
-        fixture_teams=[(team_1, team_2)], seed=seed
-    )[0][0]
-    score_1 = max(probs[team_1], key=probs[team_1].get)
-    score_2 = max(probs[team_2], key=probs[team_2].get)
-    prob = probs[team_1][score_1] * probs[team_2][score_2]
-    return score_1, score_2, float(prob)
+    return wc_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
 
 
 def get_difference_in_stages(stage_1: str, stage_2: str) -> int:

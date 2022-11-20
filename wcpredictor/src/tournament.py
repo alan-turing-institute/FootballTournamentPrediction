@@ -114,9 +114,9 @@ class Group:
         Fill specified slot in our team standings.
         """
         if self.standings[position]:
-            raise RuntimeError("Position {} is already filled!".format(position))
+            raise RuntimeError(f"Position {position} is already filled!")
         if verbose:
-            print("Putting {} in {}".format(team, position))
+            print(f"Putting {team} in {position}")
         self.standings[position] = team
         return
 
@@ -124,7 +124,7 @@ class Group:
         team_1 = None
         team_2 = None
         for result in self.results:
-            if set(result.keys()) == set([team_A, team_B]):
+            if set(result.keys()) == {team_A, team_B}:
                 if result[team_A] > result[team_B]:
                     team_1 = team_A
                     team_2 = team_B
@@ -148,19 +148,12 @@ class Group:
             )
         if verbose:
             print(
-                "Sorting {} using {} to fill positions {}".format(
-                    teams_to_sort, metric, positions_to_fill
-                )
+                f"Sorting {teams_to_sort} using {metric} to fill positions "
+                f"{positions_to_fill}"
             )
+
         # if random, just shuffle our list
-        if metric == "random":
-            random.shuffle(teams_to_sort)
-            for i, pos in enumerate(positions_to_fill):
-                self.fill_standings_position(teams_to_sort[i], pos)
-            if verbose:
-                print("randomly assigned {} teams".format(len(teams_to_sort)))
-            return
-        elif metric == "head-to-head":
+        if metric == "head-to-head":
             if len(teams_to_sort) > 2:
                 print("Can't use head-to-head for more than 2 teams")
                 # skip ahead to random
@@ -180,6 +173,13 @@ class Group:
                         teams_to_sort, positions_to_fill, "random"
                     )
             return
+        elif metric == "random":
+            random.shuffle(teams_to_sort)
+            for i, pos in enumerate(positions_to_fill):
+                self.fill_standings_position(teams_to_sort[i], pos)
+            if verbose:
+                print(f"randomly assigned {len(teams_to_sort)} teams")
+            return
         # ok, otherwise we need to sort the table by the metric
         team_dict = {t: self.table[t] for t in teams_to_sort}
         team_scores = sort_teams_by(team_dict, metric)  # list of dicts of teams
@@ -193,18 +193,16 @@ class Group:
             if team_scores[0][metric] > team_scores[1][metric]:  # one team is better
                 self.fill_standings_position(team_list[0], positions_to_fill[0])
                 self.fill_standings_position(team_list[1], positions_to_fill[1])
-                return
             else:
                 # they are equal - call this func again with the next metric
                 self.set_positions_using_metric(
                     team_list, positions_to_fill, new_metric
                 )
-                return
+            return
         elif len(team_list) == 3:
             # 4 possible cases
             if (
-                team_scores[0][metric] > team_scores[1][metric]
-                and team_scores[1][metric] > team_scores[2][metric]
+                team_scores[0][metric] > team_scores[1][metric] > team_scores[2][metric]
             ):  # 1st > 2nd > 3rd
                 self.fill_standings_position(team_list[0], positions_to_fill[0])
                 self.fill_standings_position(team_list[1], positions_to_fill[1])
@@ -384,24 +382,24 @@ class Group:
         }
 
     def __str__(self) -> str:
-        max_team_name_length = 0
-        for t in self.teams:
-            if len(t) > max_team_name_length:
-                max_team_name_length = len(t)
-
-        output = f"Position |  Team{' '*(max_team_name_length-8)}| Points | GS |  GA \n"
+        max_team_name_length = max(len(name) for name in self.teams)
+        output = f"Position | Team{' '*(max_team_name_length-3)}| Points | GF   | GA \n"
         self.calc_standings()
-        for k, v in self.standings.items():
+        mean_rank = self.standings.mean(axis=1)
+        mean_pts = self.table["points"].mean(axis=1)
+        mean_gf = self.table["goals_for"].mean(axis=1)
+        mean_ga = self.table["goals_against"].mean(axis=1)
+        for idx in np.argsort(mean_rank):
             output += (
-                f"   {k}    {v}{' '*(max_team_name_length-len(v))}   "
-                f"{self.table[v]['points']}      {self.table[v]['goals_for']}     "
-                f"{self.table[v]['goals_against']} \n"
+                f"    {mean_rank[idx]:.2f}   {self.teams[idx]}"
+                f"{' '*(max_team_name_length-len(self.teams[idx]))} "
+                f"  {mean_pts[idx]:.2f}     {mean_gf[idx]:.2f}   {mean_ga[idx]:.2f} \n"
             )
         return output
 
 
 class Tournament:
-    def __init__(self, year: str = "2022", num_samples=1):
+    def __init__(self, year: str = "2022", num_samples: int = 1):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -413,50 +411,6 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
-
-    def get_next_match(self) -> Dict:
-        """
-        Using next_fixture_index, return details of the next match to be played
-        """
-        fixture = self.fixtures_df.iloc[self.next_fixture_index]
-        stage = fixture.Stage
-        if stage == "Group":
-            group = find_group(fixture.Team_1, self.teams_df)
-            stage += f" {group}"
-            return {
-                "team_1": fixture.Team_1,
-                "team_2": fixture.Team_2,
-                "date": fixture.Date,
-                "stage": stage,
-            }
-        else:
-            return {
-                "team_1": self.aliases[fixture.Team_1],
-                "team_1": self.aliases[fixture.Team_1],
-                "date": fixture.Date,
-                "stage": fixture.Stage,
-            }
-
-    def play_next_match(
-        self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
-    ) -> Dict:
-        """
-        Using the next_fixture_index, play a game
-        """
-        fixture = self.fixtures_df.iloc[self.next_fixture_index]
-        self.next_fixture_index += 1
-        if fixture.Stage == "Group":
-            group = find_group(fixture.Team_1, self.teams_df)
-            self.groups[group].play_match(wc_pred, fixture, seed)
-            return self.groups[group].results[-1]
-        else:
-            self.aliases[fixture.Team_1 + fixture.Team_2] = predict_knockout_match(
-                wc_pred=wc_pred,
-                team_1=self.aliases[f.Team_1],
-                team_2=self.aliases[f.Team_2],
-                seed=seed,
-            )
-            return {"winner": self.aliases[fixture.Team_1 + fixture.Team_2]}
 
     def play_group_stage(
         self,

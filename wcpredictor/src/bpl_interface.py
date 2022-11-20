@@ -389,3 +389,32 @@ class WCPred:
             )
             simulated_scores.append((T1_goals, T2_goals))
         return probs, simulated_scores
+
+    def get_most_probable_scoreline(self, home_team, away_team):
+        (
+            home_team,
+            away_team,
+            home_conference,
+            away_conference,
+            venue,
+        ) = self._parse_sim_args(home_team, away_team)
+
+        if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+            probs, home_goals, away_goals = self.model.predict_score_grid_proba(
+                home_team, away_team, home_conference, away_conference, venue
+            )
+
+        elif isinstance(self.model, NeutralDixonColesMatchPredictor):
+            probs, home_goals, away_goals = self.model.predict_score_grid_proba(
+                home_team, away_team, home_conference, away_conference, venue
+            )
+
+        else:
+            probs, home_goals, away_goals = self.model.predict_score_grid_proba(
+                home_team, away_team, home_conference, away_conference, venue
+            )
+        probs = probs.reshape((len(home_team), -1))
+        home_goals = home_goals.flatten()
+        away_goals = away_goals.flatten()
+        idx = np.argmax(probs, axis=-1)
+        return home_goals[idx], away_goals[idx], probs[:, idx]
