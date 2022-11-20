@@ -123,7 +123,7 @@ class WCPred:
         if model is not None:
             self.model = model
         if self.model is None:
-            self.model = NeutralDixonColesMatchPredictorWC()
+            self.model = NeutralDixonColesMatchPredictorWC(max_goals=10)
         if self.training_data is None:
             self.set_training_data()
         print("[MODEL FITTING] Fitting the model")
