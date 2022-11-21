@@ -172,7 +172,6 @@ class Group:
         metric: str,
         verbose: bool = False,
     ) -> None:
-        verbose = True  # TODO
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(
                 f"Can't fill {len(positions_to_fill)} positions with "
