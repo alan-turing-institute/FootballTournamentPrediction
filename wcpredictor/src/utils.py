@@ -25,7 +25,7 @@ def get_and_train_model(
     rankings_source: str = "org",
     epsilon: float = 2.0,
     world_cup_weight: float = 4.0,
-    model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
+    model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
     **fit_args,
 ) -> WCPred:
     """
