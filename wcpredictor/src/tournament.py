@@ -357,7 +357,6 @@ class Group:
         if not head_to_head sort by points -> goal difference -> goals -> random
         (i.e. don't consider head to head as a tiebreaker)
         """
-        head_to_head = True  # TODO
         if self.table is None:
             self.calc_table()
 
@@ -370,7 +369,7 @@ class Group:
                     self.table["points"],
                 ),
                 axis=0,
-            )
+            ).argsort(axis=0)
         else:
             # Include head_to_head tiebreaker between two teams (slower)
             # reset the standings table to start from scratch
@@ -450,7 +449,6 @@ class Tournament:
         seed: Optional[int] = None,
         head_to_head: bool = False,
     ) -> None:
-        head_to_head = True  # TODO
         print("G")
         t = time()
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
