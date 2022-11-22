@@ -6,6 +6,7 @@ import pandas as pd
 from wcpredictor import (
     Group,
     Tournament,
+    WCPred,
     get_fixture_data,
     get_teams_data,
     sort_teams_by,
@@ -295,70 +296,53 @@ def test_standings_1st_2nd_head_to_head():
     }
     g.add_results(results)
     g.calc_table()
-    g.calc_standings()
 
-    np.testing.assert_array_equal(g.standings[:, 0], np.array([3, 4, 1, 2]))
+    for _ in range(20):
+        # test could pass in error as the next tiebreaker is random is head-to-head is
+        # skipped, so repeat the standings computation to verify
+        g.calc_standings()
+        np.testing.assert_array_equal(g.standings[:, 0], np.array([3, 4, 1, 2]))
 
 
 def test_many_standings():
     """
     Define some sanity checks, run the group with random results many times.
     """
+    g = Group("A", ["Qatar", "Ecuador", "Senegal", "Netherlands"])
+    results = {
+        "home_team": np.array(
+            [
+                "Ecuador",
+                "Netherlands",
+                "Netherlands",
+                "Netherlands",
+                "Senegal",
+                "Ecuador",
+            ]
+        ),
+        "away_team": np.array(
+            ["Qatar", "Qatar", "Senegal", "Ecuador", "Qatar", "Senegal"]
+        ),
+        "home_score": np.random.randint(0, 5, size=(6, 100)),
+        "away_score": np.random.randint(0, 5, size=(6, 100)),
+    }
+    g.add_results(results)
+    g.calc_table()
+    g.calc_standings()
+    rank_idx = g.standings.argsort(axis=0)
 
-    def sanity_check_points(g):
-        top_points = g.table[g.standings["1st"]]["points"]
-        if (
-            g.table[g.standings["2nd"]]["points"] > top_points
-            or g.table[g.standings["3rd"]]["points"] > top_points
-            or g.table[g.standings["4th"]]["points"] > top_points
-        ):
-            return False
-        return True
+    for i in range(100):
+        pts = g.table["points"][rank_idx[:, i], i]
+        # pts (in rank order) should be >= next team's pts
+        assert np.all(pts[:-1] >= pts[1:])
 
-    def sanity_check_goal_diff(g):
+        top_points_mask = pts == pts.max()
+        if top_points_mask.sum() == 1:
+            continue  # group has clear pts winner, don't check gd
 
-        top_points = g.table[g.standings["1st"]]["points"]
-        top_gd = g.table[g.standings["1st"]]["goal_difference"]
-        if (
-            g.table[g.standings["2nd"]]["points"] == top_points
-            and g.table[g.standings["2nd"]]["goal_difference"] > top_gd
-        ):
-            return False
-        if (
-            g.table[g.standings["3rd"]]["points"] == top_points
-            and g.table[g.standings["3rd"]]["goal_difference"] > top_gd
-        ):
-            return False
-        if (
-            g.table[g.standings["4th"]]["points"] == top_points
-            and g.table[g.standings["4th"]]["goal_difference"] > top_gd
-        ):
-            return False
-        return True
-
-    for _ in range(100):
-        g = Group("A", ["Qatar", "Ecuador", "Senegal", "Netherlands"])
-        g.results.append(
-            {"Ecuador": random.randint(0, 4), "Qatar": random.randint(0, 4)}
-        )
-        g.results.append(
-            {"Netherlands": random.randint(0, 4), "Qatar": random.randint(0, 4)}
-        )
-        g.results.append(
-            {"Netherlands": random.randint(0, 4), "Senegal": random.randint(0, 4)}
-        )
-        g.results.append(
-            {"Netherlands": random.randint(0, 4), "Ecuador": random.randint(0, 4)}
-        )
-        g.results.append(
-            {"Senegal": random.randint(0, 4), "Qatar": random.randint(0, 4)}
-        )
-        g.results.append(
-            {"Ecuador": random.randint(0, 4), "Senegal": random.randint(0, 4)}
-        )
-        g.calc_standings()
-        assert sanity_check_points(g)
-        assert sanity_check_goal_diff(g)
+        gd = g.table["goal_difference"][rank_idx[:, i], i][top_points_mask]
+        # gd (in rank order) amongst teams tied on pts should be >= next gd
+        assert np.all(gd[:-1] >= gd[1:])
 
 
 def test_play_group_stage(mocker):
@@ -368,20 +352,29 @@ def test_play_group_stage(mocker):
     """
 
     def pick_random_score():
-        s1 = random.randint(0, 3)
-        s2 = random.randint(0, 3)
-        return s1, s2
+        fixtures_df = get_fixture_data()
+        fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
+        results = {
+            "home_team": fixtures_df["Team_1"],
+            "away_team": fixtures_df["Team_2"],
+            "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
+            "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
+        }
+        return results
 
-    for _ in range(100):
-        t = Tournament()
-        mocker.patch(
-            "wcpredictor.src.tournament.predict_group_match",
-            return_value=pick_random_score(),
+    t = Tournament()
+    mocker.patch.object(WCPred, "sample_score", return_value=pick_random_score())
+    t.play_group_stage(
+        WCPred(
+            pd.DataFrame({"home_team": ["dummy"], "away_team": ["dummy"]}),
+            teams=get_teams_data()["Team"].values,
         )
-        t.play_group_stage("dummy")
-        for group in t.groups.values():
-            assert len(group.results) == 6
-            assert len(group.get_qualifiers()) == 2
+    )
+    for group in t.groups.values():
+        assert group.results["home_score"].shape == (6, 100)
+        gq = group.get_qualifiers()
+        assert len(gq[0]) == 100
+        assert len(gq[1]) == 100
 
 
 def test_play_knockout_stages(mocker):
@@ -390,27 +383,32 @@ def test_play_knockout_stages(mocker):
     """
 
     def pick_random_score():
-        s1 = random.randint(0, 3)
-        s2 = random.randint(0, 3)
-        return s1, s2
+        fixtures_df = get_fixture_data()
+        fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
+        results = {
+            "home_team": fixtures_df["Team_1"],
+            "away_team": fixtures_df["Team_2"],
+            "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
+            "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
+        }
+        return results
 
-    def pick_random_winner(wc_pred, team_1, team_2, seed):
-        if random.random() > 0.5:
-            return team_1
-        else:
-            return team_2
-
-    teams_df = get_teams_data()
-    teams = list(teams_df.Team.values)
-    t = Tournament()
-    mocker.patch(
-        "wcpredictor.src.tournament.predict_group_match",
-        return_value=pick_random_score(),
-    )
-    t.play_group_stage("dummy")
-    for _ in range(100):
-        mocker.patch(
-            "wcpredictor.src.tournament.predict_knockout_match", new=pick_random_winner
+    def pick_random_winner(self, home_team, away_team, *args, **kwargs):
+        return np.array(
+            [
+                np.random.choice([home_team[i], away_team[i]])
+                for i in range(len(home_team))
+            ]
         )
-        t.play_knockout_stages("dummy")
-        assert t.winner in teams
+
+    t = Tournament(num_samples=100)
+    mocker.patch.object(WCPred, "sample_score", return_value=pick_random_score())
+    mocker.patch.object(WCPred, "sample_outcome", new=pick_random_winner)
+    wc_pred = WCPred(
+        pd.DataFrame({"home_team": ["dummy"], "away_team": ["dummy"]}),
+        teams=get_teams_data()["Team"].values,
+    )
+    t.play_group_stage(wc_pred)
+    t.play_knockout_stages(wc_pred)
+    teams = get_teams_data()["Team"].values
+    assert np.isin(t.winner, teams).all()
