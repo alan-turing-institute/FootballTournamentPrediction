@@ -216,8 +216,14 @@ class Group:
 
         # ok, otherwise we need to sort the table by the metric (minus sign to sort
         # descending)
-        team_list = np.argsort(-self.table[metric][teams_to_sort, sample])
+        team_list = teams_to_sort[
+            np.argsort(-self.table[metric][teams_to_sort, sample])
+        ]
         team_scores = self.table[metric][team_list, sample]
+
+        if verbose:
+            print("team order", team_list)
+            print(metric, team_scores)
 
         # figure out the next metric, in case this one doesn't differentiate
         current_metric_index = self.metrics.index(metric)
@@ -264,8 +270,6 @@ class Group:
                 )
             return
         elif len(team_list) == 4:  # 8 possible cases.
-            if verbose:
-                print("TEAM SCORES", team_scores)
             if (
                 team_scores[0] > team_scores[1]
                 and team_scores[1] > team_scores[2]
@@ -349,7 +353,7 @@ class Group:
                     sample, team_list, positions_to_fill, new_metric
                 )
 
-    def calc_standings(self, head_to_head=False) -> None:
+    def calc_standings(self, head_to_head=True, verbose=False) -> None:
         """
         sort the table, and try and assign positions in the standings
 
@@ -375,9 +379,13 @@ class Group:
             self.standings = np.empty(self.table["points"].shape, dtype=int)
             # now calculate the standings again
             for sample in range(self.table["points"].shape[1]):
+                if verbose:
+                    print("sample", sample)
                 self.set_positions_using_metric(
                     sample, np.arange(len(self.teams)), [1, 2, 3, 4], "points"
                 )
+                if verbose:
+                    print("-" * 15)
 
     def check_if_result_exists(self, team_1, team_2):
         """
@@ -446,7 +454,7 @@ class Tournament:
         self,
         wc_pred: WCPred,
         seed: Optional[int] = None,
-        head_to_head: bool = False,
+        head_to_head: bool = True,
     ) -> None:
         print("G")
         t = time()

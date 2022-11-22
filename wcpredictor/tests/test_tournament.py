@@ -298,9 +298,9 @@ def test_standings_1st_2nd_head_to_head():
     g.calc_table()
 
     for _ in range(20):
-        # test could pass in error as the next tiebreaker is random is head-to-head is
+        # test could pass in error as the next tiebreaker is random if head-to-head is
         # skipped, so repeat the standings computation to verify
-        g.calc_standings()
+        g.calc_standings(head_to_head=True)
         np.testing.assert_array_equal(g.standings[:, 0], np.array([3, 4, 1, 2]))
 
 
@@ -355,8 +355,8 @@ def test_play_group_stage(mocker):
         fixtures_df = get_fixture_data()
         fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
         results = {
-            "home_team": fixtures_df["Team_1"],
-            "away_team": fixtures_df["Team_2"],
+            "home_team": fixtures_df["Team_1"].values,
+            "away_team": fixtures_df["Team_2"].values,
             "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
             "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
         }
@@ -386,8 +386,8 @@ def test_play_knockout_stages(mocker):
         fixtures_df = get_fixture_data()
         fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
         results = {
-            "home_team": fixtures_df["Team_1"],
-            "away_team": fixtures_df["Team_2"],
+            "home_team": fixtures_df["Team_1"].values,
+            "away_team": fixtures_df["Team_2"].values,
             "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
             "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
         }
