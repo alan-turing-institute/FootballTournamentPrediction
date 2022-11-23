@@ -141,61 +141,41 @@ class WCPred:
 
     def get_fixture_probabilities(
         self,
-        fixture_teams: Optional[List[Tuple[str, str]]] = None,
+        home_team,
+        away_team,
         knockout: bool = False,
-        seed: Optional[int] = None,
     ) -> pd.DataFrame:
         """
         Returns probabilities and predictions for all fixtures in a given gameweek and
         season, as a data frame with a row for each fixture and columns being home_team,
         away_team, home_win_probability, draw_probability, away_win_probability.
         """
-        if seed is not None:
-            np.random.seed(seed)
-        if self.model is None:
-            self.fit_model()
-        # if fixture_teams not passed, predict for all games in self.fixtures by default
-        if fixture_teams is None:
-            fixture_teams = self.get_fixture_teams()
-        Team_1, Team_2 = zip(*fixture_teams)
-        Team_1_conference = [self.confed_dict[team] for team in Team_1]
-        Team_2_conference = [self.confed_dict[team] for team in Team_2]
-        venue = np.ones(len(Team_1))
+        (
+            home_team,
+            away_team,
+            home_conference,
+            away_conference,
+            venue,
+        ) = self._parse_sim_args(home_team, away_team)
 
         if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
             p = self.model.predict_outcome_proba(
-                Team_1, Team_2, Team_1_conference, Team_2_conference, venue
+                home_team, away_team, home_conference, away_conference, venue, knockout
             )
         elif isinstance(self.model, NeutralDixonColesMatchPredictor):
-            p = self.model.predict_outcome_proba(Team_1, Team_2, venue)
+            p = self.model.predict_outcome_proba(home_team, away_team, venue, knockout)
         else:
-            p = self.model.predict_outcome_proba(Team_1, Team_2)
+            p = self.model.predict_outcome_proba(home_team, away_team, knockout)
 
-        # predict outcome of the game
-        simulated_outcome = []
-        for i in range(len(fixture_teams)):
-            if knockout:
-                prob = np.array([p["home_win"][i], p["away_win"][i]])
-                simulated_outcome.append(
-                    np.random.choice(a=[Team_1[i], Team_2[i]], p=prob / prob.sum())
-                )
-            else:
-                prob = np.array([p["home_win"][i], p["draw"][i], p["away_win"][i]])
-                simulated_outcome.append(
-                    np.random.choice(
-                        a=[Team_1[i], "Draw", Team_2[i]], p=prob / prob.sum()
-                    )
-                )
-        return pd.DataFrame(
-            {
-                "Team_1": Team_1,
-                "Team_2": Team_2,
-                "Team_1_win_probability": p["home_win"],
-                "draw_probability": p["draw"],
-                "Team_2_win_probability": p["away_win"],
-                "simulated_outcome": simulated_outcome,
-            }
-        )
+        result = {
+            "home_team": home_team,
+            "away_team": away_team,
+            "home_win": p["home_win"],
+            "away_win": p["away_win"],
+        }
+        if not knockout:
+            result["draw"] = p["draw"]
+        return result
 
     def _parse_sim_args(self, home_team, away_team):
         if isinstance(home_team, str):
@@ -300,97 +280,7 @@ class WCPred:
                 seed,
             )
 
-    def get_fixture_goal_probabilities(
-        self,
-        fixture_teams: Optional[List[Tuple[str, str]]] = None,
-        seed: Optional[int] = None,
-        max_goals: int = 10,
-    ) -> Tuple[dict[int, dict[str, DeviceArray]], List[Tuple[int, int]]]:
-        """
-        Get the probability that each team in a fixture scores any number of goals up to
-        max_goals, and prediction of goals scored.
-        """
-        if seed is not None:
-            np.random.seed(seed)
-        if self.model is None:
-            self.fit_model()
-        goals = np.arange(0, max_goals + 1)
-        probs = {}
-        simulated_scores = []
-        # if fixture_teams not passed, predict for all games in self.fixtures by default
-        if fixture_teams is None:
-            fixture_teams = self.get_fixture_teams()
-        Team_1, Team_2 = zip(*fixture_teams)
-        Team_1_conference = [self.confed_dict[team] for team in Team_1]
-        Team_2_conference = [self.confed_dict[team] for team in Team_2]
-        venue = np.ones(len(Team_1))
-        for i in range(len(fixture_teams)):
-            if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
-                home_team_goal_prob = self.model.predict_score_n_proba(
-                    goals,
-                    Team_1[i],
-                    Team_2[i],
-                    Team_1_conference[i],
-                    Team_2_conference[i],
-                    home=True,
-                    neutral_venue=venue[i],
-                )
-                away_team_goal_prob = self.model.predict_score_n_proba(
-                    goals,
-                    Team_2[i],
-                    Team_1[i],
-                    Team_2_conference[i],
-                    Team_1_conference[i],
-                    home=False,
-                    neutral_venue=venue[i],
-                )
-            elif isinstance(self.model, NeutralDixonColesMatchPredictor):
-                home_team_goal_prob = self.model.predict_score_n_proba(
-                    goals,
-                    Team_1[i],
-                    Team_2[i],
-                    home=True,
-                    neutral_venue=venue[i],
-                )
-                away_team_goal_prob = self.model.predict_score_n_proba(
-                    goals,
-                    Team_2[i],
-                    Team_1[i],
-                    home=False,
-                    neutral_venue=venue[i],
-                )
-            else:
-                home_team_goal_prob = self.model.predict_score_n_proba(
-                    goals,
-                    Team_1[i],
-                    Team_2[i],
-                    home=True,
-                )
-                away_team_goal_prob = self.model.predict_score_n_proba(
-                    goals,
-                    Team_2[i],
-                    Team_1[i],
-                    home=False,
-                )
-
-            probs[i] = {
-                Team_1[i]: {g: p for g, p in zip(goals, home_team_goal_prob)},
-                Team_2[i]: {g: p for g, p in zip(goals, away_team_goal_prob)},
-            }
-            # predict number of goals scored by Team 1
-            T1_prob = np.array(list(probs[i][Team_1[i]].values()))
-            T1_goals = np.random.choice(
-                a=range(max_goals + 1), p=T1_prob / T1_prob.sum()
-            )
-            # predict number of goals scored by Team 2
-            T2_prob = np.array(list(probs[i][Team_2[i]].values()))
-            T2_goals = np.random.choice(
-                a=range(max_goals + 1), p=T2_prob / T2_prob.sum()
-            )
-            simulated_scores.append((T1_goals, T2_goals))
-        return probs, simulated_scores
-
-    def get_most_probable_scoreline(self, home_team, away_team):
+    def get_fixture_score_probabilities(self, home_team, away_team):
         (
             home_team,
             away_team,
@@ -400,19 +290,88 @@ class WCPred:
         ) = self._parse_sim_args(home_team, away_team)
 
         if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
-            probs, home_goals, away_goals = self.model.predict_score_grid_proba(
+            return self.model.predict_score_grid_proba(
                 home_team, away_team, home_conference, away_conference, venue
             )
-
         elif isinstance(self.model, NeutralDixonColesMatchPredictor):
-            probs, home_goals, away_goals = self.model.predict_score_grid_proba(
-                home_team, away_team, home_conference, away_conference, venue
+            return self.model.predict_score_grid_proba(home_team, away_team, venue)
+        else:
+            return self.model.predict_score_grid_proba(home_team, away_team)
+
+    def get_fixture_team_goal_probabilities(self, home_team, away_team, max_goals=10):
+        """
+        Get the probability that each team in a fixture scores any number of goals up to
+        max_goals, and prediction of goals scored.
+        """
+        (
+            home_team,
+            away_team,
+            home_conference,
+            away_conference,
+            venue,
+        ) = self._parse_sim_args(home_team, away_team)
+        goals = np.arange(0, max_goals + 1)
+
+        if isinstance(self.model, NeutralDixonColesMatchPredictorWC):
+            home_team_goal_prob = self.model.predict_score_n_proba(
+                goals,
+                home_team,
+                away_team,
+                home_conference,
+                away_conference,
+                home=True,
+                neutral_venue=venue,
+            )
+            away_team_goal_prob = self.model.predict_score_n_proba(
+                goals,
+                away_team,
+                home_team,
+                away_conference,
+                home_conference,
+                home=False,
+                neutral_venue=venue,
+            )
+        elif isinstance(self.model, NeutralDixonColesMatchPredictor):
+            home_team_goal_prob = self.model.predict_score_n_proba(
+                goals,
+                home_team,
+                away_team,
+                home=True,
+                neutral_venue=venue,
+            )
+            away_team_goal_prob = self.model.predict_score_n_proba(
+                goals,
+                away_team,
+                home_team,
+                home=False,
+                neutral_venue=venue,
+            )
+        else:
+            home_team_goal_prob = self.model.predict_score_n_proba(
+                goals,
+                home_team,
+                away_team,
+                home=True,
+            )
+            away_team_goal_prob = self.model.predict_score_n_proba(
+                goals,
+                away_team,
+                home_team,
+                home=False,
             )
 
-        else:
-            probs, home_goals, away_goals = self.model.predict_score_grid_proba(
-                home_team, away_team, home_conference, away_conference, venue
-            )
+        return {
+            "goals": goals,
+            "home_team": home_team,
+            "away_team": away_team,
+            "home_prob": home_team_goal_prob,
+            "away_prob": away_team_goal_prob,
+        }
+
+    def get_most_probable_scoreline(self, home_team, away_team):
+        probs, home_goals, away_goals = self.get_fixture_score_probabilities(
+            home_team, away_team
+        )
         probs = probs.reshape((len(home_team), -1))
         home_goals = home_goals.flatten()
         away_goals = away_goals.flatten()
