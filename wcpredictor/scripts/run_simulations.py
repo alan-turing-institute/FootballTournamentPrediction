@@ -12,6 +12,7 @@ from uuid import uuid4
 import pandas as pd
 
 from wcpredictor import Tournament, get_and_train_model
+from wcpredictor.src.bpl_interface import WC_HOSTS
 from wcpredictor.src.utils import get_stage_difference_loss
 
 
@@ -216,6 +217,7 @@ rankings: {ratings_src}
         rankings_source=ratings_src,
         epsilon=args.epsilon,
         world_cup_weight=args.world_cup_weight,
+        host=WC_HOSTS[args.tournament_year],
     )
     model_time = time() - model_start
     print(f"Model fit took {model_time:.2f}s")

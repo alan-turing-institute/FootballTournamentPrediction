@@ -11,6 +11,15 @@ from bpl.base import BaseMatchPredictor
 
 from wcpredictor.src.data_loader import get_confederations_data
 
+WC_HOSTS = {
+    "2002": "South Korea",  # and Japan
+    "2006": "Germany",
+    "2010": "South Africa",
+    "2014": "Brazil",
+    "2018": "Russia",
+    "2022": "Qatar",
+}
+
 
 class WCPred:
     def __init__(
