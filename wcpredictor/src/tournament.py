@@ -388,21 +388,6 @@ class Group:
                 if verbose:
                     print("-" * 15)
 
-    def check_if_result_exists(self, team_1, team_2):
-        """
-        See if we already have a result for these two teams.
-        Parameters
-        ==========
-        team_1, team_2: both str, team names, as in teams.csv
-        Returns
-        =======
-        True if result already stored, False otherwise
-        """
-        return (
-            (self.results["home_team"] == team_1)
-            & (self.results["away_team"] == team_2)
-        ).sum() > 0
-
     def add_results(self, results):
         """
         Add a result for a group-stage match.

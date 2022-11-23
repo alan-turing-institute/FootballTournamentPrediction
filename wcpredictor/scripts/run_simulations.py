@@ -11,13 +11,8 @@ from uuid import uuid4
 
 import pandas as pd
 
-from wcpredictor import (
-    Tournament,
-    get_and_train_model,
-    get_difference_in_stages,
-    get_teams_data,
-    get_wcresults_data,
-)
+from wcpredictor import Tournament, get_and_train_model
+from wcpredictor.src.utils import get_stage_difference_loss
 
 
 def get_cmd_line_args():
@@ -145,33 +140,36 @@ def merge_csv_outputs(output_csv, tournament_year, output_txt):
         os.remove(f)
 
     if tournament_year != "2022":
-        teams_df = get_teams_data(tournament_year)
-        teams = list(teams_df.Team.values)
-        wcresults_df = None
-        wcresults_df = get_wcresults_data(tournament_year)
-        total_loss = 0
-        for team in teams:
-            actual_result = wcresults_df.loc[wcresults_df.Team == team].Stage.values[0]
-            total_loss += get_difference_in_stages(
-                simresults_df.loc[team], actual_result
-            )
-        # output txt file containing loss function values
-        print(
-            f"\nTotal Loss = {total_loss} (mean = "
-            f"{total_loss / simresults_df.iloc[0].sum():.2f})\n"
+        get_stage_difference_loss(
+            tournament_year, simresults_df, output_path=output_txt, verbose=True
         )
-        with open(f"{output_txt}", "w") as outfile:
-            outfile.write(f"{total_loss}\n")
 
 
-def run_sims(tournament_year, num_simulations, model, output_csv):
+def run_sims(
+    tournament_year,
+    num_simulations,
+    model,
+    output_csv,
+    output_loss=None,
+    add_runid=True,
+):
     t = Tournament(tournament_year, num_samples=num_simulations)
     t.play_group_stage(model)
     t.play_knockout_stages(model)
     t.count_stages()
 
-    runid = str(uuid4())
-    t.stage_counts.to_csv(f"{runid}_{output_csv}")
+    if add_runid:
+        runid = str(uuid4())
+        output_csv = f"{runid}_{output_csv}"
+        output_loss = f"{runid}_{output_loss}" if output_loss else None
+    else:
+        runid = None
+
+    t.stage_counts.to_csv(output_csv)
+
+    if output_loss:
+        get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
+
     return runid
 
 

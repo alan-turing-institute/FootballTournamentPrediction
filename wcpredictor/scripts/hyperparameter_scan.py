@@ -1,9 +1,10 @@
-import os
 import argparse
-
+import os
 from multiprocessing import Process, Queue
 
-from .run_simulations import run_sims, get_dates_from_years_training
+from wcpredictor.src.utils import get_and_train_model
+
+from .run_simulations import get_dates_from_years_training, run_sims
 
 
 def get_cmd_line_args():
@@ -80,25 +81,27 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
             wc_weight,
         ) = status
 
-        if len(comps) == 6:
-            comptxt = "all_comps"
-        else:
-            comptxt = "no_friendlies"
+        comptxt = "all_comps" if len(comps) == 6 else "no_friendlies"
         csv_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.csv"
         loss_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}_loss.txt"
         csv_filename = os.path.join(output_dir, csv_filename)
         loss_filename = os.path.join(output_dir, loss_filename)
-        run_sims(
-            tournament_year=tournament,
-            num_simulations=num_simulations,
+
+        model = get_and_train_model(
             start_date=start_date,
             end_date=end_date,
             competitions=comps,
-            rankings_src=ratings,
+            rankings_source=ratings,
             epsilon=epsilon,
             world_cup_weight=wc_weight,
+        )
+        run_sims(
+            tournament_year=tournament,
+            num_simulations=num_simulations,
+            model=model,
             output_csv=csv_filename,
-            output_txt=loss_filename,
+            output_loss=loss_filename,
+            add_runid=False,
         )
         print(f"Process {pid} Wrote file {csv_filename}")
 

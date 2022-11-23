@@ -15,6 +15,8 @@ from .data_loader import (
     get_confederations_data,
     get_fifa_rankings_data,
     get_results_data,
+    get_teams_data,
+    get_wcresults_data,
 )
 
 
@@ -157,8 +159,9 @@ def forecast_evaluation(
     method: str = "rps",
 ) -> List[float]:
     """
-    Compute the Brier score, or Rank Probability score (RPS) to evaluate the model against
-    real match scores for a model (to use like a loss function). By default computes the RPS
+    Compute the Brier score, or Rank Probability score (RPS) to evaluate the model
+    against real match scores for a model (to use like a loss function). By default
+    computes the RPS
 
     Use 'competitions' argument to specify which rows to include in training data.
     Key for competitions:
@@ -308,3 +311,50 @@ def get_difference_in_stages(stage_1: Union[str, pd.Series], stage_2: str) -> in
         cnt * abs(stages.index(st) - stages.index(stage_2))
         for st, cnt in stage_1.items()
     )
+
+
+def get_stage_difference_loss(
+    tournament_year: str,
+    sim_results: pd.DataFrame,
+    output_path: Optional[str] = None,
+    verbose: bool = True,
+) -> int:
+    """Compute the total loss for a set of simulations of a world cup using
+    get_difference_in_stages
+
+    Parameters
+    ----------
+    tournament_year : str
+        Year of the world cup to compute the loss for
+    sim_results : pd.DataFrame
+        Tournament.stage_counts from a number of tournament simulations
+    output_path : Optional[str], optional
+        Path to save the loss to, by default None
+    verbose : bool, optional
+        Print the total loss if true, by default True
+
+    Returns
+    -------
+    int
+        Total loss across all simulations in sim_results
+    """
+
+    teams_df = get_teams_data(tournament_year)
+    teams = list(teams_df.Team.values)
+    wcresults_df = None
+    wcresults_df = get_wcresults_data(tournament_year)
+    total_loss = 0
+    for team in teams:
+        actual_result = wcresults_df.loc[wcresults_df.Team == team].Stage.values[0]
+        total_loss += get_difference_in_stages(sim_results.loc[team], actual_result)
+
+    if verbose:
+        print(
+            f"\nTotal Loss = {total_loss} (mean = "
+            f"{total_loss / sim_results.iloc[0].sum():.2f})\n"
+        )
+    if output_path:
+        with open(f"{output_path}", "w") as outfile:
+            outfile.write(f"{total_loss}\n")
+
+    return total_loss
