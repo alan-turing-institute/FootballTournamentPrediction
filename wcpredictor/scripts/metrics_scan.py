@@ -1,10 +1,11 @@
-import os
 import argparse
-import pandas as pd
-
+import os
 from multiprocessing import Process, Queue
 
-from wcpredictor.src.utils import get_and_train_model, forecast_evaluation
+import pandas as pd
+
+from wcpredictor.src.utils import forecast_evaluation, get_and_train_model
+
 from .run_simulations import get_dates_from_years_training
 
 
@@ -50,7 +51,10 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--world_cup_weight_choices",
-        help="how much to weight the World Cup games and other competitions - comma-separated list",
+        help=(
+            "how much to weight the World Cup games and other competitions - "
+            "comma-separated list"
+        ),
         default="2,5",
     )
     parser.add_argument(

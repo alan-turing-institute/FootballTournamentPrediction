@@ -119,7 +119,8 @@ def get_start_end_dates(args):
         )
     else:
         raise RuntimeError(
-            "Need to provide either start_date and end_date, or years_training_data arguments"
+            "Need to provide either start_date and end_date, or years_training_data "
+            "arguments"
         )
     print(f"Start/End dates for training data are {start_date}, {end_date}")
     return start_date, end_date

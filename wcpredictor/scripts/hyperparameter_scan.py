@@ -44,7 +44,10 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--world_cup_weight_choices",
-        help="how much to weight the World Cup games and other competitions - comma-separated list",
+        help=(
+            "how much to weight the World Cup games and other competitions - "
+            "comma-separated list"
+        ),
         default="2,5",
     )
     parser.add_argument(
@@ -82,8 +85,14 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
         ) = status
 
         comptxt = "all_comps" if len(comps) == 6 else "no_friendlies"
-        csv_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.csv"
-        loss_filename = f"{tournament}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}_loss.txt"
+        csv_filename = (
+            f"{tournament}_{num_years}_{ratings}_{comptxt}_"
+            f"ep_{epsilon}_wc_{wc_weight}.csv"
+        )
+        loss_filename = (
+            f"{tournament}_{num_years}_{ratings}_{comptxt}_"
+            f"ep_{epsilon}_wc_{wc_weight}_loss.txt"
+        )
         csv_filename = os.path.join(output_dir, csv_filename)
         loss_filename = os.path.join(output_dir, loss_filename)
 
@@ -154,7 +163,7 @@ def main():
         pass  # end of loop over tournaments
 
     # add some items to the queue to make the target function exit
-    for i in range(args.num_thread):
+    for _ in range(args.num_thread):
         queue.put("DONE")
 
     # define processes for running the jobs

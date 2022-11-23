@@ -2,13 +2,12 @@
 Interface to the NumPyro team model in bpl-next:
 https://github.com/anguswilliams91/bpl-next
 """
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
-from jax.numpy import DeviceArray
 
 from wcpredictor.src.data_loader import get_confederations_data
 
@@ -133,11 +132,6 @@ class WCPred:
             fit_args["epsilon"] = self.epsilon
 
         self.model = self.model.fit(self.training_data, **fit_args)
-
-    def get_fixture_teams(self) -> List[Tuple[str, str]]:
-        if self.fixtures is None:
-            raise ValueError("No fixtures have been set into self.fixtures")
-        return [(row.Team_1, row.Team_2) for index, row in self.fixtures.iterrows()]
 
     def get_fixture_probabilities(
         self,

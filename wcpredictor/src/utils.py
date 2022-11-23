@@ -210,7 +210,8 @@ def forecast_evaluation(
             test_data["home_team"],
             test_data["away_team"],
         )
-    # obtain len(results) x 3 array where each row is the outcome probabilities for each game
+    # obtain len(results) x 3 array where each row is the outcome probabilities
+    # for each game
     outcome_probs = jnp.concatenate(list(proba.values())).reshape([3, len(results)])
     outcome_probs = outcome_probs.transpose()
     # obtain actual match outcomes from the test data
@@ -225,7 +226,8 @@ def forecast_evaluation(
 
     metrics = []
     for i in range(len(results)):
-        # fix any nans (happens when have two very lobsided teams - computational underflow)
+        # fix any nans (happens when have two very lobsided teams - computational
+        # underflow)
         prediction = outcome_probs[i, :]
         if math.isnan(prediction[0].item()):
             prediction = prediction.at[0].set(1 - (prediction[1] + prediction[2]))
