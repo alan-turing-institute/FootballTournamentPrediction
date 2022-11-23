@@ -2,7 +2,7 @@
 Assorted functions to get the BPL model, and predict results.
 """
 import math
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import jax.numpy as jnp
 import numpy as np
@@ -280,7 +280,7 @@ def get_most_probable_scoreline(
     return wc_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
 
 
-def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
+def get_difference_in_stages(stage_1: Union[str, pd.Series], stage_2: str) -> int:
     """
     Give an integer value to the differences between two
     'stages' i.e. how far a team got in the tournament.
@@ -289,13 +289,22 @@ def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
 
     Parameters
     ==========
-    stage_1, stage_2: both str, can be "G","R16","QF","SF","RU","W"
+    stage_1, stage_2: both str, can be "Group","R16","QF","SF","RU","W"
+    stage_1 can also be a pd.Series with index ["Group", "R16", "QF", "SF", "RU", "W"],
+    containing simulated counts for progression to each round.
 
     Returns
     =======
     diff: int, how far apart the two stages are.
     """
-    stages = ["G", "R16", "QF", "SF", "RU", "W"]
-    if stage_1 not in stages and stage_2 in stages:
-        raise RuntimeError(f"Unknown value for stage - must be in {stages}")
-    return abs(stages.index(stage_1) - stages.index(stage_2))
+    stages = ["Group", "R16", "QF", "SF", "RU", "W"]
+
+    if isinstance(stage_1, str):
+        if stage_1 not in stages and stage_2 in stages:
+            raise RuntimeError(f"Unknown value for stage - must be in {stages}")
+        return abs(stages.index(stage_1) - stages.index(stage_2))
+
+    return sum(
+        cnt * abs(stages.index(st) - stages.index(stage_2))
+        for st, cnt in stage_1.items()
+    )

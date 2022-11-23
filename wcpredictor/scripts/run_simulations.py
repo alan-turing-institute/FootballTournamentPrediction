@@ -130,28 +130,19 @@ def get_start_end_dates(args):
     return start_date, end_date
 
 
-def merge_csv_outputs(output_csv):
+def merge_csv_outputs(output_csv, tournament_year, output_txt):
     files = glob(f"*_{output_csv}")
-    df = pd.concat(
+    simresults_df = pd.concat(
         [
             pd.read_csv(f, usecols=["Team", "Group", "R16", "QF", "SF", "RU", "W"])
             for f in files
         ]
     )
-    df = df.groupby("Team").sum()
-    print(df)
-    df.to_csv(output_csv)
+    simresults_df = simresults_df.groupby("Team").sum()
+    print(simresults_df.sort_values(by="W", ascending=False))
+    simresults_df.to_csv(output_csv)
     for f in files:
         os.remove(f)
-
-
-def run_sims(tournament_year, num_simulations, model, output_csv, output_txt):
-    runid = str(uuid4())
-    t = Tournament(tournament_year, num_samples=num_simulations)
-    t.play_group_stage(model)
-    t.play_knockout_stages(model)
-    t.count_stages()
-    t.stage_counts.to_csv(f"{runid}_{output_csv}")
 
     if tournament_year != "2022":
         teams_df = get_teams_data(tournament_year)
@@ -161,20 +152,32 @@ def run_sims(tournament_year, num_simulations, model, output_csv, output_txt):
         total_loss = 0
         for team in teams:
             actual_result = wcresults_df.loc[wcresults_df.Team == team].Stage.values[0]
-            loss = get_difference_in_stages(result, actual_result)
-            total_loss += loss
-        loss_values = [total_loss]
+            total_loss += get_difference_in_stages(
+                simresults_df.loc[team], actual_result
+            )
         # output txt file containing loss function values
-        with open(f"{runid}_{output_txt}", "w") as outfile:
-            for val in loss_values:
-                outfile.write(f"{val}\n")
+        print(
+            f"\nTotal Loss = {total_loss} (mean = "
+            f"{total_loss / simresults_df.iloc[0].sum():.2f})\n"
+        )
+        with open(f"{output_txt}", "w") as outfile:
+            outfile.write(f"{total_loss}\n")
 
+
+def run_sims(tournament_year, num_simulations, model, output_csv):
+    t = Tournament(tournament_year, num_samples=num_simulations)
+    t.play_group_stage(model)
+    t.play_knockout_stages(model)
+    t.count_stages()
+
+    runid = str(uuid4())
+    t.stage_counts.to_csv(f"{runid}_{output_csv}")
     return runid
 
 
 def run_wrapper(args):
-    tournament_year, num_simulations, model, output_csv, output_txt = args
-    return run_sims(tournament_year, num_simulations, model, output_csv, output_txt)
+    tournament_year, num_simulations, model, output_csv = args
+    return run_sims(tournament_year, num_simulations, model, output_csv)
 
 
 def main():
@@ -221,7 +224,7 @@ rankings: {ratings_src}
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
     sim_args = (
-        (args.tournament_year, args.per_tournament, model, output_csv, output_loss_txt)
+        (args.tournament_year, args.per_tournament, model, output_csv)
         for _ in range(n_tournaments)
     )
     with Pool(args.num_thread) as p:
@@ -229,7 +232,7 @@ rankings: {ratings_src}
         p.close()
         p.join()
 
-    merge_csv_outputs(output_csv)
+    merge_csv_outputs(output_csv, args.tournament_year, output_loss_txt)
 
     print(f"Model fit took {model_time:.2f}s")
     sim_time = time() - sim_start

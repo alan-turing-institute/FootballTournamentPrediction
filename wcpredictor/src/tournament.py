@@ -185,7 +185,8 @@ class Group:
 
         if metric == "head-to-head":
             if len(teams_to_sort) > 2:
-                print("Can't use head-to-head for more than 2 teams")
+                if verbose:
+                    print("Can't use head-to-head for more than 2 teams")
                 # skip ahead to random
                 self.set_positions_using_metric(
                     sample, teams_to_sort, positions_to_fill, "random"
@@ -456,7 +457,7 @@ class Tournament:
         seed: Optional[int] = None,
         head_to_head: bool = True,
     ) -> None:
-        print("G")
+        print("Group")
         t = time()
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
         results = wc_pred.sample_score(
