@@ -446,9 +446,9 @@ class Tournament:
         if resume_from is not None:
             if resume_from in ["Group", "R16", "QF", "SF", "F"]:
                 # end date from tournament round fixture dates
-                dates = pd.to_datetime(self.fixtures_df["Date"])
+                dates = pd.to_datetime(self.fixtures_df["date"])
                 round_start = (
-                    dates[self.fixtures_df["Stage"] == resume_from].min().date()
+                    dates[self.fixtures_df["stage"] == resume_from].min().date()
                 )
                 resume_from = str(round_start - pd.Timedelta(days=1))
             self.actual_results, _ = get_results_data(
@@ -463,11 +463,11 @@ class Tournament:
     ) -> None:
         print("Group")
         t = time()
-        group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
+        group_fixtures = self.fixtures_df[self.fixtures_df.stage == "Group"]
         ...  # TODO split into fixtures with and without results
         results = wc_pred.sample_score(
-            group_fixtures["Team_1"],
-            group_fixtures["Team_2"],
+            group_fixtures["home_team"],
+            group_fixtures["away_team"],
             seed=seed,
             num_samples=self.num_samples,
         )
@@ -493,17 +493,19 @@ class Tournament:
         for stage in ["R16", "QF", "SF", "F"]:
             print(stage)
             t = time()
-            stage_fixtures = self.fixtures_df[self.fixtures_df["Stage"] == stage]
+            stage_fixtures = self.fixtures_df[self.fixtures_df["stage"] == stage]
 
             results = wc_pred.sample_outcome(
-                self.bracket[stage_fixtures["Team_1"]].values.flatten(),
-                self.bracket[stage_fixtures["Team_2"]].values.flatten(),
+                self.bracket[stage_fixtures["home_team"]].values.flatten(),
+                self.bracket[stage_fixtures["away_team"]].values.flatten(),
                 knockout=True,
                 seed=seed,
                 num_samples=1,
             ).reshape((self.num_samples, len(stage_fixtures)))
 
-            self.bracket[stage_fixtures["Team_1"] + stage_fixtures["Team_2"]] = results
+            self.bracket[
+                stage_fixtures["home_team"] + stage_fixtures["away_team"]
+            ] = results
 
             if stage == "F":
                 self.winner = results.flatten()
@@ -524,7 +526,7 @@ class Tournament:
         for stage in stages[:-1]:
             round_aliases = np.unique(
                 self.fixtures_df.loc[
-                    self.fixtures_df.Stage == stage, ["Team_1", "Team_2"]
+                    self.fixtures_df.stage == stage, ["home_team", "away_team"]
                 ]
             )
             teams, counts = np.unique(self.bracket[round_aliases], return_counts=True)

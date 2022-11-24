@@ -349,7 +349,7 @@ def get_stage_difference_loss(
     wcresults_df = get_wcresults_data(tournament_year)
     total_loss = 0
     for team in teams:
-        actual_result = wcresults_df.loc[wcresults_df.Team == team].Stage.values[0]
+        actual_result = wcresults_df.loc[wcresults_df.Team == team].stage.values[0]
         total_loss += get_difference_in_stages(sim_results.loc[team], actual_result)
 
     if verbose:

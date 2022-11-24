@@ -351,10 +351,10 @@ def test_play_group_stage(mocker):
 
     def pick_random_score():
         fixtures_df = get_fixture_data()
-        fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
+        fixtures_df = fixtures_df[fixtures_df["stage"] == "Group"]
         results = {
-            "home_team": fixtures_df["Team_1"].values,
-            "away_team": fixtures_df["Team_2"].values,
+            "home_team": fixtures_df["home_team"].values,
+            "away_team": fixtures_df["away_team"].values,
             "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
             "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
         }
@@ -382,10 +382,10 @@ def test_play_knockout_stages(mocker):
 
     def pick_random_score():
         fixtures_df = get_fixture_data()
-        fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
+        fixtures_df = fixtures_df[fixtures_df["stage"] == "Group"]
         results = {
-            "home_team": fixtures_df["Team_1"].values,
-            "away_team": fixtures_df["Team_2"].values,
+            "home_team": fixtures_df["home_team"].values,
+            "away_team": fixtures_df["away_team"].values,
             "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
             "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
         }

@@ -19,7 +19,7 @@ def get_fixture_data(year: str = "2022") -> pd.DataFrame:
         raise RuntimeError("Unknown year " + year)
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(current_dir, "..", "data", f"fixtures_{year}.csv")
-    return pd.read_csv(csv_path)
+    return pd.read_csv(csv_path, parse_dates=["date"])
 
 
 def get_confederations_data() -> pd.DataFrame:
