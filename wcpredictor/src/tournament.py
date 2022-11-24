@@ -443,6 +443,7 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
+
         if resume_from is not None:
             if resume_from in ["Group", "R16", "QF", "SF", "F"]:
                 # end date from tournament round fixture dates
@@ -451,9 +452,33 @@ class Tournament:
                     dates[self.fixtures_df["stage"] == resume_from].min().date()
                 )
                 resume_from = str(round_start - pd.Timedelta(days=1))
-            self.actual_results, _ = get_results_data(
+            actual_results, _ = get_results_data(
                 start_date=f"{year}-01-01", end_date=resume_from, competitions="W"
             )
+            self.fixtures_df["actual_home"] = np.nan
+            self.fixtures_df["actual_away"] = np.nan
+
+            for _, result in actual_results.iterrows():
+                fixture_idx = np.where(
+                    (self.fixtures_df["home_team"] == result["home_team"])
+                    & (self.fixtures_df["away_team"] == result["away_team"])
+                    & (self.fixtures_df["date"] == result["date"])
+                )[0]
+
+                if len(fixture_idx) == 0:
+                    continue
+                elif len(fixture_idx) > 1:
+                    raise RuntimeError(
+                        f"Found multiple {result['home_team']} vs. "
+                        f"{result['away_team']} fixtures on {result['date']}"
+                    )
+                else:
+                    self.fixtures_df["actual_home"].iloc[fixture_idx[0]] = result[
+                        "home_score"
+                    ]
+                    self.fixtures_df["actual_away"].iloc[fixture_idx[0]] = result[
+                        "away_score"
+                    ]
 
     def play_group_stage(
         self,
@@ -464,15 +489,65 @@ class Tournament:
         print("Group")
         t = time()
         group_fixtures = self.fixtures_df[self.fixtures_df.stage == "Group"]
-        ...  # TODO split into fixtures with and without results
-        results = wc_pred.sample_score(
-            group_fixtures["home_team"],
-            group_fixtures["away_team"],
+        fixtures_with_results = group_fixtures.dropna(
+            subset=["actual_home", "actual_away"]
+        )
+        fixtures_to_sample = group_fixtures[
+            group_fixtures[["actual_home", "actual_away"]].isna().all(axis=1)
+        ]
+        if len(fixtures_with_results) + len(fixtures_to_sample) != len(group_fixtures):
+            raise RuntimeError(
+                "Separating matches with and without results removed fixtures"
+            )
+
+        # sample fixtures without results
+        sampled_results = wc_pred.sample_score(
+            fixtures_to_sample["home_team"],
+            fixtures_to_sample["away_team"],
             seed=seed,
             num_samples=self.num_samples,
         )
-        ...  # TODO create replicated actual results arrays with correct shape
-        ...  # TODO merge simulated results and actual results
+
+        # create replicated actual results arrays
+        actual_results = {
+            "home_team": np.empty(
+                len(fixtures_with_results), dtype=sampled_results["home_team"].dtype
+            ),
+            "away_team": np.empty(
+                len(fixtures_with_results), dtype=sampled_results["away_team"].dtype
+            ),
+            "home_score": np.empty(
+                (len(fixtures_with_results), self.num_samples),
+                dtype=sampled_results["home_score"].dtype,
+            ),
+            "away_score": np.empty(
+                (len(fixtures_with_results), self.num_samples),
+                dtype=sampled_results["away_score"].dtype,
+            ),
+        }
+        for i in range(len(fixtures_with_results)):
+            row = fixtures_with_results.iloc[i]
+            actual_results["home_team"][i] = row["home_team"]
+            actual_results["away_team"][i] = row["away_team"]
+            actual_results["home_score"][i, :] = row["actual_home"]
+            actual_results["away_score"][i, :] = row["actual_away"]
+
+        # merge simulated results and actual results
+        results = {
+            "home_team": np.concatenate(
+                (sampled_results["home_team"], actual_results["home_team"])
+            ),
+            "away_team": np.concatenate(
+                (sampled_results["away_team"], actual_results["away_team"])
+            ),
+            "home_score": np.concatenate(
+                (sampled_results["home_score"], actual_results["home_score"])
+            ),
+            "away_score": np.concatenate(
+                (sampled_results["away_score"], actual_results["away_score"])
+            ),
+        }
+
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
