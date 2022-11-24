@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from .bpl_interface import WCPred
-from .data_loader import get_fixture_data, get_teams_data
+from .data_loader import get_fixture_data, get_results_data, get_teams_data
 
 
 class Group:
@@ -426,7 +426,12 @@ class Group:
 
 
 class Tournament:
-    def __init__(self, year: str = "2022", num_samples: int = 1):
+    def __init__(
+        self,
+        year: str = "2022",
+        num_samples: int = 1,
+        resume_from: Optional[str] = None,
+    ):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -438,6 +443,17 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
+        if resume_from is not None:
+            if resume_from in ["Group", "R16", "QF", "SF", "F"]:
+                # end date from tournament round fixture dates
+                dates = pd.to_datetime(self.fixtures_df["Date"])
+                round_start = (
+                    dates[self.fixtures_df["Stage"] == resume_from].min().date()
+                )
+                resume_from = str(round_start - pd.Timedelta(days=1))
+            self.actual_results, _ = get_results_data(
+                start_date=f"{year}-01-01", end_date=resume_from, competitions="W"
+            )
 
     def play_group_stage(
         self,
@@ -448,12 +464,15 @@ class Tournament:
         print("Group")
         t = time()
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
+        ...  # TODO split into fixtures with and without results
         results = wc_pred.sample_score(
             group_fixtures["Team_1"],
             group_fixtures["Team_2"],
             seed=seed,
             num_samples=self.num_samples,
         )
+        ...  # TODO create replicated actual results arrays with correct shape
+        ...  # TODO merge simulated results and actual results
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
