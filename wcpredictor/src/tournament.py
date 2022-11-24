@@ -430,14 +430,14 @@ class Tournament:
     def __init__(self,
                  year: str = "2022",
                  partial_predict: bool = False,
-                 partial_predict_end_date: Optional[str] = None,
+                 partial_predict_from_date: Optional[str] = None,
                  num_samples: int = 1):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
-        if partial_predict_end_date is None:
-            end_date = f"{year}-12-31"
+        if partial_predict_from_date is None:
+            partial_predict_from_date = f"{year}-12-31"
         self.results_df, _ = get_results_data(start_date=f"{year}-01-01",
-                                              end_date=end_date,
+                                              end_date=partial_predict_from_date,
                                               competitions=["W"])
         self.group_names = list(set(self.teams_df["Group"].values))
         self.groups = {}
@@ -462,6 +462,11 @@ class Tournament:
                 game_info["Team_2_score"].append(int(df["away_score"]))
                 # remove match from self.fixtures_df
                 self.fixtures_df.drop(index=index, inplace = True)
+            elif len(df)>1:
+                raise RuntimeError(
+                        f"Found multiple {self.results_df['home_team']} vs. "
+                        f"{self.results_df['away_team']} fixtures on {self.results_df['date']}"
+                    )
         return pd.DataFrame(game_info)
     
     def play_group_stage(

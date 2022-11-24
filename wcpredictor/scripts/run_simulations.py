@@ -19,6 +19,17 @@ from wcpredictor.src.utils import get_stage_difference_loss
 def get_cmd_line_args():
     parser = argparse.ArgumentParser("Simulate multiple World Cups")
     parser.add_argument(
+        "--partial_predict",
+        help="Whether or not to partially predict (i.e. predict from a certain date",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--partial_prediction_from_date",
+        help="at what point to simulate from",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
         "--num_simulations",
         help="How many simulations to run in total",
         type=int,
@@ -149,13 +160,15 @@ def merge_csv_outputs(output_csv, tournament_year, output_txt):
 
 def run_sims(
     tournament_year,
+    partial_predict,
+    partial_prediction_from_date,
     num_simulations,
     model,
     output_csv,
     output_loss=None,
     add_runid=True,
 ):
-    t = Tournament(tournament_year, num_samples=num_simulations)
+    t = Tournament(tournament_year, partial_predict, partial_prediction_from_date, num_simulations)
     t.play_group_stage(model)
     t.play_knockout_stages(model)
     t.count_stages()
@@ -176,8 +189,8 @@ def run_sims(
 
 
 def run_wrapper(args):
-    tournament_year, num_simulations, model, output_csv = args
-    return run_sims(tournament_year, num_simulations, model, output_csv)
+    tournament_year, partial_predict, partial_prediction_from_date, num_simulations, model, output_csv = args
+    return run_sims(tournament_year, partial_predict, partial_prediction_from_date, num_simulations, model, output_csv)
 
 
 def main():
@@ -198,6 +211,8 @@ def main():
         f"""
 Running simulations with
 tournament_year: {args.tournament_year}
+partial_predicton: {args.partial_predict}
+partial_prediction_from_date: {args.partial_prediction_from_date}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
 end_date: {end_date}
@@ -225,7 +240,12 @@ rankings: {ratings_src}
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
     sim_args = (
-        (args.tournament_year, args.per_tournament, model, output_csv)
+        (args.tournament_year,
+         args.partial_predict,
+         args.partial_prediction_from_date,
+         args.per_tournament,
+         model,
+         output_csv)
         for _ in range(n_tournaments)
     )
     with Pool(args.num_thread) as p:
