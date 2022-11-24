@@ -5,13 +5,14 @@ knockout stages, to the final, and produce a winner.
 
 import random
 from time import time
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+import jax.numpy as jnp
 
 from .bpl_interface import WCPred
-from .data_loader import get_fixture_data, get_teams_data
+from .data_loader import get_fixture_data, get_teams_data, get_results_data
 
 
 class Group:
@@ -426,19 +427,43 @@ class Group:
 
 
 class Tournament:
-    def __init__(self, year: str = "2022", num_samples: int = 1):
+    def __init__(self,
+                 year: str = "2022",
+                 partial_predict: bool = False,
+                 partial_predict_end_date: Optional[str] = None,
+                 num_samples: int = 1):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
+        if partial_predict_end_date is None:
+            end_date = f"{year}-12-31"
+        self.results_df, _ = get_results_data(start_date=f"{year}-01-01",
+                                              end_date=end_date,
+                                              competitions=["W"])
         self.group_names = list(set(self.teams_df["Group"].values))
         self.groups = {}
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
+        self.partial_predict = partial_predict
         self.bracket = pd.DataFrame(index=np.arange(num_samples))
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
 
+    def get_played_fixtures(self):
+        game_info = {"Team_1": [], "Team_2": [], "Team_1_score": [], "Team_2_score": []}
+        for index, row in self.fixtures_df.iterrows():
+            df = self.results_df[(self.results_df["home_team"]==row["Team_1"]) &
+                                 (self.results_df["away_team"]==row["Team_2"])]
+            if len(df)==1:
+                game_info["Team_1"].append(row["Team_1"])
+                game_info["Team_2"].append(row["Team_2"])
+                game_info["Team_1_score"].append(int(df["home_score"]))
+                game_info["Team_2_score"].append(int(df["away_score"]))
+                # remove match from self.fixtures_df
+                self.fixtures_df.drop(index=index, inplace = True)
+        return pd.DataFrame(game_info)
+    
     def play_group_stage(
         self,
         wc_pred: WCPred,
@@ -447,13 +472,30 @@ class Tournament:
     ) -> None:
         print("Group")
         t = time()
+        if self.partial_predict:
+            # find out which games have already been played
+            # remove played fixtures from self.fixtures_df
+            played_fixtures = self.get_played_fixtures()
         group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
+        # predict the results for the remaining games
         results = wc_pred.sample_score(
             group_fixtures["Team_1"],
             group_fixtures["Team_2"],
             seed=seed,
             num_samples=self.num_samples,
         )
+        if self.partial_predict:
+            # add in the played fixtures
+            for index, row in played_fixtures.iterrows():
+                results["home_score"] = jnp.append(results["home_score"],
+                                                jnp.repeat(row["Team_1_score"], self.num_samples).reshape(1, self.num_samples),
+                                                axis=0)
+                results["away_score"] = jnp.append(results["away_score"],
+                                                jnp.repeat(row["Team_2_score"], self.num_samples).reshape(1, self.num_samples),
+                                                axis=0)
+                results["home_team"] = np.append(results["home_team"], row["Team_1"])
+                results["away_team"] = np.append(results["away_team"], row["Team_2"],)
+        
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
