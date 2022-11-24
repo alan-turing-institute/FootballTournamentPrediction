@@ -437,6 +437,7 @@ class Tournament:
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
         if partial_predict_from_date is None:
+            # pull out all available games from that year's world cup
             partial_predict_from_date = f"{year}-12-31"
         self.results_df, _ = get_results_data(
             start_date=f"{year}-01-01",
