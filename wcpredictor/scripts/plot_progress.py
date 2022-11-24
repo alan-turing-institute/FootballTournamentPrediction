@@ -30,9 +30,9 @@ def main():
     offset = width * (len(teams) - 1) / 2
     # y-axis values for each selected team
     for i, team in enumerate(teams):
-        row = df.loc[df.team == team]
+        row = df.loc[df.Team == team]
         stages = [
-            row.G.values[0],
+            row.Group.values[0],
             row.R16.values[0],
             row.QF.values[0],
             row.SF.values[0],

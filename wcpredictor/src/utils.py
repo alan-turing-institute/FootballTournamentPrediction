@@ -2,7 +2,7 @@
 Assorted functions to get the BPL model, and predict results.
 """
 import math
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import jax.numpy as jnp
 import numpy as np
@@ -15,6 +15,8 @@ from .data_loader import (
     get_confederations_data,
     get_fifa_rankings_data,
     get_results_data,
+    get_teams_data,
+    get_wcresults_data,
 )
 
 
@@ -25,7 +27,9 @@ def get_and_train_model(
     rankings_source: str = "org",
     epsilon: float = 2.0,
     world_cup_weight: float = 4.0,
-    model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
+    model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
+    host: str = "Qatar",
+    **fit_args,
 ) -> WCPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
@@ -41,7 +45,6 @@ def get_and_train_model(
     values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
     neither (None).
     """
-    print("in get_and_train_model")
     results, weights_dict = get_results_data(
         start_date=start_date,
         end_date=end_date,
@@ -59,9 +62,10 @@ def get_and_train_model(
         world_cup_weight=world_cup_weight,
         weights_dict=weights_dict,
         model=model,
+        host=host,
     )
     wc_pred.set_training_data()
-    wc_pred.fit_model()
+    wc_pred.fit_model(**fit_args)
 
     return wc_pred
 
@@ -157,8 +161,9 @@ def forecast_evaluation(
     method: str = "rps",
 ) -> List[float]:
     """
-    Compute the Brier score, or Rank Probability score (RPS) to evaluate the model against
-    real match scores for a model (to use like a loss function). By default computes the RPS
+    Compute the Brier score, or Rank Probability score (RPS) to evaluate the model
+    against real match scores for a model (to use like a loss function). By default
+    computes the RPS
 
     Use 'competitions' argument to specify which rows to include in training data.
     Key for competitions:
@@ -207,7 +212,8 @@ def forecast_evaluation(
             test_data["home_team"],
             test_data["away_team"],
         )
-    # obtain len(results) x 3 array where each row is the outcome probabilities for each game
+    # obtain len(results) x 3 array where each row is the outcome probabilities
+    # for each game
     outcome_probs = jnp.concatenate(list(proba.values())).reshape([3, len(results)])
     outcome_probs = outcome_probs.transpose()
     # obtain actual match outcomes from the test data
@@ -222,7 +228,8 @@ def forecast_evaluation(
 
     metrics = []
     for i in range(len(results)):
-        # fix any nans (happens when have two very lobsided teams - computational underflow)
+        # fix any nans (happens when have two very lobsided teams - computational
+        # underflow)
         prediction = outcome_probs[i, :]
         if math.isnan(prediction[0].item()):
             prediction = prediction.at[0].set(1 - (prediction[1] + prediction[2]))
@@ -239,26 +246,6 @@ def forecast_evaluation(
             )
 
     return metrics
-
-
-def find_group(team, teams_df):
-    """
-    Look in teams_df and find the group for a given team
-
-    Parameters
-    ==========
-    team: str, team name, as given in teams.csv
-    teams_df: Pandas dataframe
-
-    Returns
-    =======
-    group_name: str, "A"-"H", or None if team not found
-    """
-    for idx, row in teams_df.iterrows():
-        if row.Team == team:
-            return row.Group
-    print("Unable to find {} in teams.csv".format(team))
-    return None
 
 
 def sort_teams_by(table_dict, metric):
@@ -284,40 +271,6 @@ def sort_teams_by(table_dict, metric):
     return team_list
 
 
-def predict_knockout_match(
-    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
-) -> str:
-    """
-    Parameters
-    ==========
-    team_1, team_2: both str, names of two teams
-
-    Returns:
-    ========
-    winning_team: str, one of team_1 or team_2
-    """
-    return wc_pred.get_fixture_probabilities(
-        fixture_teams=[(team_1, team_2)], knockout=True, seed=seed
-    )["simulated_outcome"][0]
-
-
-def predict_group_match(
-    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
-) -> Tuple[int, int]:
-    """
-    Parameters
-    ==========
-    team_1, team_2: both str, names of two teams
-
-    Returns:
-    ========
-    score_1, score_2: both int, score for each team
-    """
-    return wc_pred.get_fixture_goal_probabilities(
-        fixture_teams=[(team_1, team_2)], seed=seed
-    )[1][0]
-
-
 def get_most_probable_scoreline(
     wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
 ) -> Tuple[int, int, float]:
@@ -331,16 +284,10 @@ def get_most_probable_scoreline(
     score_1:int, score_2:int,  prob:float, scores of each team, and prob
                                            of that scoreline
     """
-    probs = wc_pred.get_fixture_goal_probabilities(
-        fixture_teams=[(team_1, team_2)], seed=seed
-    )[0][0]
-    score_1 = max(probs[team_1], key=probs[team_1].get)
-    score_2 = max(probs[team_2], key=probs[team_2].get)
-    prob = probs[team_1][score_1] * probs[team_2][score_2]
-    return score_1, score_2, float(prob)
+    return wc_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
 
 
-def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
+def get_difference_in_stages(stage_1: Union[str, pd.Series], stage_2: str) -> int:
     """
     Give an integer value to the differences between two
     'stages' i.e. how far a team got in the tournament.
@@ -349,13 +296,69 @@ def get_difference_in_stages(stage_1: str, stage_2: str) -> int:
 
     Parameters
     ==========
-    stage_1, stage_2: both str, can be "G","R16","QF","SF","RU","W"
+    stage_1, stage_2: both str, can be "Group","R16","QF","SF","RU","W"
+    stage_1 can also be a pd.Series with index ["Group", "R16", "QF", "SF", "RU", "W"],
+    containing simulated counts for progression to each round.
 
     Returns
     =======
     diff: int, how far apart the two stages are.
     """
-    stages = ["G", "R16", "QF", "SF", "RU", "W"]
-    if stage_1 not in stages and stage_2 in stages:
-        raise RuntimeError(f"Unknown value for stage - must be in {stages}")
-    return abs(stages.index(stage_1) - stages.index(stage_2))
+    stages = ["Group", "R16", "QF", "SF", "RU", "W"]
+
+    if isinstance(stage_1, str):
+        if stage_1 not in stages and stage_2 in stages:
+            raise RuntimeError(f"Unknown value for stage - must be in {stages}")
+        return abs(stages.index(stage_1) - stages.index(stage_2))
+
+    return sum(
+        cnt * abs(stages.index(st) - stages.index(stage_2))
+        for st, cnt in stage_1.items()
+    )
+
+
+def get_stage_difference_loss(
+    tournament_year: str,
+    sim_results: pd.DataFrame,
+    output_path: Optional[str] = None,
+    verbose: bool = True,
+) -> int:
+    """Compute the total loss for a set of simulations of a world cup using
+    get_difference_in_stages
+
+    Parameters
+    ----------
+    tournament_year : str
+        Year of the world cup to compute the loss for
+    sim_results : pd.DataFrame
+        Tournament.stage_counts from a number of tournament simulations
+    output_path : Optional[str], optional
+        Path to save the loss to, by default None
+    verbose : bool, optional
+        Print the total loss if true, by default True
+
+    Returns
+    -------
+    int
+        Total loss across all simulations in sim_results
+    """
+
+    teams_df = get_teams_data(tournament_year)
+    teams = list(teams_df.Team.values)
+    wcresults_df = None
+    wcresults_df = get_wcresults_data(tournament_year)
+    total_loss = 0
+    for team in teams:
+        actual_result = wcresults_df.loc[wcresults_df.Team == team].Stage.values[0]
+        total_loss += get_difference_in_stages(sim_results.loc[team], actual_result)
+
+    if verbose:
+        print(
+            f"\nTotal Loss = {total_loss} (mean = "
+            f"{total_loss / sim_results.iloc[0].sum():.2f})\n"
+        )
+    if output_path:
+        with open(f"{output_path}", "w") as outfile:
+            outfile.write(f"{total_loss}\n")
+
+    return total_loss

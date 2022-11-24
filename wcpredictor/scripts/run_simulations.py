@@ -1,30 +1,37 @@
 #!/usr/bin/env python
 import argparse
+import math
 import os
 import random
 from datetime import datetime
 from glob import glob
-from multiprocessing import Process, Queue
+from multiprocessing import Pool
+from time import time
 from uuid import uuid4
 
 import pandas as pd
 
-from wcpredictor import (
-    Tournament,
-    get_and_train_model,
-    get_difference_in_stages,
-    get_teams_data,
-    get_wcresults_data,
-)
+from wcpredictor import Tournament, get_and_train_model
+from wcpredictor.src.bpl_interface import WC_HOSTS
+from wcpredictor.src.utils import get_stage_difference_loss
 
 
 def get_cmd_line_args():
     parser = argparse.ArgumentParser("Simulate multiple World Cups")
     parser.add_argument(
-        "--num_simulations", help="How many simulations to run", type=int
+        "--num_simulations",
+        help="How many simulations to run in total",
+        type=int,
+        default=100,
     )
     parser.add_argument(
-        "--num_thread", help="How many simulations to run", type=int, default=4
+        "--per_tournament",
+        help="How many samples to run per tournament",
+        type=int,
+        default=100,
+    )
+    parser.add_argument(
+        "--num_thread", help="How many simulations to run", type=int, default=1
     )
     parser.add_argument(
         "--tournament_year",
@@ -56,7 +63,7 @@ def get_cmd_line_args():
     parser.add_argument(
         "--ratings_source",
         choices=["game", "org", "both"],
-        default="game",
+        default="org",
         help=(
             "if 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
             "organization ratings"
@@ -92,7 +99,6 @@ def get_dates_from_years_training(tournament_year, years):
     start_year = int(tournament_year) - years
     # always start at 1st June, to capture the summer tournament
     start_date = f"{start_year}-06-01"
-    end_year = int(tournament_year)
     # end at 1st June if tournament year is 2014 or 2018, or 20th Nov for 2022
     if tournament_year == "2022":
         end_date = "2022-11-20"
@@ -114,23 +120,31 @@ def get_start_end_dates(args):
         )
     else:
         raise RuntimeError(
-            "Need to provide either start_date and end_date, or years_training_data arguments"
+            "Need to provide either start_date and end_date, or years_training_data "
+            "arguments"
         )
     print(f"Start/End dates for training data are {start_date}, {end_date}")
     return start_date, end_date
 
 
-def merge_csv_outputs(output_csv):
+def merge_csv_outputs(output_csv, tournament_year, output_txt):
     files = glob(f"*_{output_csv}")
-    df = pd.concat(
+    simresults_df = pd.concat(
         [
-            pd.read_csv(f, usecols=["team", "G", "R16", "QF", "SF", "RU", "W"])
+            pd.read_csv(f, usecols=["Team", "Group", "R16", "QF", "SF", "RU", "W"])
             for f in files
         ]
     )
-    df = df.groupby("team").sum().to_csv(f"merged_{output_csv}")
+    simresults_df = simresults_df.groupby("Team").sum()
+    print(simresults_df.sort_values(by="W", ascending=False))
+    simresults_df.to_csv(output_csv)
     for f in files:
         os.remove(f)
+
+    if tournament_year != "2022":
+        get_stage_difference_loss(
+            tournament_year, simresults_df, output_path=output_txt, verbose=True
+        )
 
 
 def run_sims(
@@ -138,72 +152,32 @@ def run_sims(
     num_simulations,
     model,
     output_csv,
-    output_txt,
-    print_winner=False,
+    output_loss=None,
+    add_runid=True,
 ):
-    teams_df = get_teams_data(tournament_year)
-    teams = list(teams_df.Team.values)
-    team_results = {
-        team: {"G": 0, "R16": 0, "QF": 0, "SF": 0, "RU": 0, "W": 0} for team in teams
-    }
-    wcresults_df = None
-    loss_values = []
-    if tournament_year != "2022":
-        wcresults_df = get_wcresults_data(tournament_year)
-    for _ in range(num_simulations):
-        t = Tournament(tournament_year)
-        t.play_group_stage(model)
-        t.play_knockout_stages(model)
-        if print_winner:
-            print(f"====== WINNER: {t.winner} =======")
-        total_loss = 0
-        for team in teams:
-            result = t.get_furthest_position_for_team(team)
-            team_results[team][result] += 1
-            if tournament_year != "2022":
-                actual_result = wcresults_df.loc[
-                    wcresults_df.Team == team
-                ].Stage.values[0]
-                loss = get_difference_in_stages(result, actual_result)
-                total_loss += loss
-        loss_values.append(total_loss)
-    team_records = [{"team": k, **v} for k, v in team_results.items()]
+    t = Tournament(tournament_year, num_samples=num_simulations)
+    t.play_group_stage(model)
+    t.play_knockout_stages(model)
+    t.count_stages()
 
-    runid = str(uuid4())
+    if add_runid:
+        runid = str(uuid4())
+        output_csv = f"{runid}_{output_csv}"
+        output_loss = f"{runid}_{output_loss}" if output_loss else None
+    else:
+        runid = None
 
-    df = pd.DataFrame(team_records)
-    df.to_csv(f"{runid}_{output_csv}")
-    # output txt file containing loss function values
-    if tournament_year != "2022":
-        with open(f"{runid}_{output_txt}", "w") as outfile:
-            for val in loss_values:
-                outfile.write(f"{val}\n")
+    t.stage_counts.to_csv(output_csv)
+
+    if output_loss:
+        get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
+
+    return runid
 
 
-def run_wrapper(
-    queue,
-    pid,
-    tournament_year,
-    num_simulations,
-    model,
-    output_csv,
-    output_txt,
-    print_winner,
-):
-    while True:
-        status = queue.get()
-        if status == "DONE":
-            print(f"Process {pid} finished all jobs!")
-            break
-
-        run_sims(
-            tournament_year,
-            num_simulations,
-            model,
-            output_csv,
-            output_txt,
-            print_winner,
-        )
+def run_wrapper(args):
+    tournament_year, num_simulations, model, output_csv = args
+    return run_sims(tournament_year, num_simulations, model, output_csv)
 
 
 def main():
@@ -230,12 +204,12 @@ end_date: {end_date}
 comps: {comps}
 rankings: {ratings_src}
 {output_csv}
-{output_loss_txt}
     """
     )
     if args.seed:
         random.seed(args.seed)
 
+    model_start = time()
     model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
@@ -243,42 +217,32 @@ rankings: {ratings_src}
         rankings_source=ratings_src,
         epsilon=args.epsilon,
         world_cup_weight=args.world_cup_weight,
+        host=WC_HOSTS[args.tournament_year],
     )
+    model_time = time() - model_start
+    print(f"Model fit took {model_time:.2f}s")
 
-    # first add items to our multiprocessing queue
-    queue = Queue()
-    for i in range(args.num_thread):
-        queue.put(i)
+    sim_start = time()
+    n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
+    sim_args = (
+        (args.tournament_year, args.per_tournament, model, output_csv)
+        for _ in range(n_tournaments)
+    )
+    with Pool(args.num_thread) as p:
+        p.imap_unordered(run_wrapper, sim_args)
+        p.close()
+        p.join()
 
-    # add some items to the queue to make the target function exit
-    for _ in range(args.num_thread):
-        queue.put("DONE")
+    merge_csv_outputs(output_csv, args.tournament_year, output_loss_txt)
 
-    # define processes for running the jobs
-    procs = []
-    for i in range(args.num_thread):
-        p = Process(
-            target=run_wrapper,
-            args=(
-                queue,
-                i,
-                args.tournament_year,
-                args.num_simulations,
-                model,
-                output_csv,
-                output_loss_txt,
-                True,
-            ),
-        )
-        p.daemon = True
-        p.start()
-        procs.append(p)
-
-    # finally start the processes
-    for i in range(args.num_thread):
-        procs[i].join()
-
-    merge_csv_outputs(output_csv)
+    print(f"Model fit took {model_time:.2f}s")
+    sim_time = time() - sim_start
+    per_tournament = sim_time / args.num_simulations
+    print(
+        f"{args.num_simulations} tournaments took {sim_time:.3f}s "
+        f"({per_tournament:.3f}s per tournament)\n100,000 tournaments would take "
+        f"{per_tournament * 100000 / (60 * 60):.2f} hours"
+    )
 
 
 if __name__ == "__main__":

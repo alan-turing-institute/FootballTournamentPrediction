@@ -1,4 +1,5 @@
 # WorldCupPrediction
+
 Predicting results for the 2022 world cup.
 
 Matches are predicted using a framework based on the team-level model in https://github.com/alan-turing-institute/AIrsenal, which in turn uses https://github.com/anguswilliams91/bpl-next.
@@ -14,10 +15,12 @@ The **[New Scientist](https://www.newscientist.com/article/2347699-brazil-picked
 ## Installation
 
 The easiest way to use the code is via [poetry](https://python-poetry.org/).  If you have poetry installed, from this directory, you can do
-```
+
+```bash
 poetry shell
 poetry install
 ```
+
 to first open a shell in a virtual environment, and then install the dependencies and the `wcpredictor` package.
 
 ## Usage
@@ -27,19 +30,26 @@ to first open a shell in a virtual environment, and then install the dependencie
 There are a couple of command-line applications that can be run when the `wcpredictor` package is installed as described above.
 
 In order to simulate the tournament N times, you can do
-```
+
+```bash
 wcpred_run_simulations --num_simulations <N> --tournament_year <year> --training_data_start <YYYY-MM-DD> --training_data_end <YYYY-MM-DD> --output_csv <outputfilename> --use_ratings
 ```
+
 and the results, in the form of a table of how many times each team got to each stage of the competition, will be saved in the specified csv file.   At present, the allowed values for `tournament_year` are "2014", "2018", and "2022" (the default).
 
-Once you have a csv file saved from running that, you can plot the top ten most frequent winners by running:
-```
+⚠️ **Warning:** ⚠️ The simulations can use ***a lot*** of memory. If you want to run more than around 250 simulationns we recommend checking the help (`wcpred_run_simulations --help`) and setting the `--num_thread` and `--per_tournament` arguments (start low andd then slowly increase them whilst monitoring CPU/memory usage on your system).
+
+Once you have a csv file saved from running the simulation, you can plot the top ten most frequent winners by running:
+
+```bash
 wcpred_plot_winners --input_csv <inputfilename> --output_png <outputfilename>
 ```
+
 and the results will be saved in the specified png.
 
 You can also make a plot showing how far in the tournament a selection of teams got, by running e.g.:
-```
+
+```bash
 wcpred_plot_progress --input_csv <inputfilename> --output_png <outputfilename> --team_list "England,Wales"
 ```
 
@@ -48,7 +58,8 @@ Note that both these commands can be run with `--help` to see the options.
 ### Running a single tournament
 
 In a python session, you can do something like:
-```
+
+```python
 python
 >>> from wcpredictor import Tournament, get_and_train_model
 >>> t = Tournament("2022") # can also choose "2018" or "2014"

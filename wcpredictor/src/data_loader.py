@@ -138,9 +138,9 @@ def get_results_data(
         (results_df.date >= start_date) & (results_df.date <= end_date)
     ]
     # replace any names that we have written differently elsewhere
-    results_df.replace("United States", "USA", inplace=True)
-    results_df.replace(
-        "United States Virgin Islands", "USA Virgin Islands", inplace=True
+    results_df = results_df.replace("United States", "USA")
+    results_df = results_df.replace(
+        "United States Virgin Islands", "USA Virgin Islands"
     )
     # filter matches with non-fifa recognised teams
     if rankings_source:

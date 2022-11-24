@@ -9,12 +9,9 @@ from .src.data_loader import (
 )
 from .src.tournament import Group, Tournament
 from .src.utils import (
-    find_group,
     get_and_train_model,
     get_difference_in_stages,
     get_most_probable_scoreline,
-    predict_group_match,
-    predict_knockout_match,
     sort_teams_by,
 )
 
@@ -28,11 +25,8 @@ __all__ = [
     "get_wcresults_data",
     "Group",
     "Tournament",
-    "find_group",
     "get_and_train_model",
     "get_difference_in_stages",
     "get_most_probable_scoreline",
-    "predict_group_match",
-    "predict_knockout_match",
     "sort_teams_by",
 ]

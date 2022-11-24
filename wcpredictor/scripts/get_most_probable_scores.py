@@ -2,13 +2,7 @@
 
 import argparse
 
-from wcpredictor import (
-    get_and_train_model,
-    get_fixture_data,
-    get_most_probable_scoreline,
-    predict_group_match,
-    predict_knockout_match,
-)
+from wcpredictor import get_and_train_model, get_fixture_data
 
 
 def get_cmd_line_args():
@@ -25,8 +19,7 @@ def get_cmd_line_args():
     parser.add_argument(
         "--show_probs", help="print the probability of result", action="store_true"
     )
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def get_fixture_indices(stage):
@@ -66,10 +59,11 @@ def main():
             print(f"\n{date}\n")
             current_date = date
         if args.sample:
-            score_1, score_2 = predict_group_match(model, team_1, team_2)
+            score = model.sample_score(team_1, team_2)
+            score_1, score_2 = score["home_score"][0], score["away_score"][0]
             print(f"{team_1} {score_1}:{score_2} {team_2}")
         else:
-            score_1, score_2, prob = get_most_probable_scoreline(model, team_1, team_2)
+            score_1, score_2, prob = model.get_most_probable_scoreline(team_1, team_2)
             output_string = f"{team_1} {score_1}:{score_2} {team_2}"
             if args.show_probs:
                 output_string += f" with probability of {prob*100:.1f}%"
