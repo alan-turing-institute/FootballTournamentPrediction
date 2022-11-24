@@ -48,6 +48,16 @@ def get_cmd_line_args():
         default=6,
     )
     parser.add_argument(
+        "--resume_from",
+        help=(
+            "Use actual results up to the given date or round strings, and then "
+            "simulate the tournament from that point onwards. Defaults to today's "
+            "date if simulating 2022 or 'None' otherwise"
+        ),
+        type=str,
+        default="None",
+    )
+    parser.add_argument(
         "--output_csv", help="Path to output CSV file", default="sim_results.csv"
     )
     parser.add_argument(
@@ -127,6 +137,12 @@ def get_start_end_dates(args):
     return start_date, end_date
 
 
+def get_resume_from(args):
+    if args.resume_from == "None":
+        return str(datetime.now().date()) if args.tournament_year == "2022" else None
+    return args.resume_from
+
+
 def merge_csv_outputs(output_csv, tournament_year, output_txt):
     files = glob(f"*_{output_csv}")
     simresults_df = pd.concat(
@@ -151,11 +167,14 @@ def run_sims(
     tournament_year,
     num_simulations,
     model,
+    resume_from,
     output_csv,
     output_loss=None,
     add_runid=True,
 ):
-    t = Tournament(tournament_year, num_samples=num_simulations)
+    t = Tournament(
+        tournament_year, num_samples=num_simulations, resume_from=resume_from
+    )
     t.play_group_stage(model)
     t.play_knockout_stages(model)
     t.count_stages()
@@ -176,8 +195,8 @@ def run_sims(
 
 
 def run_wrapper(args):
-    tournament_year, num_simulations, model, output_csv = args
-    return run_sims(tournament_year, num_simulations, model, output_csv)
+    tournament_year, num_simulations, model, resume_from, output_csv = args
+    return run_sims(tournament_year, num_simulations, model, resume_from, output_csv)
 
 
 def main():
@@ -191,6 +210,7 @@ def main():
         for comp in exclude_comps:
             comps.remove(comp)
     start_date, end_date = get_start_end_dates(args)
+    resume_from = get_resume_from(args)
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}"
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
@@ -201,6 +221,7 @@ tournament_year: {args.tournament_year}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
 end_date: {end_date}
+resume_from: {resume_from}
 comps: {comps}
 rankings: {ratings_src}
 {output_csv}
@@ -225,7 +246,7 @@ rankings: {ratings_src}
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
     sim_args = (
-        (args.tournament_year, args.per_tournament, model, output_csv)
+        (args.tournament_year, args.per_tournament, model, resume_from, output_csv)
         for _ in range(n_tournaments)
     )
     with Pool(args.num_thread) as p:
