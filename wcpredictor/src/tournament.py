@@ -448,12 +448,12 @@ class Tournament:
             if resume_from in ["Group", "R16", "QF", "SF", "F"]:
                 # end date from tournament round fixture dates
                 dates = pd.to_datetime(self.fixtures_df["date"])
-                round_start = (
+                resume_from = (  # round start date
                     dates[self.fixtures_df["stage"] == resume_from].min().date()
                 )
-                resume_from = str(round_start - pd.Timedelta(days=1))
+            end_date = str(pd.to_datetime(resume_from) - pd.Timedelta(days=1))
             actual_results, _ = get_results_data(
-                start_date=f"{year}-01-01", end_date=resume_from, competitions="W"
+                start_date=f"{year}-01-01", end_date=end_date, competitions="W"
             )
             self.fixtures_df["actual_home"] = np.nan
             self.fixtures_df["actual_away"] = np.nan
