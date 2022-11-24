@@ -405,7 +405,7 @@ class WCPred:
 
     def get_most_probable_scoreline(
         self, home_team: Union[str, List[str]], away_team: Union[str, List[str]]
-    ) -> Tuple[np.ndaarray, np.ndarray, np.ndarray]:
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Get the most probable scoreline for matches between home_team and
         away_team. Returned values are arrays home_goals, away_goals, and the
         probability of that scoreline"""
