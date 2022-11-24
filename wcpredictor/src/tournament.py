@@ -427,18 +427,22 @@ class Group:
 
 
 class Tournament:
-    def __init__(self,
-                 year: str = "2022",
-                 partial_predict: bool = False,
-                 partial_predict_from_date: Optional[str] = None,
-                 num_samples: int = 1):
+    def __init__(
+        self,
+        year: str = "2022",
+        partial_predict: bool = False,
+        partial_predict_from_date: Optional[str] = None,
+        num_samples: int = 1,
+    ):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
         if partial_predict_from_date is None:
             partial_predict_from_date = f"{year}-12-31"
-        self.results_df, _ = get_results_data(start_date=f"{year}-01-01",
-                                              end_date=partial_predict_from_date,
-                                              competitions=["W"])
+        self.results_df, _ = get_results_data(
+            start_date=f"{year}-01-01",
+            end_date=partial_predict_from_date,
+            competitions=["W"],
+        )
         self.group_names = list(set(self.teams_df["Group"].values))
         self.groups = {}
         for n in self.group_names:
@@ -453,22 +457,24 @@ class Tournament:
     def get_played_fixtures(self):
         game_info = {"Team_1": [], "Team_2": [], "Team_1_score": [], "Team_2_score": []}
         for index, row in self.fixtures_df.iterrows():
-            df = self.results_df[(self.results_df["home_team"]==row["Team_1"]) &
-                                 (self.results_df["away_team"]==row["Team_2"])]
-            if len(df)==1:
+            df = self.results_df[
+                (self.results_df["home_team"] == row["Team_1"])
+                & (self.results_df["away_team"] == row["Team_2"])
+            ]
+            if len(df) == 1:
                 game_info["Team_1"].append(row["Team_1"])
                 game_info["Team_2"].append(row["Team_2"])
                 game_info["Team_1_score"].append(int(df["home_score"]))
                 game_info["Team_2_score"].append(int(df["away_score"]))
                 # remove match from self.fixtures_df
-                self.fixtures_df.drop(index=index, inplace = True)
-            elif len(df)>1:
+                self.fixtures_df.drop(index=index, inplace=True)
+            elif len(df) > 1:
                 raise RuntimeError(
-                        f"Found multiple {self.results_df['home_team']} vs. "
-                        f"{self.results_df['away_team']} fixtures on {self.results_df['date']}"
-                    )
+                    f"Found multiple {self.results_df['home_team']} vs. "
+                    f"{self.results_df['away_team']} fixtures on {self.results_df['date']}"
+                )
         return pd.DataFrame(game_info)
-    
+
     def play_group_stage(
         self,
         wc_pred: WCPred,
@@ -492,15 +498,26 @@ class Tournament:
         if self.partial_predict:
             # add in the played fixtures
             for index, row in played_fixtures.iterrows():
-                results["home_score"] = jnp.append(results["home_score"],
-                                                jnp.repeat(row["Team_1_score"], self.num_samples).reshape(1, self.num_samples),
-                                                axis=0)
-                results["away_score"] = jnp.append(results["away_score"],
-                                                jnp.repeat(row["Team_2_score"], self.num_samples).reshape(1, self.num_samples),
-                                                axis=0)
+                results["home_score"] = jnp.append(
+                    results["home_score"],
+                    jnp.repeat(row["Team_1_score"], self.num_samples).reshape(
+                        1, self.num_samples
+                    ),
+                    axis=0,
+                )
+                results["away_score"] = jnp.append(
+                    results["away_score"],
+                    jnp.repeat(row["Team_2_score"], self.num_samples).reshape(
+                        1, self.num_samples
+                    ),
+                    axis=0,
+                )
                 results["home_team"] = np.append(results["home_team"], row["Team_1"])
-                results["away_team"] = np.append(results["away_team"], row["Team_2"],)
-        
+                results["away_team"] = np.append(
+                    results["away_team"],
+                    row["Team_2"],
+                )
+
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)

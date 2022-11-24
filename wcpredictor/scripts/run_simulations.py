@@ -168,7 +168,9 @@ def run_sims(
     output_loss=None,
     add_runid=True,
 ):
-    t = Tournament(tournament_year, partial_predict, partial_prediction_from_date, num_simulations)
+    t = Tournament(
+        tournament_year, partial_predict, partial_prediction_from_date, num_simulations
+    )
     t.play_group_stage(model)
     t.play_knockout_stages(model)
     t.count_stages()
@@ -189,8 +191,22 @@ def run_sims(
 
 
 def run_wrapper(args):
-    tournament_year, partial_predict, partial_prediction_from_date, num_simulations, model, output_csv = args
-    return run_sims(tournament_year, partial_predict, partial_prediction_from_date, num_simulations, model, output_csv)
+    (
+        tournament_year,
+        partial_predict,
+        partial_prediction_from_date,
+        num_simulations,
+        model,
+        output_csv,
+    ) = args
+    return run_sims(
+        tournament_year,
+        partial_predict,
+        partial_prediction_from_date,
+        num_simulations,
+        model,
+        output_csv,
+    )
 
 
 def main():
@@ -240,12 +256,14 @@ rankings: {ratings_src}
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
     sim_args = (
-        (args.tournament_year,
-         args.partial_predict,
-         args.partial_prediction_from_date,
-         args.per_tournament,
-         model,
-         output_csv)
+        (
+            args.tournament_year,
+            args.partial_predict,
+            args.partial_prediction_from_date,
+            args.per_tournament,
+            model,
+            output_csv,
+        )
         for _ in range(n_tournaments)
     )
     with Pool(args.num_thread) as p:
