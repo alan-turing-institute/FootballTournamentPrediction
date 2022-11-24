@@ -172,6 +172,9 @@ class Group:
         metric: str,
         verbose: bool = False,
     ) -> None:
+        """Recursively called on subsequent metrics until all the positions in the table
+        can be filled without ties (with ties broken at random if all other metrics are
+        tied)"""
         if len(teams_to_sort) != len(positions_to_fill):
             raise RuntimeError(
                 f"Can't fill {len(positions_to_fill)} positions with "
@@ -390,12 +393,12 @@ class Group:
 
     def add_results(self, results):
         """
-        Add a result for a group-stage match.
+        Add a results for group-stage matches.
         Parameters
         ==========
-        fixtures: dict of results (with keys 'home_team', 'away_team', 'home_score',
-        'away_score')
-        results: Simulated match scores for all fixtures in df
+        results: Simulated match scores with keys home_team, away_team, home_score,
+        away_score. These will be filtered to only include fixtures that are between
+        teams in the group.
         """
         group_mask = np.isin(results["home_team"], self.teams)
         self.results = {

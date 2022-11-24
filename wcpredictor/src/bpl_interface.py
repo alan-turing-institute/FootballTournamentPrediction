@@ -2,7 +2,7 @@
 Interface to the NumPyro team model in bpl-next:
 https://github.com/anguswilliams91/bpl-next
 """
-from typing import List, Optional
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -33,7 +33,7 @@ class WCPred:
         world_cup_weight: float = 1.0,
         weights_dict: Optional[dict[str, float]] = None,
         model: BaseMatchPredictor = None,
-        host="Qatar",
+        host: str = "Qatar",
     ):
         self.results = results
         self.fixtures = fixtures
@@ -95,6 +95,7 @@ class WCPred:
         return ratings_dict
 
     def check_teams_in_ratings(self) -> bool:
+        """Validate whether there are (e.g. FIFA) ratings for all the teams"""
         if self.ratings is None:
             return True
         teams = pd.Series(self.teams)
@@ -144,14 +145,15 @@ class WCPred:
 
     def get_fixture_probabilities(
         self,
-        home_team,
-        away_team,
+        home_team: Union[str, List[str]],
+        away_team: Union[str, List[str]],
         knockout: bool = False,
-    ) -> pd.DataFrame:
+    ) -> dict:
         """
-        Returns probabilities and predictions for all fixtures in a given gameweek and
-        season, as a data frame with a row for each fixture and columns being home_team,
-        away_team, home_win_probability, draw_probability, away_win_probability.
+        Returns probabilities and predictions for the fixtures defined by home_team,
+        and away_team as a dict with keys home_team, away_team, home_win, away_win,
+        and draw, where the last 3 are the probabilities of that result. If knockout
+        is True don't consider the possibility of draws.
         """
         (
             home_team,
@@ -180,7 +182,9 @@ class WCPred:
             result["draw"] = p["draw"]
         return result
 
-    def _parse_sim_args(self, home_team, away_team):
+    def _parse_sim_args(
+        self, home_team: Union[str, List[str]], away_team: Union[str, List[str]]
+    ):
         if isinstance(home_team, str):
             home_team = [home_team]
         if isinstance(away_team, str):
@@ -201,7 +205,16 @@ class WCPred:
 
         return home_team, away_team, home_conference, away_conference, venue
 
-    def sample_score(self, home_team, away_team, num_samples=1, seed=None):
+    def sample_score(
+        self,
+        home_team: Union[str, List[str]],
+        away_team: Union[str, List[str]],
+        num_samples: int = 1,
+        seed: int = None,
+    ) -> dict:
+        """Sample the score of matches between home_team and away_team num_samples
+        times, returned as a dict with keys home_team, away_team, home_score, away_score
+        """
         (
             home_team,
             away_team,
@@ -242,8 +255,17 @@ class WCPred:
         return result
 
     def sample_outcome(
-        self, home_team, away_team, knockout=False, num_samples=1, seed=None
-    ):
+        self,
+        home_team: Union[str, List[str]],
+        away_team: Union[str, List[str]],
+        knockout: bool = False,
+        num_samples: float = 1,
+        seed: int = None,
+    ) -> np.ndarray:
+        """Sample the outcome of matches between home_team and away_team num_samples
+        times, returned as an array of strings representing the winning team or 'Draw'
+        ('Draw' only considered if knockout is False)
+        """
         (
             home_team,
             away_team,
@@ -283,7 +305,11 @@ class WCPred:
                 seed,
             )
 
-    def get_fixture_score_probabilities(self, home_team, away_team):
+    def get_fixture_score_probabilities(
+        self, home_team: Union[str, List[str]], away_team: Union[str, List[str]]
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute the proability of exact scorelines in fixtures between home_team
+        and away_team. Returned values are (probabilities, home_score, away_score)"""
         (
             home_team,
             away_team,
@@ -301,10 +327,16 @@ class WCPred:
         else:
             return self.model.predict_score_grid_proba(home_team, away_team)
 
-    def get_fixture_team_goal_probabilities(self, home_team, away_team, max_goals=10):
+    def get_fixture_team_goal_probabilities(
+        self,
+        home_team: Union[str, List[str]],
+        away_team: Union[str, List[str]],
+        max_goals: int = 10,
+    ) -> dict:
         """
         Get the probability that each team in a fixture scores any number of goals up to
-        max_goals, and prediction of goals scored.
+        max_goals, and prediction of goals scored. Returned as dict with keys goals,
+        home_team, away_team, home_prob, away_prob.
         """
         (
             home_team,
@@ -371,7 +403,12 @@ class WCPred:
             "away_prob": away_team_goal_prob,
         }
 
-    def get_most_probable_scoreline(self, home_team, away_team):
+    def get_most_probable_scoreline(
+        self, home_team: Union[str, List[str]], away_team: Union[str, List[str]]
+    ) -> Tuple[np.ndaarray, np.ndarray, np.ndarray]:
+        """Get the most probable scoreline for matches between home_team and
+        away_team. Returned values are arrays home_goals, away_goals, and the
+        probability of that scoreline"""
         probs, home_goals, away_goals = self.get_fixture_score_probabilities(
             home_team, away_team
         )
