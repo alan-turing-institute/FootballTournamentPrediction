@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from .bpl_interface import WCPred
-from .data_loader import get_fixture_data, get_results_data, get_teams_data
+from .data_loader import get_fixture_data, get_teams_data
 
 
 class Group:
@@ -426,13 +426,7 @@ class Group:
 
 
 class Tournament:
-    def __init__(
-        self,
-        year: str = "2022",
-        num_samples: int = 1,
-        resume_from: Optional[str] = None,
-    ):
-        self.year = year
+    def __init__(self, year: str = "2022", num_samples: int = 1):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year)
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -444,14 +438,6 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
-        if resume_from is not None:
-            if resume_from in []:
-                # end date from tournament round fixture dates
-                ...
-            r, _ = get_results_data(
-                start_date=f"{year}-01-01", end_date=resume_from, competitions="W"
-            )
-            self.actual_results = ...
 
     def play_group_stage(
         self,
