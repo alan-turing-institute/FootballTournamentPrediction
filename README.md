@@ -76,3 +76,6 @@ Position |  Team   | Points | GS |  GA
 >>> t.play_knockout_stages(model)
 >>> print(t.winner)
 ```
+
+### Pre-tournament predictions:
+![world_cup_2022_predictions](plots/plots/predictions.png)
