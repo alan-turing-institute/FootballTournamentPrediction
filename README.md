@@ -1,8 +1,8 @@
 # WorldCupPrediction | AIrgentina
 
-<img align="right" width="150" height="150" src="https://github.com/alan-turing-institute/WorldCupPrediction/blob/main/plots/AIrgentina_hex.png">
+<img align="right" width="150" height="150" src="plots/AIrgentina_hex.png">
 
-Predicting results for the 2022 world cup.
+Predicting results for the 2022 World Cup.
 
 Matches are predicted using a framework based on the team-level model in https://github.com/alan-turing-institute/AIrsenal, which in turn uses https://github.com/anguswilliams91/bpl-next.
 This model is trained on international mens football results obtained from https://github.com/martj42/international_results.
