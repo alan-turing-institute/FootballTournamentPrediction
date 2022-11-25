@@ -129,4 +129,7 @@ dmypy.json
 .pyre/
 
 # emacs autosave
-*~
+i*~
+
+# miscellaneous
+*.DS_Store

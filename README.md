@@ -1,4 +1,6 @@
-# WorldCupPrediction
+# WorldCupPrediction | AIrgentina
+
+<img align="right" width="150" height="150" src="https://github.com/alan-turing-institute/WorldCupPrediction/blob/plots/plots/AIrgentina_hex.png">
 
 Predicting results for the 2022 world cup.
 
@@ -76,3 +78,6 @@ Position |  Team   | Points | GS |  GA
 >>> t.play_knockout_stages(model)
 >>> print(t.winner)
 ```
+
+### Pre-tournament predictions:
+![world_cup_2022_predictions](plots/plots/predictions.png)
