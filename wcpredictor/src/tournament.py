@@ -456,6 +456,7 @@ class Tournament:
         self.stage_counts = None
 
     def get_played_fixtures(self):
+        remaining_fixtures = self.fixtures_df.copy(deep=True)
         game_info = {"Team_1": [], "Team_2": [], "Team_1_score": [], "Team_2_score": []}
         for index, row in self.fixtures_df.iterrows():
             df = self.results_df[
@@ -468,13 +469,13 @@ class Tournament:
                 game_info["Team_1_score"].append(int(df["home_score"]))
                 game_info["Team_2_score"].append(int(df["away_score"]))
                 # remove match from self.fixtures_df
-                self.fixtures_df.drop(index=index, inplace=True)
+                remaining_fixtures.drop(index=index, inplace=True)
             elif len(df) > 1:
                 raise RuntimeError(
                     f"Found multiple {self.results_df['home_team']} vs. "
                     f"{self.results_df['away_team']} fixtures on {self.results_df['date']}"
                 )
-        return pd.DataFrame(game_info)
+        return pd.DataFrame(game_info), remaining_fixtures
 
     def play_group_stage(
         self,
@@ -487,8 +488,10 @@ class Tournament:
         if self.partial_predict:
             # find out which games have already been played
             # remove played fixtures from self.fixtures_df
-            played_fixtures = self.get_played_fixtures()
-        group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
+            played_fixtures, group_fixtures = self.get_played_fixtures()
+            group_fixtures = group_fixtures[group_fixtures.Stage == "Group"]
+        else:
+            group_fixtures = self.fixtures_df[self.fixtures_df.Stage == "Group"]
         # predict the results for the remaining games
         results = wc_pred.sample_score(
             group_fixtures["Team_1"],
