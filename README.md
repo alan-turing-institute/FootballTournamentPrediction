@@ -1,6 +1,6 @@
 # WorldCupPrediction | AIrgentina
 
-<img align="right" width="150" height="150" src="https://github.com/alan-turing-institute/WorldCupPrediction/blob/plots/plots/AIrgentina_hex.png">
+<img align="right" width="150" height="150" src="https://github.com/alan-turing-institute/WorldCupPrediction/blob/main/plots/AIrgentina_hex.png">
 
 Predicting results for the 2022 world cup.
 
