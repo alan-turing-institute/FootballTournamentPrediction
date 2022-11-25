@@ -1,4 +1,4 @@
-# WorldCupPrediction
+# WorldCupPrediction | AIrgentina
 
 Predicting results for the 2022 world cup.
 
