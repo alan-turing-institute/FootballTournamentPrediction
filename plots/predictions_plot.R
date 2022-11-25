@@ -5,9 +5,11 @@ library(gtExtras)
 library(webshot2)
 
 # # before World Cup
-original <- read.csv("merged_1668598471_ep_2_wc_4_100000.csv")
+original <- read.csv("original_predictions.csv")
 # after Round 1 games
-round_1 <- read.csv("1669331060_sim_results.csv")
+round_1 <- read.csv("after_round_1.csv")
+# after Round 1 games and Wales-Iran
+round_1_WI <- read.csv("after_round_1_wales_iran.csv")
 
 get_progression_probabiltiies <- function(df, n_sim) {
   df <- df[order(df$W, decreasing = TRUE),]
@@ -137,4 +139,22 @@ create_table_plot_alt_colours(data_frame = after_round_1_prob,
                               subtitle = "After Round 1",
                               filename = "plots/after_round_1_colour_diff.png")
 
+# after round 1 plots with Wales-Iran
+after_round_1_prob <- get_progression_probabiltiies(round_1_WI, 100000)
+after_round_1_diff <- get_progression_prob_differences(new_df = after_round_1_prob,
+                                                       old_df = original_prob)
+
+create_table_plot(data_frame = after_round_1_prob,
+                  domain = c(-0.5, 1),
+                  subtitle = "After Round 1 (and Wales-Iran)",
+                  filename = "plots/after_round_1_WI.png")
+create_table_plot(data_frame = after_round_1_diff,
+                  domain = c(-0.5, 0.5),
+                  subtitle = "Difference in probability after Round 1 (and Wales-Iran)",
+                  filename = "plots/after_round_1_WI_diff.png")
+create_table_plot_alt_colours(data_frame = after_round_1_prob,
+                              data_frame_for_colours = after_round_1_diff,
+                              domain = c(-0.5, 0.5),
+                              subtitle = "After Round 1 (and Wales-Iran)",
+                              filename = "plots/after_round_1_WI_colour_diff.png")
  
