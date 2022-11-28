@@ -218,6 +218,7 @@ def main():
         f"""
 Running simulations with
 tournament_year: {args.tournament_year}
+resume_from: {resume_from}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
 end_date: {end_date}
