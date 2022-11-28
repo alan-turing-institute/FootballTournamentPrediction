@@ -175,9 +175,7 @@ def run_sims(
     t = Tournament(
         tournament_year, num_samples=num_simulations, resume_from=resume_from
     )
-    t.play_group_stage(model)
-    t.play_knockout_stages(model)
-    t.count_stages()
+    t.play_tournament(model)
 
     if add_runid:
         runid = str(uuid4())

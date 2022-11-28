@@ -11,7 +11,14 @@ import numpy as np
 import pandas as pd
 
 from .bpl_interface import WCPred
-from .data_loader import get_fixture_data, get_results_data, get_teams_data
+from .data_loader import (
+    get_alias_data,
+    get_fixture_data,
+    get_results_data,
+    get_teams_data,
+)
+
+STAGES = ["Group", "R16", "QF", "SF", "F"]
 
 
 class Group:
@@ -433,62 +440,106 @@ class Tournament:
         resume_from: Optional[str] = None,
     ):
         self.teams_df = get_teams_data(year)
-        self.fixtures_df = get_fixture_data(year)
+        self.fixtures_df = get_fixture_data(year).sort_values(by="date")
         self.group_names = list(set(self.teams_df["Group"].values))
         self.groups = {}
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
-        self.bracket = pd.DataFrame(index=np.arange(num_samples))
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
+        self.resume_date, self.resume_stage = self._parse_resume_from(resume_from, year)
+        self._fill_played_fixtures(year)
+        self.bracket = self._init_bracket(year)
 
-        if resume_from is not None:
-            if resume_from in ["Group", "R16", "QF", "SF", "F"]:
-                # end date from tournament round fixture dates
-                dates = pd.to_datetime(self.fixtures_df["date"])
-                resume_from = (  # round start date
-                    dates[self.fixtures_df["stage"] == resume_from].min().date()
+    def _parse_resume_from(self, resume_from, year):
+        if resume_from is None:
+            # starting from the beginning, i.e. the group stage
+            return pd.to_datetime(f"{year}-1-1"), "Group"
+        if resume_from in STAGES:
+            # end date from tournament round fixture dates
+            dates = pd.to_datetime(self.fixtures_df["date"])
+            # round start date
+            resume_date = dates[self.fixtures_df["stage"] == resume_from].min()
+            return resume_date, resume_from
+
+        if resume_from == "latest":
+            resume_from = f"{year}-12-31"
+        actual_results, _ = get_results_data(
+            start_date=f"{year}-01-01",
+            end_date=pd.to_datetime(resume_from),
+            competitions="W",
+        )
+        resume_date = (
+            actual_results[actual_results["date"] <= resume_from]
+            .sort_values(by="date")
+            .iloc[-1]["date"]
+        )
+        dates = pd.to_datetime(self.fixtures_df["date"])
+        resume_stage = self.fixtures_df[dates == resume_from].iloc[0]["stage"]
+        return resume_date, resume_stage
+
+    def _fill_played_fixtures(self, year):
+        """Fill the actual results of played results up to resume_from, and return
+        the stage that takes us up to"""
+        self.fixtures_df["actual_home"] = np.nan
+        self.fixtures_df["actual_away"] = np.nan
+
+        end_date = self.resume_date - pd.Timedelta(days=1)
+        actual_results, _ = get_results_data(
+            start_date=f"{year}-01-01",
+            end_date=pd.to_datetime(end_date),
+            competitions="W",
+        )
+
+        for _, result in actual_results.iterrows():
+            fixture_idx = np.where(
+                (self.fixtures_df["home_team"] == result["home_team"])
+                & (self.fixtures_df["away_team"] == result["away_team"])
+                & (self.fixtures_df["date"] == result["date"])
+            )[0]
+            if len(fixture_idx) == 0:
+                continue
+            elif len(fixture_idx) > 1:
+                raise RuntimeError(
+                    f"Found multiple {result['home_team']} vs. "
+                    f"{result['away_team']} fixtures on {result['date']}"
                 )
-            end_date = str(pd.to_datetime(resume_from) - pd.Timedelta(days=1))
-            actual_results, _ = get_results_data(
-                start_date=f"{year}-01-01", end_date=end_date, competitions="W"
-            )
-            self.fixtures_df["actual_home"] = np.nan
-            self.fixtures_df["actual_away"] = np.nan
+            else:
+                self.fixtures_df.loc[
+                    self.fixtures_df.index[fixture_idx[0]], "actual_home"
+                ] = result["home_score"]
+                self.fixtures_df.loc[
+                    self.fixtures_df.index[fixture_idx[0]], "actual_away"
+                ] = result["away_score"]
 
-            for _, result in actual_results.iterrows():
-                fixture_idx = np.where(
-                    (self.fixtures_df["home_team"] == result["home_team"])
-                    & (self.fixtures_df["away_team"] == result["away_team"])
-                    & (self.fixtures_df["date"] == result["date"])
-                )[0]
+    def _init_bracket(self, year):
+        aliases = get_alias_data(year)
+        # not na actual score and not an actual team name
+        bracket = pd.DataFrame(
+            index=np.arange(self.num_samples), columns=aliases["team"].index.values
+        )
+        if self.resume_stage == "Group":
+            return bracket
 
-                if len(fixture_idx) == 0:
-                    continue
-                elif len(fixture_idx) > 1:
-                    raise RuntimeError(
-                        f"Found multiple {result['home_team']} vs. "
-                        f"{result['away_team']} fixtures on {result['date']}"
-                    )
-                else:
-                    self.fixtures_df["actual_home"].iloc[fixture_idx[0]] = result[
-                        "home_score"
-                    ]
-                    self.fixtures_df["actual_away"].iloc[fixture_idx[0]] = result[
-                        "away_score"
-                    ]
+        group_aliases = ["1" + gn for gn in self.group_names]
+        group_aliases += ["2" + gn for gn in self.group_names]
+        for aka in group_aliases:
+            bracket[aka] = aliases.loc[aka]
+        self.fixtures_df[
+            (self.fixtures_df["date"] < self.resume_date)
+            & (self.fixtures_df["stage"] != "Group")
+        ]
 
-    def play_group_stage(
-        self,
-        wc_pred: WCPred,
-        seed: Optional[int] = None,
-        head_to_head: bool = True,
-    ) -> None:
-        print("Group")
-        t = time()
-        group_fixtures = self.fixtures_df[self.fixtures_df.stage == "Group"]
+        for aka, team in aliases["team"].items():
+            # TODO only fill up to resume_date
+            bracket[aka] = team
+        return bracket
+
+    def split_played_fixtures(self, stage):
+        """Separate matches with and without actual results"""
+        group_fixtures = self.fixtures_df[self.fixtures_df.stage == stage]
         fixtures_with_results = group_fixtures.dropna(
             subset=["actual_home", "actual_away"]
         )
@@ -499,14 +550,11 @@ class Tournament:
             raise RuntimeError(
                 "Separating matches with and without results removed fixtures"
             )
+        return fixtures_to_sample, fixtures_with_results
 
-        # sample fixtures without results
-        sampled_results = wc_pred.sample_score(
-            fixtures_to_sample["home_team"],
-            fixtures_to_sample["away_team"],
-            seed=seed,
-            num_samples=self.num_samples,
-        )
+    def _merge_scores(self, sampled_results, fixtures_with_results, num_samples):
+        if len(fixtures_with_results) == 0:
+            return sampled_results
 
         # create replicated actual results arrays
         actual_results = {
@@ -517,11 +565,11 @@ class Tournament:
                 len(fixtures_with_results), dtype=sampled_results["away_team"].dtype
             ),
             "home_score": np.empty(
-                (len(fixtures_with_results), self.num_samples),
+                (len(fixtures_with_results), num_samples),
                 dtype=sampled_results["home_score"].dtype,
             ),
             "away_score": np.empty(
-                (len(fixtures_with_results), self.num_samples),
+                (len(fixtures_with_results), num_samples),
                 dtype=sampled_results["away_score"].dtype,
             ),
         }
@@ -533,7 +581,7 @@ class Tournament:
             actual_results["away_score"][i, :] = row["actual_away"]
 
         # merge simulated results and actual results
-        results = {
+        return {
             "home_team": np.concatenate(
                 (sampled_results["home_team"], actual_results["home_team"])
             ),
@@ -548,9 +596,45 @@ class Tournament:
             ),
         }
 
+    def play_tournament(
+        self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
+    ):
+        if self.resume_stage == "Group":
+            self.play_group_stage(wc_pred, seed, head_to_head)
+        self.play_knockout_stages(wc_pred, seed)
+        self.count_stages()
+
+    def play_group_stage(
+        self,
+        wc_pred: WCPred,
+        seed: Optional[int] = None,
+        head_to_head: bool = True,
+    ) -> None:
+        print("Group")
+        t = time()
+
+        fixtures_to_sample, fixtures_with_results = self.split_played_fixtures("Group")
+
+        # sample fixtures without results
+        sampled_results = wc_pred.sample_score(
+            fixtures_to_sample["home_team"],
+            fixtures_to_sample["away_team"],
+            seed=seed,
+            num_samples=self.num_samples,
+        )
+
+        # merge simulated results and actual results
+        results = self._merge_scores(
+            sampled_results, fixtures_with_results, self.num_samples
+        )
+
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
+            t1, t2 = g.get_qualifiers()
+            self.bracket["1" + g.name] = t1
+            self.bracket["2" + g.name] = t2
+
         print(time() - t)
 
     def play_knockout_stages(
@@ -560,30 +644,38 @@ class Tournament:
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
-        for g in self.groups.values():
-            t1, t2 = g.get_qualifiers()
-            self.bracket["1" + g.name] = t1
-            self.bracket["2" + g.name] = t2
-
-        for stage in ["R16", "QF", "SF", "F"]:
+        for stage in STAGES[1:]:  # stages excluding group stage
             print(stage)
             t = time()
-            stage_fixtures = self.fixtures_df[self.fixtures_df["stage"] == stage]
+            stage_fixtures = self.fixtures_df[self.fixtures_df.stage == stage]
 
-            results = wc_pred.sample_outcome(
-                self.bracket[stage_fixtures["home_team"]].values.flatten(),
-                self.bracket[stage_fixtures["away_team"]].values.flatten(),
-                knockout=True,
-                seed=seed,
-                num_samples=1,
-            ).reshape((self.num_samples, len(stage_fixtures)))
+            winner_alias = stage_fixtures["home_team"] + stage_fixtures["away_team"]
+            sample_mask = self.bracket[winner_alias].isna().sum() > 0
+            fixtures_to_sample = stage_fixtures.loc[sample_mask.values]
+
+            if self.resume_stage == stage:
+                sampled_outcomes = wc_pred.sample_outcome(
+                    self.bracket[fixtures_to_sample["home_team"]].iloc[0].values,
+                    self.bracket[fixtures_to_sample["away_team"]].iloc[0].values,
+                    knockout=True,
+                    seed=seed,
+                    num_samples=self.num_samples,
+                ).T
+            else:
+                sampled_outcomes = wc_pred.sample_outcome(
+                    self.bracket[fixtures_to_sample["home_team"]].values.flatten(),
+                    self.bracket[fixtures_to_sample["away_team"]].values.flatten(),
+                    knockout=True,
+                    seed=seed,
+                    num_samples=1,
+                ).reshape((self.num_samples, len(fixtures_to_sample)))
 
             self.bracket[
-                stage_fixtures["home_team"] + stage_fixtures["away_team"]
-            ] = results
+                fixtures_to_sample["home_team"] + fixtures_to_sample["away_team"]
+            ] = sampled_outcomes
 
             if stage == "F":
-                self.winner = results.flatten()
+                self.winner = sampled_outcomes.flatten()
             print(time() - t)
 
         self.is_complete = True
@@ -595,10 +687,12 @@ class Tournament:
         if not self.is_complete:
             raise RuntimeError("Tournament is not yet complete")
 
-        stages = ["F", "SF", "QF", "R16", "Group"]
-        self.stage_counts = pd.DataFrame(columns=stages, index=self.teams_df["Team"])
+        self.stage_counts = pd.DataFrame(
+            columns=list(reversed(STAGES)), index=self.teams_df["Team"]
+        )
         self.stage_counts["Group"] = self.num_samples
-        for stage in stages[:-1]:
+
+        for stage in list(reversed(STAGES))[:-1]:
             round_aliases = np.unique(
                 self.fixtures_df.loc[
                     self.fixtures_df.stage == stage, ["home_team", "away_team"]

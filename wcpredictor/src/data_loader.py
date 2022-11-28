@@ -178,5 +178,10 @@ def get_results_data(
 def get_wcresults_data(year: str) -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(current_dir, "..", "data", f"wcresults_{year}.csv")
-    wcresults_df = pd.read_csv(csv_path)
-    return wcresults_df
+    return pd.read_csv(csv_path)
+
+
+def get_alias_data(year: str) -> pd.DataFrame:
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(current_dir, "..", "data", f"aliases_{year}.csv")
+    return pd.read_csv(csv_path, index_col="alias")
