@@ -209,8 +209,10 @@ def main():
         exclude_comps = args.exclude_competitions.split(",")
         for comp in exclude_comps:
             comps.remove(comp)
-    start_date, end_date = get_start_end_dates(args)
     resume_from = get_resume_from(args)
+    start_date, end_date = get_start_end_dates(args)
+    if pd.to_datetime(end_date) < pd.to_datetime(resume_from):
+        end_date = resume_from
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}"
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
@@ -218,7 +220,6 @@ def main():
         f"""
 Running simulations with
 tournament_year: {args.tournament_year}
-resume_from: {resume_from}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
 end_date: {end_date}
