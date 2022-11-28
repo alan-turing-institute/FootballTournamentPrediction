@@ -450,22 +450,20 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
-        self._parse_resume_from(resume_from, year)
+        self.resume_date, self.resume_stage = self._parse_resume_from(resume_from, year)
+        self._fill_played_fixtures(year)
         self.bracket = self._init_bracket(year)
 
     def _parse_resume_from(self, resume_from, year):
         if resume_from is None:
             # starting from the beginning, i.e. the group stage
-            self.resume_date = pd.to_datetime(f"{year}-1-1")
-            self.resume_stage = "Group"
-            return
+            return pd.to_datetime(f"{year}-1-1"), "Group"
         if resume_from in STAGES:
             # end date from tournament round fixture dates
             dates = pd.to_datetime(self.fixtures_df["date"])
             # round start date
-            self.resume_date = dates[self.fixtures_df["stage"] == resume_from].min()
-            self.resume_stage = resume_from
-            return
+            resume_date = dates[self.fixtures_df["stage"] == resume_from].min()
+            return resume_date, resume_from
         if resume_from == "latest":
             resume_from = pd.to_datetime(date.today())
         actual_results, _ = get_results_data(
@@ -473,18 +471,14 @@ class Tournament:
             end_date=resume_from,
             competitions="W",
         )
-        self.resume_date = (
+        resume_date = (
             actual_results[actual_results["date"] <= resume_from]
             .sort_values(by="date")
             .iloc[-1]["date"]
         )
         dates = pd.to_datetime(self.fixtures_df["date"])
-        # fill in played fixtures up to resume date to find stage to resume from
-        self._fill_played_fixtures(year)
-        # resume stage is the last stage
-        self.resume_stage = self.fixtures_df[(dates <= resume_from) &
-                                             (~np.isnan(self.fixtures_df["actual_home"])) &
-                                             (~np.isnan(self.fixtures_df["actual_away"]))].iloc[-1]["stage"]
+        resume_stage = self.fixtures_df[dates == resume_date].iloc[-1]["stage"]
+        return resume_date, resume_stage
 
     def _fill_played_fixtures(self, year):
         """Fill the actual results of played results up to resume_from, and return
