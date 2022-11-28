@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import jax.numpy as jnp
 
 from .bpl_interface import WCPred
 from .data_loader import get_fixture_data, get_results_data, get_teams_data
@@ -451,7 +452,7 @@ class Tournament:
                 resume_from = (  # round start date
                     dates[self.fixtures_df["stage"] == resume_from].min().date()
                 )
-            end_date = str(pd.to_datetime(resume_from) - pd.Timedelta(days=1))
+            end_date = str(pd.to_datetime(resume_from))
             actual_results, _ = get_results_data(
                 start_date=f"{year}-01-01", end_date=end_date, competitions="W"
             )
@@ -473,10 +474,10 @@ class Tournament:
                         f"{result['away_team']} fixtures on {result['date']}"
                     )
                 else:
-                    self.fixtures_df["actual_home"].iloc[fixture_idx[0]] = result[
+                    self.fixtures_df.loc[self.fixtures_df.index[fixture_idx[0]], "actual_home"] = result[
                         "home_score"
                     ]
-                    self.fixtures_df["actual_away"].iloc[fixture_idx[0]] = result[
+                    self.fixtures_df.loc[self.fixtures_df.index[fixture_idx[0]], "actual_away"] = result[
                         "away_score"
                     ]
 
@@ -501,52 +502,31 @@ class Tournament:
             )
 
         # sample fixtures without results
-        sampled_results = wc_pred.sample_score(
+        results = wc_pred.sample_score(
             fixtures_to_sample["home_team"],
             fixtures_to_sample["away_team"],
             seed=seed,
             num_samples=self.num_samples,
         )
-
+        
         # create replicated actual results arrays
-        actual_results = {
-            "home_team": np.empty(
-                len(fixtures_with_results), dtype=sampled_results["home_team"].dtype
-            ),
-            "away_team": np.empty(
-                len(fixtures_with_results), dtype=sampled_results["away_team"].dtype
-            ),
-            "home_score": np.empty(
-                (len(fixtures_with_results), self.num_samples),
-                dtype=sampled_results["home_score"].dtype,
-            ),
-            "away_score": np.empty(
-                (len(fixtures_with_results), self.num_samples),
-                dtype=sampled_results["away_score"].dtype,
-            ),
-        }
-        for i in range(len(fixtures_with_results)):
-            row = fixtures_with_results.iloc[i]
-            actual_results["home_team"][i] = row["home_team"]
-            actual_results["away_team"][i] = row["away_team"]
-            actual_results["home_score"][i, :] = row["actual_home"]
-            actual_results["away_score"][i, :] = row["actual_away"]
-
-        # merge simulated results and actual results
-        results = {
-            "home_team": np.concatenate(
-                (sampled_results["home_team"], actual_results["home_team"])
-            ),
-            "away_team": np.concatenate(
-                (sampled_results["away_team"], actual_results["away_team"])
-            ),
-            "home_score": np.concatenate(
-                (sampled_results["home_score"], actual_results["home_score"])
-            ),
-            "away_score": np.concatenate(
-                (sampled_results["away_score"], actual_results["away_score"])
-            ),
-        }
+        for index, row in fixtures_with_results.iterrows():
+            results["home_score"] = jnp.append(
+                results["home_score"],
+                jnp.repeat(row["actual_home"], self.num_samples).reshape(
+                    1, self.num_samples
+                ),
+                axis=0,
+            )
+            results["away_score"] = jnp.append(
+                results["away_score"],
+                jnp.repeat(row["actual_away"], self.num_samples).reshape(
+                    1, self.num_samples
+                ),
+                axis=0,
+            )
+            results["home_team"] = np.append(results["home_team"], row["home_team"])
+            results["away_team"] = np.append(results["away_team"], row["away_team"])
 
         for g in self.groups.values():
             g.add_results(results)
