@@ -111,7 +111,7 @@ def get_dates_from_years_training(tournament_year, years):
     start_date = f"{start_year}-06-01"
     # end at 1st June if tournament year is 2014 or 2018, or 20th Nov for 2022
     if tournament_year == "2022":
-        end_date = "2022-11-20"
+        end_date = "2022-12-31"
     else:
         end_date = f"{tournament_year}-06-01"
     return start_date, end_date
@@ -211,7 +211,7 @@ def main():
             comps.remove(comp)
     resume_from = get_resume_from(args)
     start_date, end_date = get_start_end_dates(args)
-    if pd.to_datetime(end_date) < pd.to_datetime(resume_from):
+    if pd.to_datetime(end_date) > pd.to_datetime(resume_from):
         end_date = resume_from
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}"
