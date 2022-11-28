@@ -235,7 +235,7 @@ rankings: {ratings_src}
     model_start = time()
     model = get_and_train_model(
         start_date=start_date,
-        end_date=resume_from,
+        end_date=end_date,
         competitions=comps,
         rankings_source=ratings_src,
         epsilon=args.epsilon,
