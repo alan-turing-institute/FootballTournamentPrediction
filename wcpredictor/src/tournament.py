@@ -7,9 +7,9 @@ import random
 from time import time
 from typing import List, Optional, Tuple
 
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-import jax.numpy as jnp
 
 from .bpl_interface import WCPred
 from .data_loader import get_fixture_data, get_results_data, get_teams_data
@@ -474,12 +474,12 @@ class Tournament:
                         f"{result['away_team']} fixtures on {result['date']}"
                     )
                 else:
-                    self.fixtures_df.loc[self.fixtures_df.index[fixture_idx[0]], "actual_home"] = result[
-                        "home_score"
-                    ]
-                    self.fixtures_df.loc[self.fixtures_df.index[fixture_idx[0]], "actual_away"] = result[
-                        "away_score"
-                    ]
+                    self.fixtures_df.loc[
+                        self.fixtures_df.index[fixture_idx[0]], "actual_home"
+                    ] = result["home_score"]
+                    self.fixtures_df.loc[
+                        self.fixtures_df.index[fixture_idx[0]], "actual_away"
+                    ] = result["away_score"]
 
     def play_group_stage(
         self,
@@ -508,7 +508,7 @@ class Tournament:
             seed=seed,
             num_samples=self.num_samples,
         )
-        
+
         # create replicated actual results arrays
         for index, row in fixtures_with_results.iterrows():
             results["home_score"] = jnp.append(
