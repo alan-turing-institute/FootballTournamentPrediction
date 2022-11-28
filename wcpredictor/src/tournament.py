@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from datetime import date
 
 from .bpl_interface import WCPred
 from .data_loader import (
@@ -449,36 +450,41 @@ class Tournament:
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
-        self.resume_date, self.resume_stage = self._parse_resume_from(resume_from, year)
-        self._fill_played_fixtures(year)
+        self._parse_resume_from(resume_from, year)
         self.bracket = self._init_bracket(year)
 
     def _parse_resume_from(self, resume_from, year):
         if resume_from is None:
             # starting from the beginning, i.e. the group stage
-            return pd.to_datetime(f"{year}-1-1"), "Group"
+            self.resume_date = pd.to_datetime(f"{year}-1-1")
+            self.resume_stage = "Group"
+            return
         if resume_from in STAGES:
             # end date from tournament round fixture dates
             dates = pd.to_datetime(self.fixtures_df["date"])
             # round start date
-            resume_date = dates[self.fixtures_df["stage"] == resume_from].min()
-            return resume_date, resume_from
-
+            self.resume_date = dates[self.fixtures_df["stage"] == resume_from].min()
+            self.resume_stage = resume_from
+            return
         if resume_from == "latest":
-            resume_from = f"{year}-12-31"
+            resume_from = pd.to_datetime(date.today())
         actual_results, _ = get_results_data(
             start_date=f"{year}-01-01",
-            end_date=pd.to_datetime(resume_from),
+            end_date=resume_from,
             competitions="W",
         )
-        resume_date = (
+        self.resume_date = (
             actual_results[actual_results["date"] <= resume_from]
             .sort_values(by="date")
             .iloc[-1]["date"]
         )
         dates = pd.to_datetime(self.fixtures_df["date"])
-        resume_stage = self.fixtures_df[dates == resume_from].iloc[0]["stage"]
-        return resume_date, resume_stage
+        # fill in played fixtures up to resume date to find stage to resume from
+        self._fill_played_fixtures(year)
+        # resume stage is the last stage
+        self.resume_stage = self.fixtures_df[(dates <= resume_from) &
+                                             (~np.isnan(self.fixtures_df["actual_home"])) &
+                                             (~np.isnan(self.fixtures_df["actual_away"]))].iloc[-1]["stage"]
 
     def _fill_played_fixtures(self, year):
         """Fill the actual results of played results up to resume_from, and return
@@ -525,15 +531,17 @@ class Tournament:
 
         group_aliases = ["1" + gn for gn in self.group_names]
         group_aliases += ["2" + gn for gn in self.group_names]
-        for aka in group_aliases:
-            bracket[aka] = aliases.loc[aka]
-        self.fixtures_df[
-            (self.fixtures_df["date"] < self.resume_date)
-            & (self.fixtures_df["stage"] != "Group")
-        ]
-
+        
         for aka, team in aliases["team"].items():
-            # TODO only fill up to resume_date
+            # only fill up to resume_date and resume_stage
+            if (self.resume_stage == "R16") and (len(aka) > 2):
+                break
+            elif (self.resume_stage == "QF") and (len(aka) > 4):
+                break
+            elif (self.resume_stage == "SF") and (len(aka) > 8):
+                break
+            elif (self.resume_stage == "F") and (len(aka) > 16):
+                break
             bracket[aka] = team
         return bracket
 

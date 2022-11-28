@@ -6,6 +6,7 @@ from .src.data_loader import (
     get_results_data,
     get_teams_data,
     get_wcresults_data,
+    get_alias_data,
 )
 from .src.tournament import Group, Tournament
 from .src.utils import (
@@ -23,6 +24,7 @@ __all__ = [
     "get_results_data",
     "get_teams_data",
     "get_wcresults_data",
+    "get_alias_data",
     "Group",
     "Tournament",
     "get_and_train_model",
