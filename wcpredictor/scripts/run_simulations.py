@@ -138,6 +138,7 @@ def get_start_end_dates(args):
 
 
 def get_resume_from(args):
+    # TODO: allow to pass stage name: Group, R16, QF, SF, F
     if args.resume_from == "None":
         return str(datetime.now().date()) if args.tournament_year == "2022" else None
     return args.resume_from
@@ -209,6 +210,8 @@ def main():
             comps.remove(comp)
     start_date, end_date = get_start_end_dates(args)
     resume_from = get_resume_from(args)
+    if pd.to_datetime(end_date) < pd.to_datetime(resume_from):
+        end_date = resume_from
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}"
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"

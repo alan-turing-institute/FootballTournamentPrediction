@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import jax.numpy as jnp
 from datetime import date
 
 from .bpl_interface import WCPred
@@ -451,6 +452,7 @@ class Tournament:
         self.num_samples = num_samples
         self.stage_counts = None
         self.resume_date, self.resume_stage = self._parse_resume_from(resume_from, year)
+        print(f"Resuming tournament simulation from {self.resume_date} at {self.resume_stage} stage")
         self._fill_played_fixtures(year)
         self.bracket = self._init_bracket(year)
 
@@ -466,19 +468,11 @@ class Tournament:
             return resume_date, resume_from
         if resume_from == "latest":
             resume_from = pd.to_datetime(date.today())
-        actual_results, _ = get_results_data(
-            start_date=f"{year}-01-01",
-            end_date=resume_from,
-            competitions="W",
-        )
-        resume_date = (
-            actual_results[actual_results["date"] <= resume_from]
-            .sort_values(by="date")
-            .iloc[-1]["date"]
-        )
         dates = pd.to_datetime(self.fixtures_df["date"])
-        resume_stage = self.fixtures_df[dates == resume_date].iloc[-1]["stage"]
-        return resume_date, resume_stage
+        if sum(dates >= resume_from) == 0:
+            raise ValueError(f"There are no more fixtures after resume_from = {resume_from}")
+        resume_stage = self.fixtures_df[dates >= resume_from].iloc[0]["stage"]
+        return resume_from, resume_stage
 
     def _fill_played_fixtures(self, year):
         """Fill the actual results of played results up to resume_from, and return
@@ -486,10 +480,10 @@ class Tournament:
         self.fixtures_df["actual_home"] = np.nan
         self.fixtures_df["actual_away"] = np.nan
 
-        end_date = self.resume_date - pd.Timedelta(days=1)
+        end_date = pd.to_datetime(self.resume_date) - pd.Timedelta(days=1)
         actual_results, _ = get_results_data(
             start_date=f"{year}-01-01",
-            end_date=pd.to_datetime(end_date),
+            end_date=end_date,
             competitions="W",
         )
 
@@ -557,46 +551,26 @@ class Tournament:
     def _merge_scores(self, sampled_results, fixtures_with_results, num_samples):
         if len(fixtures_with_results) == 0:
             return sampled_results
-
-        # create replicated actual results arrays
-        actual_results = {
-            "home_team": np.empty(
-                len(fixtures_with_results), dtype=sampled_results["home_team"].dtype
-            ),
-            "away_team": np.empty(
-                len(fixtures_with_results), dtype=sampled_results["away_team"].dtype
-            ),
-            "home_score": np.empty(
-                (len(fixtures_with_results), num_samples),
-                dtype=sampled_results["home_score"].dtype,
-            ),
-            "away_score": np.empty(
-                (len(fixtures_with_results), num_samples),
-                dtype=sampled_results["away_score"].dtype,
-            ),
-        }
-        for i in range(len(fixtures_with_results)):
-            row = fixtures_with_results.iloc[i]
-            actual_results["home_team"][i] = row["home_team"]
-            actual_results["away_team"][i] = row["away_team"]
-            actual_results["home_score"][i, :] = row["actual_home"]
-            actual_results["away_score"][i, :] = row["actual_away"]
-
-        # merge simulated results and actual results
-        return {
-            "home_team": np.concatenate(
-                (sampled_results["home_team"], actual_results["home_team"])
-            ),
-            "away_team": np.concatenate(
-                (sampled_results["away_team"], actual_results["away_team"])
-            ),
-            "home_score": np.concatenate(
-                (sampled_results["home_score"], actual_results["home_score"])
-            ),
-            "away_score": np.concatenate(
-                (sampled_results["away_score"], actual_results["away_score"])
-            ),
-        }
+        
+        for _, row in fixtures_with_results.iterrows():
+            sampled_results["home_score"] = jnp.append(
+                sampled_results["home_score"],
+                jnp.repeat(row["actual_home"], num_samples).reshape(
+                    1, num_samples
+                ),
+                axis=0,
+            )
+            sampled_results["away_score"] = jnp.append(
+                sampled_results["away_score"],
+                jnp.repeat(row["actual_away"], num_samples).reshape(
+                    1, num_samples
+                ),
+                axis=0,
+            )
+            sampled_results["home_team"] = np.append(sampled_results["home_team"], row["home_team"])
+            sampled_results["away_team"] = np.append(sampled_results["away_team"], row["away_team"])
+            
+        return sampled_results
 
     def play_tournament(
         self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
