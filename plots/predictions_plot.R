@@ -11,7 +11,7 @@ round_1 <- read.csv("after_round_1.csv")
 # after Round 1 games and Wales-Iran
 round_1_WI <- read.csv("after_round_1_wales_iran.csv")
 # after Round 2 games
-round_2 <- read.csv("after_round_2_wales_iran.csv")
+round_2 <- read.csv("after_round_2.csv")
 
 get_progression_probabiltiies <- function(df, n_sim) {
   df <- df[order(df$W, decreasing = TRUE),]
