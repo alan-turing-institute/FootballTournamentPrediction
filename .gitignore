@@ -133,3 +133,4 @@ i*~
 
 # miscellaneous
 *.DS_Store
+*.Rhistory
