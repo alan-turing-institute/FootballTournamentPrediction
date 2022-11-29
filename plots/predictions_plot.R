@@ -10,6 +10,8 @@ original <- read.csv("original_predictions.csv")
 round_1 <- read.csv("after_round_1.csv")
 # after Round 1 games and Wales-Iran
 round_1_WI <- read.csv("after_round_1_wales_iran.csv")
+# after Round 1 games (updated)
+round_1_updated <- read.csv("after_round_1_updated.csv")
 # after Round 2 games
 round_2 <- read.csv("after_round_2.csv")
 
@@ -159,6 +161,26 @@ create_table_plot_alt_colours(data_frame = after_round_1_prob,
                               domain = c(-0.5, 0.5),
                               subtitle = "After Round 1 (and Wales-Iran)",
                               filename = "plots/after_round_1_WI_colour_diff.png")
+
+# after round 1 plots (updated)
+after_round_1_prob <- get_progression_probabiltiies(round_1_updated, 100000)
+after_round_1_diff <- get_progression_prob_differences(new_df = after_round_1_prob,
+                                                       old_df = original_prob)
+
+create_table_plot(data_frame = after_round_1_prob,
+                  domain = c(-0.5, 1),
+                  subtitle = "After Round 1",
+                  filename = "plots/after_round_1_updated.png")
+create_table_plot(data_frame = after_round_1_diff,
+                  domain = c(-0.5, 0.5),
+                  subtitle = "Difference in probability after Round 1",
+                  filename = "plots/after_round_1_updated_diff.png")
+create_table_plot_alt_colours(data_frame = after_round_1_prob,
+                              data_frame_for_colours = after_round_1_diff,
+                              domain = c(-0.5, 0.5),
+                              subtitle = "After Round 1)",
+                              filename = "plots/after_round_1_updated_colour_diff.png")
+
 
 # after round 2 plots
 after_round_2_prob <- get_progression_probabiltiies(round_2, 100000)
