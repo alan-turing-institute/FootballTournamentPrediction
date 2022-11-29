@@ -178,7 +178,7 @@ create_table_plot(data_frame = after_round_1_diff,
 create_table_plot_alt_colours(data_frame = after_round_1_prob,
                               data_frame_for_colours = after_round_1_diff,
                               domain = c(-0.5, 0.5),
-                              subtitle = "After Round 1)",
+                              subtitle = "After Round 1",
                               filename = "plots/after_round_1_updated_colour_diff.png")
 
 
