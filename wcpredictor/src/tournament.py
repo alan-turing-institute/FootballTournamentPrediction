@@ -4,13 +4,13 @@ knockout stages, to the final, and produce a winner.
 """
 
 import random
+from datetime import date
 from time import time
 from typing import List, Optional, Tuple
 
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-import jax.numpy as jnp
-from datetime import date
 
 from .bpl_interface import WCPred
 from .data_loader import (
@@ -452,7 +452,9 @@ class Tournament:
         self.num_samples = num_samples
         self.stage_counts = None
         self.resume_date, self.resume_stage = self._parse_resume_from(resume_from, year)
-        print(f"Resuming tournament simulation from {self.resume_date} at {self.resume_stage} stage")
+        print(
+            f"Resuming tournament simulation from {self.resume_date} at {self.resume_stage} stage"
+        )
         self._fill_played_fixtures(year)
         self.bracket = self._init_bracket(year)
 
@@ -470,7 +472,9 @@ class Tournament:
             resume_from = pd.to_datetime(date.today())
         dates = pd.to_datetime(self.fixtures_df["date"])
         if sum(dates >= resume_from) == 0:
-            raise ValueError(f"There are no more fixtures after resume_from = {resume_from}")
+            raise ValueError(
+                f"There are no more fixtures after resume_from = {resume_from}"
+            )
         resume_stage = self.fixtures_df[dates >= resume_from].iloc[0]["stage"]
         return resume_from, resume_stage
 
@@ -519,7 +523,7 @@ class Tournament:
 
         group_aliases = ["1" + gn for gn in self.group_names]
         group_aliases += ["2" + gn for gn in self.group_names]
-        
+
         for aka, team in aliases["team"].items():
             # only fill up to resume_date and resume_stage
             if (self.resume_stage == "R16") and (len(aka) > 2):
@@ -551,25 +555,25 @@ class Tournament:
     def _merge_scores(self, sampled_results, fixtures_with_results, num_samples):
         if len(fixtures_with_results) == 0:
             return sampled_results
-        
+
         for _, row in fixtures_with_results.iterrows():
             sampled_results["home_score"] = jnp.append(
                 sampled_results["home_score"],
-                jnp.repeat(row["actual_home"], num_samples).reshape(
-                    1, num_samples
-                ),
+                jnp.repeat(row["actual_home"], num_samples).reshape(1, num_samples),
                 axis=0,
             )
             sampled_results["away_score"] = jnp.append(
                 sampled_results["away_score"],
-                jnp.repeat(row["actual_away"], num_samples).reshape(
-                    1, num_samples
-                ),
+                jnp.repeat(row["actual_away"], num_samples).reshape(1, num_samples),
                 axis=0,
             )
-            sampled_results["home_team"] = np.append(sampled_results["home_team"], row["home_team"])
-            sampled_results["away_team"] = np.append(sampled_results["away_team"], row["away_team"])
-            
+            sampled_results["home_team"] = np.append(
+                sampled_results["home_team"], row["home_team"]
+            )
+            sampled_results["away_team"] = np.append(
+                sampled_results["away_team"], row["away_team"]
+            )
+
         return sampled_results
 
     def play_tournament(
