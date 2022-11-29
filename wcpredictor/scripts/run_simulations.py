@@ -11,9 +11,10 @@ from uuid import uuid4
 
 import pandas as pd
 
-from wcpredictor import Tournament, get_and_train_model
+from wcpredictor import Tournament, get_and_train_model, STAGES
 from wcpredictor.src.bpl_interface import WC_HOSTS
 from wcpredictor.src.utils import get_stage_difference_loss
+from wcpredictor.src.data_loader import get_fixture_data
 
 
 def get_cmd_line_args():
@@ -138,10 +139,17 @@ def get_start_end_dates(args):
 
 
 def get_resume_from(args):
-    # TODO: allow to pass stage name: Group, R16, QF, SF, F
     if args.resume_from == "None":
         return str(datetime.now().date()) if args.tournament_year == "2022" else None
-    return args.resume_from
+    elif args.resume_from in STAGES:
+        # obtain fixtures for world cup year
+        fixtures_df = get_fixture_data(args.tournament_year).sort_values(by="date")
+        # obtain round start date
+        dates = pd.to_datetime(fixtures_df["date"])
+        resume_date = dates[fixtures_df["stage"] == args.resume_from].min()
+        return resume_date.strftime("%Y-%m-%d")
+    else:
+        return args.resume_from
 
 
 def merge_csv_outputs(output_csv, tournament_year, output_txt):
