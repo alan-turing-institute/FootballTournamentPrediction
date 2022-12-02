@@ -126,7 +126,6 @@ class Group:
         if verbose:
             print(f"Putting {self.teams[team_idx]} in {position}")
         self.standings[team_idx, sample] = position
-        return
 
     def find_head_to_head_winner(
         self, sample: int, team_A: int, team_B: int
@@ -218,7 +217,8 @@ class Group:
                         sample, teams_to_sort, positions_to_fill, "random"
                     )
             return
-        elif metric == "random":
+
+        if metric == "random":
             # if random, just shuffle our list
             random.shuffle(teams_to_sort)
             for i, pos in enumerate(positions_to_fill):
@@ -253,7 +253,8 @@ class Group:
                     sample, team_list, positions_to_fill, new_metric
                 )
             return
-        elif len(team_list) == 3:
+
+        if len(team_list) == 3:
             # 4 possible cases
             if team_scores[0] > team_scores[1] > team_scores[2]:  # 1st > 2nd > 3rd
                 self.fill_standings_position(sample, team_list[0], positions_to_fill[0])
@@ -282,7 +283,8 @@ class Group:
                     sample, team_list, positions_to_fill, new_metric
                 )
             return
-        elif len(team_list) == 4:  # 8 possible cases.
+
+        if len(team_list) == 4:  # 8 possible cases.
             if (
                 team_scores[0] > team_scores[1]
                 and team_scores[1] > team_scores[2]
@@ -453,7 +455,8 @@ class Tournament:
         self.stage_counts = None
         self.resume_date, self.resume_stage = self._parse_resume_from(resume_from, year)
         print(
-            f"Resuming tournament simulation from {self.resume_date} at {self.resume_stage} stage"
+            f"Resuming tournament simulation from {self.resume_date} at "
+            f"{self.resume_stage} stage"
         )
         self._fill_played_fixtures(year)
         self.bracket = self._init_bracket(year)
@@ -499,18 +502,17 @@ class Tournament:
             )[0]
             if len(fixture_idx) == 0:
                 continue
-            elif len(fixture_idx) > 1:
+            if len(fixture_idx) > 1:
                 raise RuntimeError(
                     f"Found multiple {result['home_team']} vs. "
                     f"{result['away_team']} fixtures on {result['date']}"
                 )
-            else:
-                self.fixtures_df.loc[
-                    self.fixtures_df.index[fixture_idx[0]], "actual_home"
-                ] = result["home_score"]
-                self.fixtures_df.loc[
-                    self.fixtures_df.index[fixture_idx[0]], "actual_away"
-                ] = result["away_score"]
+            self.fixtures_df.loc[
+                self.fixtures_df.index[fixture_idx[0]], "actual_home"
+            ] = result["home_score"]
+            self.fixtures_df.loc[
+                self.fixtures_df.index[fixture_idx[0]], "actual_away"
+            ] = result["away_score"]
 
     def _init_bracket(self, year):
         aliases = get_alias_data(year)
@@ -521,18 +523,15 @@ class Tournament:
         if self.resume_stage == "Group":
             return bracket
 
-        group_aliases = ["1" + gn for gn in self.group_names]
-        group_aliases += ["2" + gn for gn in self.group_names]
-
         for aka, team in aliases["team"].items():
             # only fill up to resume_date and resume_stage
             if (self.resume_stage == "R16") and (len(aka) > 2):
                 break
-            elif (self.resume_stage == "QF") and (len(aka) > 4):
+            if (self.resume_stage == "QF") and (len(aka) > 4):
                 break
-            elif (self.resume_stage == "SF") and (len(aka) > 8):
+            if (self.resume_stage == "SF") and (len(aka) > 8):
                 break
-            elif (self.resume_stage == "F") and (len(aka) > 16):
+            if (self.resume_stage == "F") and (len(aka) > 16):
                 break
             bracket[aka] = team
         return bracket
@@ -617,14 +616,12 @@ class Tournament:
 
         print(time() - t)
 
-    def play_knockout_stages(
-        self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
-    ) -> None:
+    def play_knockout_stages(self, wc_pred: WCPred, seed: Optional[int] = None) -> None:
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
-        for stage in STAGES[1:]:  # stages excluding group stage
+        for stage in STAGES[STAGES.index(self.resume_stage) :]:
             print(stage)
             t = time()
             stage_fixtures = self.fixtures_df[self.fixtures_df.stage == stage]

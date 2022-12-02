@@ -11,10 +11,10 @@ from uuid import uuid4
 
 import pandas as pd
 
-from wcpredictor import Tournament, get_and_train_model, STAGES
+from wcpredictor import STAGES, Tournament, get_and_train_model
 from wcpredictor.src.bpl_interface import WC_HOSTS
-from wcpredictor.src.utils import get_stage_difference_loss
 from wcpredictor.src.data_loader import get_fixture_data
+from wcpredictor.src.utils import get_stage_difference_loss
 
 
 def get_cmd_line_args():
