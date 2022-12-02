@@ -442,6 +442,7 @@ class Tournament:
         year: str = "2022",
         num_samples: int = 1,
         resume_from: Optional[str] = None,
+        verbose: bool = False,
     ):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year).sort_values(by="date")
@@ -460,6 +461,7 @@ class Tournament:
         )
         self._fill_played_fixtures(year)
         self.bracket = self._init_bracket(year)
+        self.verbose = verbose
 
     def _parse_resume_from(self, resume_from, year):
         if resume_from is None:
@@ -584,13 +586,9 @@ class Tournament:
         self.count_stages()
 
     def play_group_stage(
-        self,
-        wc_pred: WCPred,
-        seed: Optional[int] = None,
-        head_to_head: bool = True,
-        verbose: bool = False,
+        self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
     ) -> None:
-        if verbose:
+        if self.verbose:
             print("Simulating Group...")
         t = time()
 
@@ -616,12 +614,10 @@ class Tournament:
             self.bracket["1" + g.name] = t1
             self.bracket["2" + g.name] = t2
 
-        if verbose:
+        if self.verbose:
             print(f"Group took {time() - t:.2f}s")
 
-    def play_knockout_stages(
-        self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
-    ) -> None:
+    def play_knockout_stages(self, wc_pred: WCPred, seed: Optional[int] = None) -> None:
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
@@ -631,7 +627,7 @@ class Tournament:
         else:
             sim_stages = STAGES[STAGES.index(self.resume_stage) :]
         for stage in sim_stages:
-            if verbose:
+            if self.verbose:
                 print("Simulating", stage)
             t = time()
             stage_fixtures = self.fixtures_df[self.fixtures_df.stage == stage]
@@ -663,7 +659,7 @@ class Tournament:
 
             if stage == "F":
                 self.winner = sampled_outcomes.flatten()
-            if verbose:
+            if self.verbose:
                 print(f"{stage} took {time() - t}")
 
         self.is_complete = True
