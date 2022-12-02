@@ -442,7 +442,7 @@ class Tournament:
         year: str = "2022",
         num_samples: int = 1,
         resume_from: Optional[str] = None,
-        verbose: bool = False,
+        verbose: bool = True,
     ):
         self.teams_df = get_teams_data(year)
         self.fixtures_df = get_fixture_data(year).sort_values(by="date")

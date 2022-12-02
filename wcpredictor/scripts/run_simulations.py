@@ -162,7 +162,7 @@ def merge_csv_outputs(output_csv, tournament_year, output_txt):
         ]
     )
     simresults_df = simresults_df.groupby("Team").sum()
-    print(simresults_df.sort_values(by="W", ascending=False))
+    print(simresults_df.sort_values(by=["W", "RU", "SF", "QF", "R16"], ascending=False))
     simresults_df.to_csv(output_csv)
     for f in files:
         os.remove(f)
