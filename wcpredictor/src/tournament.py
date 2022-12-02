@@ -588,8 +588,10 @@ class Tournament:
         wc_pred: WCPred,
         seed: Optional[int] = None,
         head_to_head: bool = True,
+        verbose: bool = False,
     ) -> None:
-        print("Group")
+        if verbose:
+            print("Simulating Group...")
         t = time()
 
         fixtures_to_sample, fixtures_with_results = self.split_played_fixtures("Group")
@@ -614,15 +616,23 @@ class Tournament:
             self.bracket["1" + g.name] = t1
             self.bracket["2" + g.name] = t2
 
-        print(time() - t)
+        if verbose:
+            print(f"Group took {time() - t:.2f}s")
 
-    def play_knockout_stages(self, wc_pred: WCPred, seed: Optional[int] = None) -> None:
+    def play_knockout_stages(
+        self, wc_pred: WCPred, seed: Optional[int] = None, verbose: bool = False
+    ) -> None:
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
-        for stage in STAGES[STAGES.index(self.resume_stage) :]:
-            print(stage)
+        if self.resume_stage == "Group":
+            sim_stages = STAGES[1:]
+        else:
+            sim_stages = STAGES[STAGES.index(self.resume_stage) :]
+        for stage in sim_stages:
+            if verbose:
+                print("Simulating", stage)
             t = time()
             stage_fixtures = self.fixtures_df[self.fixtures_df.stage == stage]
 
@@ -653,7 +663,8 @@ class Tournament:
 
             if stage == "F":
                 self.winner = sampled_outcomes.flatten()
-            print(time() - t)
+            if verbose:
+                print(f"{stage} took {time() - t}")
 
         self.is_complete = True
 
