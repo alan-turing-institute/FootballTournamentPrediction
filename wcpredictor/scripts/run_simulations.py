@@ -113,7 +113,7 @@ def get_dates_from_years_training(tournament_year, years):
     start_date = f"{start_year}-06-01"
     # end at 1st June if tournament year is 2014 or 2018, or 20th Nov for 2022
     if tournament_year == "2022":
-        end_date = "2022-11-20"
+        end_date = str(datetime.now().date())
     else:
         end_date = f"{tournament_year}-06-01"
     return start_date, end_date
