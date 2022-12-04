@@ -52,9 +52,9 @@ def main():
     ]
     current_date = ""
     for _, row in fixture_df.iterrows():
-        team_1 = row.Team_1
-        team_2 = row.Team_2
-        date = row.Date
+        team_1 = row.home_team
+        team_2 = row.away_team
+        date = row.date
         if date != current_date:
             print(f"\n{date}\n")
             current_date = date

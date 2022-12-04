@@ -8,7 +8,7 @@ import pandas as pd
 
 def get_teams_data(year: str = "2022") -> pd.DataFrame:
     if year not in ["2014", "2018", "2022"]:
-        raise RuntimeError("Unknown year " + year)
+        raise RuntimeError(f"Unknown year {year}")
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(current_dir, "..", "data", f"teams_{year}.csv")
     return pd.read_csv(csv_path)
@@ -16,10 +16,10 @@ def get_teams_data(year: str = "2022") -> pd.DataFrame:
 
 def get_fixture_data(year: str = "2022") -> pd.DataFrame:
     if year not in ["2014", "2018", "2022"]:
-        raise RuntimeError("Unknown year " + year)
+        raise RuntimeError(f"Unknown year {year}")
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(current_dir, "..", "data", f"fixtures_{year}.csv")
-    return pd.read_csv(csv_path)
+    return pd.read_csv(csv_path, parse_dates=["date"])
 
 
 def get_confederations_data() -> pd.DataFrame:
@@ -29,8 +29,7 @@ def get_confederations_data() -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)
     filename = "confederations.csv"
     csv_path = os.path.join(current_dir, "..", "data", filename)
-    df = pd.read_csv(csv_path)
-    return df
+    return pd.read_csv(csv_path)
 
 
 def load_game_rankings() -> pd.DataFrame:
@@ -52,17 +51,9 @@ def load_game_rankings() -> pd.DataFrame:
     overalls = []
     for conf in set(confederations.Confederation):
         # define default value for Fifa ratings conditional on their confederation
-        if conf == "AFC":
+        if conf in ["AFC", "CAF", "CONCACAF"]:
             default = 60
-        elif conf == "CAF":
-            default = 60
-        elif conf == "CONCACAF":
-            default = 60
-        elif conf == "CONMEBOL":
-            default = 65
-        elif conf == "OFC":
-            default = 50
-        elif conf == "UEFA":
+        elif conf in ["CONMEBOL", "UEFA"]:
             default = 65
         else:
             default = 50
@@ -81,8 +72,7 @@ def load_game_rankings() -> pd.DataFrame:
             "Overall": overalls,
         }
     )
-    df = pd.concat([df, new_df]).reset_index(drop=True)
-    return df
+    return pd.concat([df, new_df]).reset_index(drop=True)
 
 
 def load_org_rankings() -> pd.DataFrame:
@@ -90,8 +80,7 @@ def load_org_rankings() -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)
     filename = "fifa_rankings.csv"
     csv_path = os.path.join(current_dir, "..", "data", filename)
-    df = pd.read_csv(csv_path)
-    return df
+    return pd.read_csv(csv_path)
 
 
 def get_fifa_rankings_data(source: str = "game") -> pd.DataFrame:
@@ -113,7 +102,7 @@ def get_fifa_rankings_data(source: str = "game") -> pd.DataFrame:
 def get_results_data(
     start_date: str = "2018-06-01",
     end_date: str = "2022-11-20",
-    competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
+    competitions: List[str] = None,
     rankings_source: str = "org",
     world_cup_weight: float = 1.0,
 ) -> Tuple[pd.DataFrame, dict[str, float]]:
@@ -127,6 +116,8 @@ def get_results_data(
     "C2": 2nd-tier continental, e.g. UEFA Nations League,
     "F": friendly/other.
     """
+    if competitions is None:
+        competitions = ["W", "C1", "WQ", "CQ", "C2", "F"]
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(current_dir, "..", "data", "results.csv")
     results_df = pd.read_csv(csv_path, parse_dates=["date"])
@@ -178,5 +169,10 @@ def get_results_data(
 def get_wcresults_data(year: str) -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)
     csv_path = os.path.join(current_dir, "..", "data", f"wcresults_{year}.csv")
-    wcresults_df = pd.read_csv(csv_path)
-    return wcresults_df
+    return pd.read_csv(csv_path)
+
+
+def get_alias_data(year: str) -> pd.DataFrame:
+    current_dir = os.path.dirname(__file__)
+    csv_path = os.path.join(current_dir, "..", "data", f"aliases_{year}.csv")
+    return pd.read_csv(csv_path, index_col="alias")

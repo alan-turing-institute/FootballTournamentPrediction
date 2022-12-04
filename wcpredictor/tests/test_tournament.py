@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from wcpredictor import (
     Group,
@@ -9,6 +10,33 @@ from wcpredictor import (
     get_teams_data,
     sort_teams_by,
 )
+
+
+def pick_random_score():
+    fixtures_df = get_fixture_data()
+    fixtures_df = fixtures_df[fixtures_df["stage"] == "Group"]
+    return {
+        "home_team": fixtures_df["home_team"].values,
+        "away_team": fixtures_df["away_team"].values,
+        "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
+        "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
+    }
+
+
+def pick_random_winner(self, home_team, away_team, *args, **kwargs):
+    return np.array(
+        [np.random.choice([home_team[i], away_team[i]]) for i in range(len(home_team))]
+    )
+
+
+@pytest.fixture
+def wc_pred(mocker):
+    mocker.patch.object(WCPred, "sample_score", return_value=pick_random_score())
+    mocker.patch.object(WCPred, "sample_outcome", new=pick_random_winner)
+    return WCPred(
+        pd.DataFrame({"home_team": ["dummy"], "away_team": ["dummy"]}),
+        teams=get_teams_data()["Team"].values,
+    )
 
 
 def test_get_teams_df():
@@ -343,31 +371,13 @@ def test_many_standings():
         assert np.all(gd[:-1] >= gd[1:])
 
 
-def test_play_group_stage(mocker):
+def test_play_group_stage(wc_pred):
     """
     Play simulated group stage 100 times - ensure that we always have 16 qualifying
     teams at the end.
     """
-
-    def pick_random_score():
-        fixtures_df = get_fixture_data()
-        fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
-        results = {
-            "home_team": fixtures_df["Team_1"].values,
-            "away_team": fixtures_df["Team_2"].values,
-            "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
-            "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
-        }
-        return results
-
-    t = Tournament()
-    mocker.patch.object(WCPred, "sample_score", return_value=pick_random_score())
-    t.play_group_stage(
-        WCPred(
-            pd.DataFrame({"home_team": ["dummy"], "away_team": ["dummy"]}),
-            teams=get_teams_data()["Team"].values,
-        )
-    )
+    t = Tournament(num_samples=100)
+    t.play_group_stage(wc_pred)
     for group in t.groups.values():
         assert group.results["home_score"].shape == (6, 100)
         gq = group.get_qualifiers()
@@ -375,38 +385,102 @@ def test_play_group_stage(mocker):
         assert len(gq[1]) == 100
 
 
-def test_play_knockout_stages(mocker):
+def test_play_knockout_stages(wc_pred):
     """
     Play simulated knockout stages 100 times, check that we always get a winner.
     """
-
-    def pick_random_score():
-        fixtures_df = get_fixture_data()
-        fixtures_df = fixtures_df[fixtures_df["Stage"] == "Group"]
-        results = {
-            "home_team": fixtures_df["Team_1"].values,
-            "away_team": fixtures_df["Team_2"].values,
-            "home_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
-            "away_score": np.random.randint(0, 5, size=(len(fixtures_df), 100)),
-        }
-        return results
-
-    def pick_random_winner(self, home_team, away_team, *args, **kwargs):
-        return np.array(
-            [
-                np.random.choice([home_team[i], away_team[i]])
-                for i in range(len(home_team))
-            ]
-        )
-
     t = Tournament(num_samples=100)
-    mocker.patch.object(WCPred, "sample_score", return_value=pick_random_score())
-    mocker.patch.object(WCPred, "sample_outcome", new=pick_random_winner)
-    wc_pred = WCPred(
-        pd.DataFrame({"home_team": ["dummy"], "away_team": ["dummy"]}),
-        teams=get_teams_data()["Team"].values,
-    )
     t.play_group_stage(wc_pred)
     t.play_knockout_stages(wc_pred)
     teams = get_teams_data()["Team"].values
     assert np.isin(t.winner, teams).all()
+
+
+def test_resume_from_group_date():
+    """
+    Test actual results are filtered correctly when passed a date mid-way through the
+    group stage
+    """
+    resume_from = "2018-06-27"
+    t = Tournament(year="2018", resume_from=resume_from)
+    assert t.resume_stage == "Group"
+    assert (
+        t.fixtures_df.loc[t.fixtures_df["date"] < resume_from, "actual_home"]
+        .isna()
+        .sum()
+    ) == 0
+    assert (
+        t.fixtures_df.loc[t.fixtures_df["date"] >= resume_from, "actual_home"]
+        .isna()
+        .all()
+    )
+    assert t.bracket.isna().all().all()
+
+
+def test_resume_from_knockout_date():
+    """
+    Test actual results are filtered correctly when passed a date in the knockout stage
+    """
+    resume_from = "2018-07-06"
+    t = Tournament(year="2018", resume_from=resume_from)
+    assert t.resume_stage == "QF"
+    assert t.bracket.loc[:, t.bracket.columns.str.len() <= 4].isna().sum().sum() == 0
+    assert t.bracket.loc[:, t.bracket.columns.str.len() > 4].isna().all().all()
+
+
+def test_resume_from_knockout_stage():
+    """
+    Test actual results are filtered correctly when passed a knockout stage name
+    """
+    resume_from = "SF"
+    t = Tournament(year="2018", resume_from=resume_from)
+    assert t.resume_date == pd.to_datetime("2018-07-10")
+    assert t.bracket.loc[:, t.bracket.columns.str.len() <= 8].isna().sum().sum() == 0
+    assert t.bracket.loc[:, t.bracket.columns.str.len() > 8].isna().all().all()
+
+
+def play_resume_from_tournament(wc_pred):
+    """
+    Test playing a partially completed tournament
+    """
+    resume_from = "QF"
+    t = Tournament(year="2018", resume_from=resume_from, num_samples=1000)
+    t.play_tournament(wc_pred)
+    knocked_out_teams = [
+        "Saudi Arabia",
+        "Egypt",
+        "Morocco",
+        "Iran",
+        "Portugal",
+        "Spain",
+        "Australia",
+        "Peru",
+        "Denmark",
+        "Argentina",
+        "Iceland",
+        "Nigeria",
+        "Costa Rica",
+        "Serbia",
+        "Switzerland",
+        "Germany",
+        "Mexico",
+        "South Korea",
+        "Panama",
+        "Tunisia",
+        "Colombia",
+        "Japan",
+        "Poland",
+        "Senegal",
+    ]
+    qf_teams = [
+        "Uruguay",
+        "France",
+        "Brazil",
+        "Belgium",
+        "Russia",
+        "Croatia",
+        "Sweden",
+        "England",
+    ]
+    assert t.stage_counts.loc[knocked_out_teams, "QF"].sum().sum() == 0
+    assert t.stage_counts.loc[qf_teams, ["QF", "SF", "RU", "W"]].sum().sum() == 8000
