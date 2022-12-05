@@ -672,7 +672,7 @@ class Tournament:
             if stage == "F":
                 self.winner = sampled_outcomes.flatten()
             if self.verbose:
-                print(f"{stage} took {time() - t}")
+                print(f"{stage} took {time() - t:.2f}s")
 
         self.is_complete = True
 
