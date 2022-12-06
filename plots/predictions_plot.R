@@ -14,8 +14,8 @@ round_1_WI <- read.csv("after_round_1_wales_iran.csv")
 round_1_updated <- read.csv("after_round_1_updated.csv")
 # after Round 2 games
 round_2 <- read.csv("after_round_2.csv")
-# # after Round 3 games (predicting R16 onwards)
-# R16 <- read.csv("R16.csv")
+# after Round 3 games (predicting R16 onwards)
+R16 <- read.csv("R16.csv")
 # after R16 (predicting QF onwards)
 QF <- read.csv("QF.csv")
 # # after QF (predicting SF onwards)
@@ -209,13 +209,13 @@ create_table_plot_alt_colours(data_frame = after_round_2_prob,
                               subtitle = "After Round 2",
                               filename = "plots/after_round_2_colour_diff.png")
 
-# # after round 3 plots
-# R16_prob <- get_progression_probabiltiies(R16, 100000)
-# 
-# create_table_plot(data_frame = R16_prob[1:16, c("Team", "QF", "SF", "F", "W")],
-#                   domain = c(-0.5, 1),
-#                   subtitle = "Round of 16",
-#                   filename = "plots/R16.png")
+# after round 3 plots
+R16_prob <- get_progression_probabiltiies(R16, 100000)
+
+create_table_plot(data_frame = R16_prob[1:16, c("Team", "QF", "SF", "F", "W")],
+                  domain = c(-0.5, 1),
+                  subtitle = "Round of 16",
+                  filename = "plots/R16.png")
 
 # after R16 plots
 QF_prob <- get_progression_probabiltiies(QF, 100000)
