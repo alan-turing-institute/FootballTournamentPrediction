@@ -526,7 +526,7 @@ class Tournament:
             return bracket
 
         for aka, team in aliases["team"].items():
-            # only fill up to resume_date and resume_stage
+            # only fill up to resume_stage
             if (self.resume_stage == "R16") and (len(aka) > 2):
                 break
             if (self.resume_stage == "QF") and (len(aka) > 4):
@@ -536,6 +536,18 @@ class Tournament:
             if (self.resume_stage == "F") and (len(aka) > 16):
                 break
             bracket[aka] = team
+
+        # check for fixtures played up to resume_date in resume_stage
+        played_aliases = self.fixtures_df.loc[
+            (self.fixtures_df["stage"] == self.resume_stage)
+            & (self.fixtures_df["date"] < self.resume_date),
+            ["home_team", "away_team"],
+        ].sum(  # sum to combine team names into alias for next round
+            axis=1
+        )
+        for aka in played_aliases:
+            bracket[aka] = aliases.loc[aka].iloc[0]
+
         return bracket
 
     def split_played_fixtures(self, stage):
@@ -660,7 +672,7 @@ class Tournament:
             if stage == "F":
                 self.winner = sampled_outcomes.flatten()
             if self.verbose:
-                print(f"{stage} took {time() - t}")
+                print(f"{stage} took {time() - t:.2f}s")
 
         self.is_complete = True
 
