@@ -18,8 +18,8 @@ round_2 <- read.csv("after_round_2.csv")
 R16 <- read.csv("R16.csv")
 # after R16 (predicting QF onwards)
 QF <- read.csv("QF.csv")
-# # after QF (predicting SF onwards)
-# SF <- read.csv("SF.csv")
+# after QF (predicting SF onwards)
+SF <- read.csv("SF.csv")
 # # after SF (predicting F)
 # Final <- read.csv("F.csv")
 
@@ -225,14 +225,14 @@ create_table_plot(data_frame = QF_prob[1:8, c("Team", "SF", "F", "W")],
                   subtitle = "Quarter Finalists",
                   filename = "plots/QF.png")
 
-# # after SF plots
-# SF_prob <- get_progression_probabiltiies(SF, 100000)
-# 
-# create_table_plot(data_frame = SF_prob[1:4, c("Team", "F", "W")],
-#                   domain = c(-0.5, 1),
-#                   subtitle = "Semi Finalists",
-#                   filename = "plots/SF.png")
-# 
+# after SF plots
+SF_prob <- get_progression_probabiltiies(SF, 100000)
+
+create_table_plot(data_frame = SF_prob[1:4, c("Team", "F", "W")],
+                  domain = c(-0.5, 1),
+                  subtitle = "Semi Finalists",
+                  filename = "plots/SF.png")
+
 # # after F plots
 # F_prob <- get_progression_probabiltiies(Final, 100000)
 # 
