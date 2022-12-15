@@ -20,8 +20,8 @@ R16 <- read.csv("R16.csv")
 QF <- read.csv("QF.csv")
 # after QF (predicting SF onwards)
 SF <- read.csv("SF.csv")
-# # after SF (predicting F)
-# Final <- read.csv("F.csv")
+# after SF (predicting F)
+Final <- read.csv("F.csv")
 
 get_progression_probabiltiies <- function(df, n_sim, from_round) {
   df <- df[order(df$W, decreasing = TRUE),]
@@ -233,11 +233,11 @@ create_table_plot(data_frame = SF_prob[1:4, c("Team", "F", "W")],
                   subtitle = "Semi Finalists",
                   filename = "plots/SF.png")
 
-# # after F plots
-# F_prob <- get_progression_probabiltiies(Final, 100000)
-# 
-# create_table_plot(data_frame = F_prob[1:4, c("Team", "W")],
-#                   domain = c(-0.5, 1),
-#                   subtitle = "Finalists",
-#                   filename = "plots/F.png")
+# after F plots
+F_prob <- get_progression_probabiltiies(Final, 100000)
+
+create_table_plot(data_frame = F_prob[1:2, c("Team", "W")],
+                  domain = c(-0.5, 1),
+                  subtitle = "Finalists",
+                  filename = "plots/F.png")
  
