@@ -12,7 +12,9 @@ The original model is a version of [Dixon and Coles](https://rss.onlinelibrary.w
 
 There is some background information and description of the results [here](https://www.turing.ac.uk/blog/can-our-algorithm-predict-winner-2022-football-world-cup).
 
-The **[New Scientist](https://www.newscientist.com/article/2347699-brazil-picked-as-2022-world-cup-winners-by-alan-turing-institute-model/)** also has an article, as does **The Daily Mail**, which prompted one reader to enthuse: *"What an absolute load of rubbish, but typical of the anti-English establishment today!"*, and another to ponder: *"I have NEVER KNOW a Prediction from a Scientist to be Right Ever, But on this Prediction  I may be wrong."*.  High praise indeed!
+The **[New Scientist](https://www.newscientist.com/article/2347699-brazil-picked-as-2022-world-cup-winners-by-alan-turing-institute-model/)** also has an article, as does **The Daily Mail**, which prompted one reader to enthuse: *"What an absolute load of rubbish, but typical of the anti-English establishment today!"*, and another to ponder: *"I have NEVER KNOW a Prediction from a Scientist to be Right Ever, But on this Prediction  I may be wrong."*. High praise indeed!
+
+Our model (AIrgentina) came 6th in [@Futbolmetrix1's WC2022 Sophisticated Prediction Contest](https://twitter.com/Futbolmetrix1/status/1604584845942087681) outperforming models developed by FiveThirtyEight, Opta and Betfair! 
 
 ## Installation
 
