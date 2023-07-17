@@ -464,7 +464,7 @@ class Tournament:
         self.bracket = self._init_bracket(year=year, womens=womens)
         self.verbose = verbose
 
-    def _parse_resume_from(self, resume_from, year):
+    def _parse_resume_from(self, resume_from: Optional[str], year: str) -> Tuple[Optional[str], str]:
         if resume_from is None:
             # starting from the beginning, i.e. the group stage
             return pd.to_datetime(f"{year}-1-1"), "Group"

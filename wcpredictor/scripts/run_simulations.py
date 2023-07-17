@@ -8,10 +8,11 @@ from glob import glob
 from multiprocessing import Pool
 from time import time
 from uuid import uuid4
+from typing import Optional
 
 import pandas as pd
 
-from wcpredictor import Tournament, get_and_train_model
+from wcpredictor import WCPred, Tournament, get_and_train_model
 from wcpredictor.src.bpl_interface import WC_HOSTS
 from wcpredictor.src.data_loader import get_fixture_data
 from wcpredictor.src.tournament import STAGES
@@ -159,7 +160,7 @@ def get_resume_from(args):
         return args.resume_from
 
 
-def merge_csv_outputs(output_csv, tournament_year, output_txt):
+def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     files = glob(f"*_{output_csv}")
     simresults_df = pd.concat(
         [
@@ -173,21 +174,21 @@ def merge_csv_outputs(output_csv, tournament_year, output_txt):
     for f in files:
         os.remove(f)
 
-    if tournament_year != "2022":
+    if tournament_year not in ["2022", "2023"]:
         get_stage_difference_loss(
             tournament_year, simresults_df, output_path=output_txt, verbose=True
         )
 
 
 def run_sims(
-    tournament_year,
-    womens,
-    num_simulations,
-    model,
-    resume_from,
-    output_csv,
-    output_loss=None,
-    add_runid=True,
+    tournament_year: str,
+    womens: bool,
+    num_simulations: int,
+    model: WCPred,
+    resume_from: Optional[str],
+    output_csv: str,
+    output_loss: Optional[str] = None,
+    add_runid: bool = True,
 ):
     t = Tournament(
         year=tournament_year,
@@ -204,9 +205,10 @@ def run_sims(
     else:
         runid = None
 
+    print(t.stage_counts)
     t.stage_counts.to_csv(output_csv)
 
-    if output_loss:
+    if output_loss and (tournament_year not in ["2022", "2023"]):
         get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
 
     return runid

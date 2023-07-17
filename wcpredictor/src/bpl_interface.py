@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+import copy
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
@@ -197,12 +198,20 @@ class WCPred:
 
         # ensure host nation always the home team
         venue = np.ones(len(home_team))
+        # find indices for games where the host is away
         away_team_host = [x in self.host for x in away_team]
-        away_team[away_team_host] = home_team[away_team_host]
-        away_conference[away_team_host] = home_conference[away_team_host]
-        home_team[away_team_host] = self.host
-        home_conference[away_team_host] = self.confed_dict[self.host]
-        venue[[x in self.host for x in home_team]] = 0
+        if sum(away_team_host) > 0:
+            # figure out the host in games where the host is away
+            host = copy.deepcopy(away_team[away_team_host])
+            # swap home and away teams
+            # set away team as home team, and swap conferences
+            away_team[away_team_host] = home_team[away_team_host]
+            away_conference[away_team_host] = home_conference[away_team_host]
+            # set away team as the host and set
+            home_team[away_team_host] = host
+            home_conference[away_team_host] = [self.confed_dict[h] for h in host]
+            # set neutral venue to zero in this case as host is playing at home
+            venue[[x in self.host for x in home_team]] = 0
 
         return home_team, away_team, home_conference, away_conference, venue
 
