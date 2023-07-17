@@ -83,32 +83,32 @@ def get_cmd_line_args():
         choices=["game", "org", "both"],
         default="org",
         help=(
-            "if 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
+            "If 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
             "organization ratings"
         ),
     )
     parser.add_argument(
         "--include_competitions",
-        help="comma-separated list of competitions to include in training data",
+        help="Comma-separated list of competitions to include in training data",
         default="W,C1,WQ,CQ,C2,F",
     )
     parser.add_argument(
         "--exclude_competitions",
-        help="comma-separated list of competitions to exclude from training data",
+        help="Comma-separated list of competitions to exclude from training data",
     )
     parser.add_argument(
         "--epsilon",
-        help="how much to downweight games by in exponential time weighting",
+        help="How much to downweight games by in exponential time weighting",
         type=float,
         default=0.0,
     )
     parser.add_argument(
         "--world_cup_weight",
-        help="how much more to weight World Cup games in the data",
+        help="How much more to weight World Cup games in the data",
         type=float,
         default=1.0,
     )
-    parser.add_argument("--seed", help="seed value for simulations", type=int)
+    parser.add_argument("--seed", help="Seed value for simulations", type=int)
 
     return parser.parse_args()
 
@@ -141,7 +141,7 @@ def get_start_end_dates(args):
             "Need to provide either start_date and end_date, or years_training_data "
             "arguments"
         )
-    print(f"Start/End dates for training data are {start_date}, {end_date}")
+    print(f"Start/end dates for training data are {start_date}, {end_date}")
     return start_date, end_date
 
 

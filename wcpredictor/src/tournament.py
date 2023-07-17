@@ -460,8 +460,8 @@ class Tournament:
             f"Resuming tournament simulation from {self.resume_date} at "
             f"{self.resume_stage} stage"
         )
-        self._fill_played_fixtures(year)
-        self.bracket = self._init_bracket(year)
+        self._fill_played_fixtures(year=year, womens=womens)
+        self.bracket = self._init_bracket(year=year, womens=womens)
         self.verbose = verbose
 
     def _parse_resume_from(self, resume_from, year):
@@ -484,7 +484,7 @@ class Tournament:
         resume_stage = self.fixtures_df[dates >= resume_from].iloc[0]["stage"]
         return resume_from, resume_stage
 
-    def _fill_played_fixtures(self, year):
+    def _fill_played_fixtures(self, year, womens):
         """Fill the actual results of played results up to resume_from, and return
         the stage that takes us up to"""
         self.fixtures_df["actual_home"] = np.nan
@@ -494,6 +494,7 @@ class Tournament:
         actual_results, _ = get_results_data(
             start_date=f"{year}-01-01",
             end_date=end_date,
+            womens=womens,
             competitions="W",
         )
 
@@ -517,8 +518,8 @@ class Tournament:
                 self.fixtures_df.index[fixture_idx[0]], "actual_away"
             ] = result["away_score"]
 
-    def _init_bracket(self, year):
-        aliases = get_alias_data(year)
+    def _init_bracket(self, year, womens):
+        aliases = get_alias_data(year=year, womens=womens)
         # not na actual score and not an actual team name
         bracket = pd.DataFrame(
             index=np.arange(self.num_samples), columns=aliases["team"].index.values

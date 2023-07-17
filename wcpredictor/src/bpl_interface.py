@@ -197,12 +197,12 @@ class WCPred:
 
         # ensure host nation always the home team
         venue = np.ones(len(home_team))
-        away_team_host = away_team in self.host
+        away_team_host = [x in self.host for x in away_team]
         away_team[away_team_host] = home_team[away_team_host]
         away_conference[away_team_host] = home_conference[away_team_host]
         home_team[away_team_host] = self.host
         home_conference[away_team_host] = self.confed_dict[self.host]
-        venue[home_team in self.host] = 0
+        venue[[x in self.host for x in home_team]] = 0
 
         return home_team, away_team, home_conference, away_conference, venue
 
