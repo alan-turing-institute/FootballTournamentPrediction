@@ -12,6 +12,12 @@ from .run_simulations import get_dates_from_years_training
 def get_cmd_line_args():
     parser = argparse.ArgumentParser(description="scan hyperparameters")
     parser.add_argument(
+        "--womens",
+        help="Predict the Women's World Cup if used",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
         "--metric",
         help="which metric to use",
         choices=["brier", "rps"],
@@ -74,7 +80,9 @@ def run_metrics_wrapper(queue, pid, output_dir):
         if status == "DONE":
             print(f"Process {pid} finished all jobs!")
             break
+        
         (
+            womens,
             metric,
             num_years,
             train_start,
@@ -95,6 +103,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
         wc_pred = get_and_train_model(
             start_date=train_start,
             end_date=train_end,
+            womens=womens,
             competitions=comps,
             rankings_source=ratings,
             epsilon=epsilon,
@@ -105,6 +114,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
             model=wc_pred.model,
             start_date=test_start,
             end_date=test_end,
+            womens=womens,
             competitions=comps,
             method=metric,
         )
@@ -112,6 +122,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
         metrics_filename = (
             f"{metric}_{num_years}_{ratings}_{comptxt}_ep_{epsilon}_wc_{wc_weight}.txt"
         )
+        metrics_filename = "womens_" + metrics_filename if womens else metrics_filename
         metrics_filename = os.path.join(output_dir, metrics_filename)
 
         with open(metrics_filename, "w") as outfile:
@@ -122,6 +133,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
 
 def main():
     args = get_cmd_line_args()
+    womens = args.womens
     metric = args.metric
     train_years = args.years_training.split(",")
     test_years = args.years_testing
@@ -161,6 +173,7 @@ def main():
                         print("adding to queue")
                         queue.put(
                             (
+                                womens,
                                 metric,
                                 num_years,
                                 train_start,

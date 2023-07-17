@@ -8,6 +8,12 @@ from wcpredictor import get_and_train_model, get_fixture_data
 def get_cmd_line_args():
     parser = argparse.ArgumentParser("Print out match predictions")
     parser.add_argument(
+        "--womens",
+        help="Predict the scores for Women's football",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
         "--stage",
         help="What stage of the tournament?",
         choices=["G1", "G2", "G3", "R16", "QF", "SF", "F"],
@@ -43,9 +49,9 @@ def get_fixture_indices(stage):
 
 def main():
     args = get_cmd_line_args()
-    model = get_and_train_model()
+    model = get_and_train_model(womens=args.womens)
     fixture_indices = get_fixture_indices(args.stage)
-    fixture_df = get_fixture_data()
+    fixture_df = get_fixture_data(womens=args.womens)
     fixture_df = fixture_df[
         (fixture_df.index >= fixture_indices[0])
         & (fixture_df.index < fixture_indices[1])

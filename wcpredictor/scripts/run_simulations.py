@@ -21,6 +21,12 @@ from wcpredictor.src.utils import get_stage_difference_loss
 def get_cmd_line_args():
     parser = argparse.ArgumentParser("Simulate multiple World Cups")
     parser.add_argument(
+        "--womens",
+        help="Predict the Women's World Cup if used",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
         "--num_simulations",
         help="How many simulations to run in total",
         type=int,
@@ -37,8 +43,8 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--tournament_year",
-        help="Which world cup to simulate? 2014, 2018 or 2022",
-        choices={"2014", "2018", "2022"},
+        help="Which world cup to simulate? 2014, 2018, 2022 or 2023 (Womens)",
+        choices={"2014", "2018", "2022", "2023"},
         default="2022",
     )
     parser.add_argument("--training_data_start", help="earliest date for training data")
@@ -175,6 +181,7 @@ def merge_csv_outputs(output_csv, tournament_year, output_txt):
 
 def run_sims(
     tournament_year,
+    womens,
     num_simulations,
     model,
     resume_from,
@@ -183,7 +190,10 @@ def run_sims(
     add_runid=True,
 ):
     t = Tournament(
-        tournament_year, num_samples=num_simulations, resume_from=resume_from
+        year=tournament_year,
+        womens=womens,
+        num_samples=num_simulations,
+        resume_from=resume_from
     )
     t.play_tournament(model)
 
@@ -203,12 +213,21 @@ def run_sims(
 
 
 def run_wrapper(args):
-    tournament_year, num_simulations, model, resume_from, output_csv = args
-    return run_sims(tournament_year, num_simulations, model, resume_from, output_csv)
+    tournament_year, womens, num_simulations, model, resume_from, output_csv = args
+    return run_sims(tournament_year=tournament_year,
+                    womens=womens,
+                    num_simulations=num_simulations,
+                    model=model,
+                    resume_from=resume_from,
+                    output_csv=output_csv)
 
 
 def main():
     args = get_cmd_line_args()
+    if args.womens & (args.tournament_year != "2023"):
+        raise ValueError("If you want to simulate a Women's World Cup, "
+                         "tournament_year must be '2023'")
+    
     # use the fifa ratings as priors?
     ratings_src = None if args.dont_use_ratings else args.ratings_source
     # list of competitions to include
@@ -224,9 +243,10 @@ def main():
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}"
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
+    world_cup_spec_str = "for Women's World Cup" if args.womens else "for Men's World Cup"
     print(
         f"""
-Running simulations with
+Running simulations {world_cup_spec_str} with
 tournament_year: {args.tournament_year}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
@@ -234,7 +254,7 @@ end_date: {end_date}
 resume_from: {resume_from}
 comps: {comps}
 rankings: {ratings_src}
-{output_csv}
+output: {output_csv}
     """
     )
     if args.seed:
@@ -244,6 +264,7 @@ rankings: {ratings_src}
     model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
+        womens=args.womens,
         competitions=comps,
         rankings_source=ratings_src,
         epsilon=args.epsilon,
@@ -256,7 +277,7 @@ rankings: {ratings_src}
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
     sim_args = (
-        (args.tournament_year, args.per_tournament, model, resume_from, output_csv)
+        (args.tournament_year, args.womens, args.per_tournament, model, resume_from, output_csv)
         for _ in range(n_tournaments)
     )
     with Pool(args.num_thread) as p:

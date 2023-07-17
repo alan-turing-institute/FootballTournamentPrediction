@@ -12,12 +12,13 @@ from bpl.base import BaseMatchPredictor
 from wcpredictor.src.data_loader import get_confederations_data
 
 WC_HOSTS = {
-    "2002": "South Korea",  # and Japan
-    "2006": "Germany",
-    "2010": "South Africa",
-    "2014": "Brazil",
-    "2018": "Russia",
-    "2022": "Qatar",
+    "2002": ["South Korea", "Japan"],
+    "2006": ["Germany"],
+    "2010": ["South Africa"],
+    "2014": ["Brazil"],
+    "2018": ["Russia"],
+    "2022": ["Qatar"],
+    "2023": ["Australia", "New Zealand"]
 }
 
 
@@ -196,12 +197,12 @@ class WCPred:
 
         # ensure host nation always the home team
         venue = np.ones(len(home_team))
-        away_team_host = away_team == self.host
+        away_team_host = away_team in self.host
         away_team[away_team_host] = home_team[away_team_host]
         away_conference[away_team_host] = home_conference[away_team_host]
         home_team[away_team_host] = self.host
         home_conference[away_team_host] = self.confed_dict[self.host]
-        venue[home_team == self.host] = 0
+        venue[home_team in self.host] = 0
 
         return home_team, away_team, home_conference, away_conference, venue
 
