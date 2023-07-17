@@ -7,7 +7,7 @@ import pandas as pd
 
 
 def get_teams_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
-    if year not in ["2014", "2018", "2022"]:
+    if year not in ["2014", "2018", "2022", "2023"]:
         raise RuntimeError(f"Unknown year {year}")
     current_dir = os.path.dirname(__file__)
     file_name = f"teams_{year}.csv" if not womens else f"teams_{year}_womens.csv"
@@ -18,7 +18,7 @@ def get_teams_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
 
 
 def get_fixture_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
-    if year not in ["2014", "2018", "2022"]:
+    if year not in ["2014", "2018", "2022", "2023"]:
         raise RuntimeError(f"Unknown year {year}")
     current_dir = os.path.dirname(__file__)
     file_name = f"fixtures_{year}.csv" if not womens else f"fixtures_{year}_womens.csv"
