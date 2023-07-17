@@ -1,0 +1,64 @@
+{
+    "W": [
+        "FIFA World Cup",
+        "World Cup"
+    ],
+    "WQ": [
+        "FIFA World Cup qualification"
+    ],
+    "C1": [
+		"UEFA Euro",
+        "Euro",
+        "Copa América",
+		"African Cup of Nations",
+        "African Championship",
+		"AFC Championship",
+        "AFC Asian Cup",
+        "Algarve Cup",
+        "Cyprus Cup",
+		"CONCACAF Gold Cup",
+		"CONCACAF Championship",
+		"OFC Championship",
+        "OFC Nations Cup",
+        "Olympic Games",
+        "Turkish Women's Cup",
+        "Four Nations Tournament"
+	],
+    "CQ": [
+		"UEFA Euro qualification",
+        "African Cup of Nations qualification",
+        "African Championship qualification",
+		"AFC Asian Cup qualification",
+        "CONCACAF Gold Cup qualification",
+        "OFC Nations Cup qualification",
+        "Olympic Games qualification"
+	],
+    "C2": [
+		"Cyprus Cup",
+        "SheBelieves Cup",
+        "Mundialito"
+	],
+	"F": [
+		"Friendly",
+        "International Tournament",
+        "Yongchuan International Tournament",
+        "Pinatar Cup",
+        "Tournoi de France",
+        "Tournament of Nations",
+        "Women's Revelations Cup",
+        "Cup of Nations",
+        "Arnold Clark Cup",
+        "Peace Queen Cup",
+        "Matchworld Women's Cup",
+        "Baltic Cup",
+        "Gold Cup India",
+        "Armenia International Friendly Tournament",
+        "SAFF Women's Friendly Tournament",
+        "MS&AD Cup",
+        "CONCACAF Invitational Tournament",
+        "Basque Country Women's Cup",
+        "Valais Women's Cup",
+        "Malta International Tournament",
+        "Finalissima"
+    ]
+}
