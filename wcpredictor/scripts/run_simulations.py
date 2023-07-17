@@ -147,7 +147,7 @@ def get_start_end_dates(args):
 
 def get_resume_from(args):
     if args.resume_from == "None":
-        return str(datetime.now().date()) if args.tournament_year == "2022" else None
+        return str(datetime.now().date()) if args.tournament_year in ["2022", "2023"] else None
     elif args.resume_from in STAGES:
         # obtain fixtures for world cup year
         fixtures_df = get_fixture_data(args.tournament_year).sort_values(by="date")
@@ -224,7 +224,7 @@ def run_wrapper(args):
 
 def main():
     args = get_cmd_line_args()
-    if args.womens & (args.tournament_year != "2023"):
+    if args.womens and (args.tournament_year != "2023"):
         raise ValueError("If you want to simulate a Women's World Cup, "
                          "tournament_year must be '2023'")
     
@@ -238,7 +238,7 @@ def main():
             comps.remove(comp)
     start_date, end_date = get_start_end_dates(args)
     resume_from = get_resume_from(args)
-    if pd.to_datetime(end_date) < pd.to_datetime(resume_from):
+    if (resume_from is not None) and (pd.to_datetime(end_date) < pd.to_datetime(resume_from)):
         end_date = resume_from
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}"
