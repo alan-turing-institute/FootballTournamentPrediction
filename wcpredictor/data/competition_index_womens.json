@@ -15,14 +15,11 @@
 		"AFC Championship",
         "AFC Asian Cup",
         "Algarve Cup",
-        "Cyprus Cup",
 		"CONCACAF Gold Cup",
 		"CONCACAF Championship",
 		"OFC Championship",
         "OFC Nations Cup",
-        "Olympic Games",
-        "Turkish Women's Cup",
-        "Four Nations Tournament"
+        "Olympic Games"
 	],
     "CQ": [
 		"UEFA Euro qualification",
@@ -36,7 +33,9 @@
     "C2": [
 		"Cyprus Cup",
         "SheBelieves Cup",
-        "Mundialito"
+        "Mundialito",
+        "Turkish Women's Cup",
+        "Four Nations Tournament"
 	],
 	"F": [
 		"Friendly",
