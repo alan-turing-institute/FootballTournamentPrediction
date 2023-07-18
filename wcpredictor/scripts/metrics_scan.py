@@ -35,7 +35,7 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--ratings_choices",
-        help="Comma-separated list of What rankings data to use",
+        help="Comma-separated list of what rankings data to use",
         choices=[
             "game",
             "org",
