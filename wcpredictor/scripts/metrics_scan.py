@@ -19,23 +19,23 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--metric",
-        help="which metric to use",
+        help="Which metric to use?",
         choices=["brier", "rps"],
         default="rps",
     )
     parser.add_argument(
         "--years_training",
-        help="comma-separated list of num-years-training-data",
+        help="Comma-separated list of number of years for the training data",
         default="20",
     )
     parser.add_argument(
         "--years_testing",
-        help="num-years-testing-data (must be less than years_training)",
+        help="Number of years in the testing data (must be less than years_training)",
         default="2",
     )
     parser.add_argument(
         "--ratings_choices",
-        help="what rankings data to use - comma-separated list",
+        help="Comma-separated list of What rankings data to use",
         choices=[
             "game",
             "org",
@@ -48,26 +48,25 @@ def get_cmd_line_args():
         default="game,org,none",
     )
     parser.add_argument(
-        "--exclude_friendlies", help="exclude friendlies", action="store_true"
+        "--exclude_friendlies", help="Whether or not to exclude friendlies", action="store_true"
     )
     parser.add_argument(
         "--epsilon_choices",
-        help="what value of epsilon to choose in weightings - comma-separated list",
+        help="Comma-separated list of what value of epsilon to choose in time weightings",
         default="0.05,0.1,0.2",
     )
     parser.add_argument(
         "--world_cup_weight_choices",
         help=(
-            "how much to weight the World Cup games and other competitions - "
-            "comma-separated list"
+            "Comma-separated list of how much to weight the World Cup games and other competitions"
         ),
         default="2,5",
     )
     parser.add_argument(
-        "--output_dir", help="where to put output", type=str, default="output"
+        "--output_dir", help="Where to put output", type=str, default="output"
     )
     parser.add_argument(
-        "--num_thread", help="how many threads for multiprocessing", type=int, default=4
+        "--num_thread", help="How many threads for multiprocessing", type=int, default=4
     )
     args = parser.parse_args()
     return args
@@ -154,7 +153,8 @@ def main():
     # first add items to our multiprocessing queue
     queue = Queue()
     for num_years in train_years:
-        train_start, test_end = get_dates_from_years_training(2022, int(num_years))
+        tournament_year = 2022 if not args.womens else 2023
+        train_start, test_end = get_dates_from_years_training(tournament_year, int(num_years))
         train_end = pd.Timestamp(test_end) - pd.DateOffset(
             years=int(test_years), days=1
         )
@@ -162,8 +162,8 @@ def main():
         # convert to string
         train_end = str(train_end.date())
         test_start = str(test_start.date())
-        print(test_start)
-        print(test_end)
+        print(f"start / end dates for training period are: {train_start}, {train_end}")
+        print(f"start / end dates for test period are: {test_start}, {test_end}")
         for r in ratings:
             if r == "none":
                 r = None
