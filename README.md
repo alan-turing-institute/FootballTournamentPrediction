@@ -91,5 +91,10 @@ Position |  Team   | Points | GS |  GA
 >>> print(t.winner)
 ```
 
-### Pre-tournament predictions:
-![world_cup_2022_predictions](plots/plots/predictions.png)
+# Pre-tournament predictions:
+
+## FIFA Men's 2022 World Cup
+![world_cup_2022_predictions](plots/mens_2022/plots/predictions.png)
+
+## FIFA Women's 2022 World Cup
+![world_cup_2023_predictions](plots/womens_2023/plots/predictions.png)
