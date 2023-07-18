@@ -4,7 +4,7 @@
 
 Predicting results for the **FIFA Men's 2022 World Cup** and **FIFA Women's 2023 World Cup**.
 
-Matches are predicted using a framework based on the team-level model in [AIrsenal](https://github.com/alan-turing-institute/AIrsenal), a Python library for using Machine learning to pick a Fantasy Premier League team , which in turn uses [bpl](https://github.com/anguswilliams91/bpl-next) which is a [numpyro](https://num.pyro.ai/en/) implementation of our model.
+Matches are predicted using a framework based on the team-level model in [AIrsenal](https://github.com/alan-turing-institute/AIrsenal), a Python library for using Machine learning to pick a Fantasy Premier League team, which in turn uses [bpl](https://github.com/anguswilliams91/bpl-next) which is a [numpyro](https://num.pyro.ai/en/) implementation of our model.
 
 This model is trained on international mens football results obtained from https://github.com/martj42/international_results and https://github.com/martj42/womens-international-results.
 
