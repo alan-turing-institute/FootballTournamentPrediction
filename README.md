@@ -74,7 +74,6 @@ Note that both these commands can be run with `--help` to see the options.
 In a python session, to simulate the Men's 2022 World Cup, you can do something like:
 
 ```python
-python
 >>> from wcpredictor import Tournament, get_and_train_model
 >>> t = Tournament("2022") # can also choose "2018" or "2014"
 >>> model = get_and_train_model(start_date="2016-06-01", end_date="2022-11-20") # choose dates for training data
