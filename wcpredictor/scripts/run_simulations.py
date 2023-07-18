@@ -290,6 +290,7 @@ output: {output_csv}
 
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
+    print(f"running {n_tournaments} tournaments each with {args.num_simulations} number of simulations")
     sim_args = (
         (args.tournament_year, args.womens, args.per_tournament, model, resume_from, output_csv)
         for _ in range(n_tournaments)

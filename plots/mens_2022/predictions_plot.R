@@ -65,7 +65,7 @@ create_table_plot <- function(data_frame,
                               subtitle = "",
                               filename = NULL) {
   full_table <- data_frame %>%
-    mutate('logo' = paste0('flags/', Team, '.png')) %>%
+    mutate('logo' = paste0('../flags/', Team, '.png')) %>%
     select(Team, logo, everything()) %>%
     gt() %>%
     tab_header(
@@ -119,7 +119,7 @@ create_table_plot_alt_colours <- function(data_frame,
                                           filename = NULL) {
   full_table <- create_table_plot(data_frame_for_colours, domain, subtitle)
   full_table$`_data` <- tibble(data_frame %>%
-                                 mutate('logo' = paste0('flags/', Team, '.png')) %>%
+                                 mutate('logo' = paste0('../flags/', Team, '.png')) %>%
                                  select(Team, logo, everything()))
   if (!is.null(filename)) {
     gtsave(full_table, filename = filename)  
