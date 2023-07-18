@@ -61,7 +61,7 @@ def get_cmd_line_args():
         help=(
             "Use actual results up to the given date or round strings, and then "
             "simulate the tournament from that point onwards. Defaults to today's "
-            "date if simulating 2022 or 'None' otherwise"
+            "date if simulating 2022 or 2023 or 'None' otherwise"
         ),
         type=str,
         default="None",
@@ -160,7 +160,7 @@ def get_resume_from(args):
         return str(datetime.now().date()) if args.tournament_year in ["2022", "2023"] else None
     elif args.resume_from in STAGES:
         # obtain fixtures for world cup year
-        fixtures_df = get_fixture_data(args.tournament_year).sort_values(by="date")
+        fixtures_df = get_fixture_data(year=args.tournament_year, womens=args.womens).sort_values(by="date")
         # obtain round start date
         dates = pd.to_datetime(fixtures_df["date"])
         resume_date = dates[fixtures_df["stage"] == args.resume_from].min()
