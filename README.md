@@ -96,5 +96,5 @@ Position |  Team   | Points | GS |  GA
 ## FIFA Men's 2022 World Cup
 ![world_cup_2022_predictions](plots/mens_2022/plots/predictions.png)
 
-## FIFA Women's 2022 World Cup
+## FIFA Women's 2023 World Cup
 ![world_cup_2023_predictions](plots/womens_2023/plots/predictions.png)
