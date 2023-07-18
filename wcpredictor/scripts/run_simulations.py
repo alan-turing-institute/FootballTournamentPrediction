@@ -67,7 +67,16 @@ def get_cmd_line_args():
         default="None",
     )
     parser.add_argument(
-        "--output_csv", help="Path to output CSV file", default="sim_results.csv"
+        "--output_csv",
+        help="Path to output CSV file",
+        type=str,
+        default="sim_results.csv"
+    )
+    parser.add_argument(
+        "--add_timestamp",
+        help="Whether or not to add timestamp to output csv file",
+        action="store_true",
+        default=False
     )
     parser.add_argument(
         "--output_loss_txt",
@@ -170,7 +179,10 @@ def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     )
     simresults_df = simresults_df.groupby("Team").sum()
     print(simresults_df.sort_values(by=["W", "RU", "SF", "QF", "R16"], ascending=False))
+    
     simresults_df.to_csv(output_csv)
+    print(f"outputting to {output_csv}")
+    
     for f in files:
         os.remove(f)
 
@@ -243,7 +255,7 @@ def main():
     if (resume_from is not None) and (pd.to_datetime(end_date) < pd.to_datetime(resume_from)):
         end_date = resume_from
     timestamp = int(datetime.now().timestamp())
-    output_csv = f"{timestamp}_{args.output_csv}"
+    output_csv = f"{timestamp}_{args.output_csv}" if args.add_timestamp else args.output_csv
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
     world_cup_spec_str = "for Women's World Cup" if args.womens else "for Men's World Cup"
     print(
