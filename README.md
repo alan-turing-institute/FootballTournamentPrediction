@@ -2,10 +2,12 @@
 
 <img align="right" width="150" height="150" src="plots/AIrgentina_hex.png">
 
-Predicting results for the Men's 2022 World Cup and Women's 2023 World Cup.
+Predicting results for the **FIFA Men's 2022 World Cup** and **FIFA Women's 2023 World Cup**.
 
-Matches are predicted using a framework based on the team-level model in https://github.com/alan-turing-institute/AIrsenal, which in turn uses https://github.com/anguswilliams91/bpl-next.
+Matches are predicted using a framework based on the team-level model in [AIrsenal](https://github.com/alan-turing-institute/AIrsenal), a Python library for using Machine learning to pick a Fantasy Premier League team , which in turn uses [bpl](https://github.com/anguswilliams91/bpl-next) which is a [numpyro](https://num.pyro.ai/en/) implementation of our model.
+
 This model is trained on international mens football results obtained from https://github.com/martj42/international_results and https://github.com/martj42/womens-international-results.
+
 The original model is a version of [Dixon and Coles](https://rss.onlinelibrary.wiley.com/doi/10.1111/1467-9876.00065).
 
 ## In the media
@@ -69,7 +71,7 @@ Note that both these commands can be run with `--help` to see the options.
 
 ### Running a single tournament
 
-In a python session, you can do something like:
+In a python session, to simulate the Men's 2022 World Cup, you can do something like:
 
 ```python
 python
