@@ -69,7 +69,7 @@ create_table_plot <- function(data_frame,
     select(Team, logo, everything()) %>%
     gt() %>%
     tab_header(
-      title = md("**World Cup 2022**"),
+      title = md("**Men's World Cup 2022**"),
       subtitle = subtitle) %>% 
     cols_label(Team = "",
                logo = "") %>%
@@ -131,6 +131,7 @@ create_table_plot_alt_colours <- function(data_frame,
 original_prob <- get_progression_probabiltiies(original, 100000)
 
 create_table_plot(original_prob, c(-0.5, 1), filename = "plots/predictions.png")
+create_table_plot(original_prob[1:10,], c(-0.5, 1), filename = "plots/predictions_top_10.png")
 
 # after round 1 plots
 after_round_1_prob <- get_progression_probabiltiies(round_1, 100000)
