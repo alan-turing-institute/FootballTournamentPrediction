@@ -2,10 +2,12 @@
 
 <img align="right" width="150" height="150" src="plots/AIrgentina_hex.png">
 
-Predicting results for the 2022 World Cup.
+Predicting results for the **FIFA Men's 2022 World Cup** and **FIFA Women's 2023 World Cup**.
 
-Matches are predicted using a framework based on the team-level model in https://github.com/alan-turing-institute/AIrsenal, which in turn uses https://github.com/anguswilliams91/bpl-next.
-This model is trained on international mens football results obtained from https://github.com/martj42/international_results.
+Matches are predicted using a framework based on the team-level model in [AIrsenal](https://github.com/alan-turing-institute/AIrsenal), a Python library for using Machine learning to pick a Fantasy Premier League team, which in turn uses [bpl](https://github.com/anguswilliams91/bpl-next) which is a [numpyro](https://num.pyro.ai/en/) implementation of our model.
+
+This model is trained on international mens football results obtained from https://github.com/martj42/international_results and https://github.com/martj42/womens-international-results.
+
 The original model is a version of [Dixon and Coles](https://rss.onlinelibrary.wiley.com/doi/10.1111/1467-9876.00065).
 
 ## In the media
@@ -33,13 +35,21 @@ to first open a shell in a virtual environment, and then install the dependencie
 
 There are a couple of command-line applications that can be run when the `wcpredictor` package is installed as described above.
 
-In order to simulate the tournament N times, you can do
+In order to simulate the 2022 Men's World Cup $N$ times, you can do
 
 ```bash
-wcpred_run_simulations --num_simulations <N> --tournament_year <year> --training_data_start <YYYY-MM-DD> --training_data_end <YYYY-MM-DD> --output_csv <outputfilename> --use_ratings
+wcpred_run_simulations --num_simulations N --tournament_year 2022 --training_data_start <YYYY-MM-DD> --training_data_end <YYYY-MM-DD> --resume_from=Group --output_csv <outputfilename>
 ```
 
-and the results, in the form of a table of how many times each team got to each stage of the competition, will be saved in the specified csv file.   At present, the allowed values for `tournament_year` are "2014", "2018", and "2022" (the default).
+For the 2023 Women's World Cup, you can run
+
+```bash
+wcpred_run_simulations --womens --num_simulations N --tournament_year 2023  --years_training_data 20 --resume_from=Group --output_csv <outputfilename>
+```
+
+Notice here, instead of passing in the training start and end dates, we can simply pass how many years of training data to look backwards in time for. You can use the `--resume_from` CLI argument to specify at what point to simulate the tournament from. 
+
+The results, in the form of a table of how many times each team got to each stage of the competition, will be saved in the specified csv file.   At present, the allowed values for `tournament_year` are "2014", "2018", "2022" (the default) and "2023".
 
 ⚠️ **Warning:** ⚠️ The simulations can use ***a lot*** of memory. If you want to run more than around 250 simulationns we recommend checking the help (`wcpred_run_simulations --help`) and setting the `--num_thread` and `--per_tournament` arguments (start low andd then slowly increase them whilst monitoring CPU/memory usage on your system).
 
@@ -61,10 +71,9 @@ Note that both these commands can be run with `--help` to see the options.
 
 ### Running a single tournament
 
-In a python session, you can do something like:
+In a python session, to simulate the Men's 2022 World Cup, you can do something like:
 
 ```python
-python
 >>> from wcpredictor import Tournament, get_and_train_model
 >>> t = Tournament("2022") # can also choose "2018" or "2014"
 >>> model = get_and_train_model(start_date="2016-06-01", end_date="2022-11-20") # choose dates for training data
@@ -81,5 +90,10 @@ Position |  Team   | Points | GS |  GA
 >>> print(t.winner)
 ```
 
-### Pre-tournament predictions:
-![world_cup_2022_predictions](plots/plots/predictions.png)
+# Pre-tournament predictions:
+
+## FIFA Men's 2022 World Cup
+![world_cup_2022_predictions](plots/mens_2022/plots/predictions.png)
+
+## FIFA Women's 2023 World Cup
+![world_cup_2023_predictions](plots/womens_2023/plots/predictions.png)

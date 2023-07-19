@@ -1,0 +1,64 @@
+home_team,away_team,date,stage
+New Zealand,Norway,2023-07-20,Group
+Australia,Republic of Ireland,2023-07-20,Group
+Nigeria,Canada,2023-07-21,Group
+Philippines,Switzerland,2023-07-21,Group
+Spain,Costa Rica,2023-07-21,Group
+USA,Vietnam,2023-07-22,Group
+Zambia,Japan,2023-07-22,Group
+England,Haiti,2023-07-22,Group
+Denmark,China PR,2023-07-22,Group
+Sweden,South Africa,2023-07-23,Group
+Netherlands,Portugal,2023-07-23,Group
+France,Jamaica,2023-07-23,Group
+Italy,Argentina,2023-07-24,Group
+Germany,Morocco,2023-07-24,Group
+Brazil,Panama,2023-07-24,Group
+Colombia,South Korea,2023-07-25,Group
+New Zealand,Philippines,2023-07-25,Group
+Switzerland,Norway,2023-07-25,Group
+Japan,Costa Rica,2023-07-26,Group
+Spain,Zambia,2023-07-26,Group
+Canada,Republic of Ireland,2023-07-26,Group
+USA,Netherlands,2023-07-27,Group
+Portugal,Vietnam,2023-07-27,Group
+Australia,Nigeria,2023-07-27,Group
+Argentina,South Africa,2023-07-28,Group
+England,Denmark,2023-07-28,Group
+China PR,Haiti,2023-07-28,Group
+Sweden,Italy,2023-07-29,Group
+France,Brazil,2023-07-29,Group
+Panama,Jamaica,2023-07-29,Group
+South Korea,Morocco,2023-07-30,Group
+Norway,Philippines,2023-07-30,Group
+Switzerland,New Zealand,2023-07-30,Group
+Germany,Colombia,2023-07-30,Group
+Costa Rica,Zambia,2023-07-30,Group
+Japan,Spain,2023-07-30,Group
+Canada,Australia,2023-07-30,Group
+Republic of Ireland,Nigeria,2023-07-30,Group
+Portugal,USA,2023-08-01,Group
+Vietnam,Netherlands,2023-08-01,Group
+China PR,England,2023-08-01,Group
+Haiti,Denmark,2023-08-01,Group
+Argentina,Sweden,2023-08-02,Group
+South Africa,Italy,2023-08-02,Group
+Jamaica,Brazil,2023-08-02,Group
+Panama,France,2023-08-02,Group
+South Korea,Germany,2023-08-03,Group
+Morocco,Colombia,2023-08-03,Group
+1A,2C,2023-08-05,R16
+1C,2A,2023-08-05,R16
+1E,2G,2023-08-06,R16
+1G,2E,2023-08-06,R16
+1D,2B,2023-08-07,R16
+1B,2D,2023-08-07,R16
+1H,2F,2023-08-08,R16
+1F,2H,2023-08-08,R16
+1A2C,1E2G,2023-08-11,QF
+1C2A,1G2E,2023-08-11,QF
+1B2D,1F2H,2023-08-12,QF
+1D2B,1H2F,2023-08-12,QF
+1A2C1E2G,1C2A1G2E,2023-08-15,SF
+1B2D1F2H,1D2B1H2F,2023-08-16,SF
+1A2C1E2G1C2A1G2E,1B2D1F2H1D2B1H2F,2023-08-20,F

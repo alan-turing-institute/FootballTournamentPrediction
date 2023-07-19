@@ -10,6 +10,12 @@ from .run_simulations import get_dates_from_years_training, run_sims
 def get_cmd_line_args():
     parser = argparse.ArgumentParser(description="scan hyperparameters")
     parser.add_argument(
+        "--womens",
+        help="Predict the Women's World Cup if used",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
         "--tournaments",
         help="comma-separated list of tournaments",
         choices=["2014", "2018", "2014,2018"],
@@ -74,6 +80,7 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
             print(f"Process {pid} finished all jobs!")
             break
         (
+            womens,
             tournament,
             num_years,
             start_date,
@@ -89,16 +96,19 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
             f"{tournament}_{num_years}_{ratings}_{comptxt}_"
             f"ep_{epsilon}_wc_{wc_weight}.csv"
         )
+        csv_filename = "womens_" + csv_filename if womens else csv_filename
         loss_filename = (
             f"{tournament}_{num_years}_{ratings}_{comptxt}_"
             f"ep_{epsilon}_wc_{wc_weight}_loss.txt"
         )
+        loss_filename = "womens_" + loss_filename if womens else loss_filename
         csv_filename = os.path.join(output_dir, csv_filename)
         loss_filename = os.path.join(output_dir, loss_filename)
 
         model = get_and_train_model(
             start_date=start_date,
             end_date=end_date,
+            womens=womens,
             competitions=comps,
             rankings_source=ratings,
             epsilon=epsilon,
@@ -106,6 +116,7 @@ def run_sim_wrapper(queue, pid, num_simulations, output_dir):
         )
         run_sims(
             tournament_year=tournament,
+            womens=womens,
             num_simulations=num_simulations,
             model=model,
             output_csv=csv_filename,
@@ -145,6 +156,7 @@ def main():
                             print("adding to queue")
                             queue.put(
                                 (
+                                    args.womens,
                                     tournament,
                                     num_years,
                                     start_date,

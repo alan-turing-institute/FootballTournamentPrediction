@@ -23,6 +23,7 @@ from .data_loader import (
 def get_and_train_model(
     start_date: str = "2002-06-01",
     end_date: str = "2022-12-31",
+    womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
     epsilon: float = 2.0,
@@ -45,16 +46,20 @@ def get_and_train_model(
     values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
     neither (None).
     """
+    results_data_choice = "Women's" if womens else "Men's" 
+    print(f"Fitting model to data for {results_data_choice} international games")
+    
     results, weights_dict = get_results_data(
         start_date=start_date,
         end_date=end_date,
+        womens=womens,
         competitions=competitions,
         rankings_source=rankings_source,
         world_cup_weight=world_cup_weight,
     )
 
     print(f"Using {len(results)} rows in training data")
-    ratings = get_fifa_rankings_data(rankings_source) if rankings_source else None
+    ratings = get_fifa_rankings_data(source=rankings_source, womens=womens) if rankings_source else None
     wc_pred = WCPred(
         results=results,
         ratings=ratings,
@@ -74,10 +79,11 @@ def test_model(
     model: BaseMatchPredictor,
     start_date: str = "2018-06-01",
     end_date: str = "2022-11-20",
+    womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
-    epsilon=0,
-    world_cup_weight=1,
-    train_end_date=None,
+    epsilon: float = 0.0,
+    world_cup_weight: float = 1.0,
+    train_end_date: Optional[str] = None,
 ) -> float:
     """
     Compute the log likelihood of real match scores for a model (to use like a loss
@@ -93,7 +99,11 @@ def test_model(
     "F": friendly/other.
     """
     results, _ = get_results_data(
-        start_date, end_date, competitions=competitions, rankings_source=None
+        start_date=start_date,
+        end_date=end_date,
+        womens=womens,
+        competitions=competitions,
+        rankings_source=None
     )
     results = results[  # only include matches where model knows about both teams
         (results["home_team"].isin(model.teams))
@@ -157,6 +167,7 @@ def forecast_evaluation(
     model: BaseMatchPredictor,
     start_date: str = "2018-06-01",
     end_date: str = "2022-11-20",
+    womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     method: str = "rps",
 ) -> List[float]:
@@ -177,7 +188,11 @@ def forecast_evaluation(
     if method not in ["rps", "brier"]:
         raise ValueError("method must be either 'brier' or 'rps'")
     results, _ = get_results_data(
-        start_date, end_date, competitions=competitions, rankings_source=None
+        start_date=start_date,
+        end_date=end_date,
+        womens=womens,
+        competitions=competitions,
+        rankings_source=None
     )
     results = results[  # only include matches where model knows about both teams
         (results["home_team"].isin(model.teams))
@@ -323,8 +338,12 @@ def get_stage_difference_loss(
     output_path: Optional[str] = None,
     verbose: bool = True,
 ) -> int:
-    """Compute the total loss for a set of simulations of a world cup using
+    """
+    Compute the total loss for a set of simulations of a world cup using
     get_difference_in_stages
+    
+    Note that this evaluation metric is not currently available for
+    the Women's World Cup.
 
     Parameters
     ----------

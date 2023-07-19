@@ -1,5 +1,7 @@
 Team,Confederation
 India,AFC
+India S,AFC
+India N,AFC
 Thailand,AFC
 North Korea,AFC
 Kazakhstan,AFC
@@ -130,6 +132,7 @@ Guyana,CONCACAF
 Panama,CONCACAF
 Grenada,CONCACAF
 Puerto Rico,CONCACAF
+Netherlands Antilles,CONCACAF
 Jamaica,CONCACAF
 USA Virgin Islands,CONCACAF
 Honduras,CONCACAF
@@ -156,6 +159,7 @@ Fiji,OFC
 Samoa,OFC
 Papua New Guinea,OFC
 New Caledonia,OFC
+Great Britain,UEFA
 Kosovo,UEFA
 Albania,UEFA
 Montenegro,UEFA
@@ -168,6 +172,7 @@ Belarus,UEFA
 Lithuania,UEFA
 Israel,UEFA
 North Macedonia,UEFA
+Macedonia,UEFA
 Northern Ireland,UEFA
 Iceland,UEFA
 Bosnia and Herzegovina,UEFA
@@ -194,6 +199,7 @@ Russia,UEFA
 Switzerland,UEFA
 Croatia,UEFA
 Germany,UEFA
+West Germany,UEFA
 Denmark,UEFA
 Cyprus,UEFA
 Portugal,UEFA
@@ -204,6 +210,7 @@ England,UEFA
 France,UEFA
 Belgium,UEFA
 Serbia,UEFA
+Serbia and Montenegro,UEFA
 Austria,UEFA
 Moldova,UEFA
 Hungary,UEFA
@@ -244,6 +251,7 @@ Palau,Unaffiliated
 Guadeloupe,Unaffiliated
 Surrey,Unaffiliated
 Yugoslavia,UEFA
+FR Yugoslavia,UEFA
 Parishes of Jersey,Unaffiliated
 Vietnam Republic,AFC
 Kernow,Unaffiliated

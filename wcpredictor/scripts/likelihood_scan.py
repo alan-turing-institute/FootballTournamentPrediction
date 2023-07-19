@@ -14,6 +14,7 @@ from wcpredictor.src.utils import get_and_train_model, test_model
 def run_wrapper(
     queue,
     pid,
+    womens,
     train_start,
     train_end,
     test_start,
@@ -34,13 +35,14 @@ def run_wrapper(
         epsilon, world_cup_weight = status
 
         wc_pred = get_and_train_model(
-            train_start,
-            train_end,
-            competitions,
-            rankings_source,
-            epsilon,
-            world_cup_weight,
-            model,
+            start_date=train_start,
+            end_date=train_end,
+            womens=womens,
+            competitions=competitions,
+            rankings_source=rankings_source,
+            epsilon=epsilon,
+            world_cup_weight=world_cup_weight,
+            model=model,
         )
 
         # test_competitions = {
@@ -61,10 +63,11 @@ def run_wrapper(
 
         likelihood = {
             name: test_model(
-                wc_pred.model,
-                test_start,
-                test_end,
-                comps,
+                model=wc_pred.model,
+                start_date=test_start,
+                end_date=test_end,
+                womens=womens,
+                competitions=comps,
                 epsilon=test_epsilon,
                 world_cup_weight=test_world_cup_weight,
                 train_end_date=train_end,
@@ -87,6 +90,7 @@ def run_wrapper(
 
 
 def main():
+    womens = False
     train_start = "1994-1-1"  # 2018 WC: 1998-1-1, 2014 WC: 1994-1-1, 2010 WC: 1990-1-1
     train_end = "2014-6-10"  # 2018 WC: 2018-6-12, 2014 WC: 2014-6-10, 2010 WC: 2010-6-9
     test_start = "2014-6-11"  # 2018WC: 2018-6-13, 2014WC: 2014-6-11, 2010WC: 2010-6-10
@@ -138,6 +142,7 @@ def main():
             args=(
                 queue,
                 i,
+                womens,
                 train_start,
                 train_end,
                 test_start,

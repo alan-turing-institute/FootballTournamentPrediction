@@ -8,10 +8,11 @@ from glob import glob
 from multiprocessing import Pool
 from time import time
 from uuid import uuid4
+from typing import Optional
 
 import pandas as pd
 
-from wcpredictor import Tournament, get_and_train_model
+from wcpredictor import WCPred, Tournament, get_and_train_model
 from wcpredictor.src.bpl_interface import WC_HOSTS
 from wcpredictor.src.data_loader import get_fixture_data
 from wcpredictor.src.tournament import STAGES
@@ -20,6 +21,12 @@ from wcpredictor.src.utils import get_stage_difference_loss
 
 def get_cmd_line_args():
     parser = argparse.ArgumentParser("Simulate multiple World Cups")
+    parser.add_argument(
+        "--womens",
+        help="Predict the Women's World Cup if used",
+        action="store_true",
+        default=False,
+    )
     parser.add_argument(
         "--num_simulations",
         help="How many simulations to run in total",
@@ -37,8 +44,8 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--tournament_year",
-        help="Which world cup to simulate? 2014, 2018 or 2022",
-        choices={"2014", "2018", "2022"},
+        help="Which world cup to simulate? 2014, 2018, 2022 or 2023 (Womens)",
+        choices={"2014", "2018", "2022", "2023"},
         default="2022",
     )
     parser.add_argument("--training_data_start", help="earliest date for training data")
@@ -54,13 +61,22 @@ def get_cmd_line_args():
         help=(
             "Use actual results up to the given date or round strings, and then "
             "simulate the tournament from that point onwards. Defaults to today's "
-            "date if simulating 2022 or 'None' otherwise"
+            "date if simulating 2022 or 2023 or 'None' otherwise"
         ),
         type=str,
         default="None",
     )
     parser.add_argument(
-        "--output_csv", help="Path to output CSV file", default="sim_results.csv"
+        "--output_csv",
+        help="Path to output CSV file",
+        type=str,
+        default="sim_results.csv"
+    )
+    parser.add_argument(
+        "--add_timestamp",
+        help="Whether or not to add timestamp to output csv file",
+        action="store_true",
+        default=False
     )
     parser.add_argument(
         "--output_loss_txt",
@@ -77,32 +93,32 @@ def get_cmd_line_args():
         choices=["game", "org", "both"],
         default="org",
         help=(
-            "if 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
+            "If 'game' use FIFA video game ratings for prior, if 'org', use FIFA "
             "organization ratings"
         ),
     )
     parser.add_argument(
         "--include_competitions",
-        help="comma-separated list of competitions to include in training data",
+        help="Comma-separated list of competitions to include in training data",
         default="W,C1,WQ,CQ,C2,F",
     )
     parser.add_argument(
         "--exclude_competitions",
-        help="comma-separated list of competitions to exclude from training data",
+        help="Comma-separated list of competitions to exclude from training data",
     )
     parser.add_argument(
         "--epsilon",
-        help="how much to downweight games by in exponential time weighting",
+        help="How much to downweight games by in exponential time weighting",
         type=float,
         default=0.0,
     )
     parser.add_argument(
         "--world_cup_weight",
-        help="how much more to weight World Cup games in the data",
+        help="How much more to weight World Cup games in the data",
         type=float,
         default=1.0,
     )
-    parser.add_argument("--seed", help="seed value for simulations", type=int)
+    parser.add_argument("--seed", help="Seed value for simulations", type=int)
 
     return parser.parse_args()
 
@@ -135,16 +151,16 @@ def get_start_end_dates(args):
             "Need to provide either start_date and end_date, or years_training_data "
             "arguments"
         )
-    print(f"Start/End dates for training data are {start_date}, {end_date}")
+    print(f"Start/end dates for training data are {start_date}, {end_date}")
     return start_date, end_date
 
 
 def get_resume_from(args):
     if args.resume_from == "None":
-        return str(datetime.now().date()) if args.tournament_year == "2022" else None
+        return str(datetime.now().date()) if args.tournament_year in ["2022", "2023"] else None
     elif args.resume_from in STAGES:
         # obtain fixtures for world cup year
-        fixtures_df = get_fixture_data(args.tournament_year).sort_values(by="date")
+        fixtures_df = get_fixture_data(year=args.tournament_year, womens=args.womens).sort_values(by="date")
         # obtain round start date
         dates = pd.to_datetime(fixtures_df["date"])
         resume_date = dates[fixtures_df["stage"] == args.resume_from].min()
@@ -153,7 +169,7 @@ def get_resume_from(args):
         return args.resume_from
 
 
-def merge_csv_outputs(output_csv, tournament_year, output_txt):
+def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     files = glob(f"*_{output_csv}")
     simresults_df = pd.concat(
         [
@@ -163,27 +179,34 @@ def merge_csv_outputs(output_csv, tournament_year, output_txt):
     )
     simresults_df = simresults_df.groupby("Team").sum()
     print(simresults_df.sort_values(by=["W", "RU", "SF", "QF", "R16"], ascending=False))
+    
     simresults_df.to_csv(output_csv)
+    print(f"outputting to {output_csv}")
+    
     for f in files:
         os.remove(f)
 
-    if tournament_year != "2022":
+    if tournament_year not in ["2022", "2023"]:
         get_stage_difference_loss(
             tournament_year, simresults_df, output_path=output_txt, verbose=True
         )
 
 
 def run_sims(
-    tournament_year,
-    num_simulations,
-    model,
-    resume_from,
-    output_csv,
-    output_loss=None,
-    add_runid=True,
+    tournament_year: str,
+    womens: bool,
+    num_simulations: int,
+    model: WCPred,
+    resume_from: Optional[str],
+    output_csv: str,
+    output_loss: Optional[str] = None,
+    add_runid: bool = True,
 ):
     t = Tournament(
-        tournament_year, num_samples=num_simulations, resume_from=resume_from
+        year=tournament_year,
+        womens=womens,
+        num_samples=num_simulations,
+        resume_from=resume_from
     )
     t.play_tournament(model)
 
@@ -194,21 +217,31 @@ def run_sims(
     else:
         runid = None
 
+    print(t.stage_counts)
     t.stage_counts.to_csv(output_csv)
 
-    if output_loss:
+    if output_loss and (tournament_year not in ["2022", "2023"]):
         get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
 
     return runid
 
 
 def run_wrapper(args):
-    tournament_year, num_simulations, model, resume_from, output_csv = args
-    return run_sims(tournament_year, num_simulations, model, resume_from, output_csv)
+    tournament_year, womens, num_simulations, model, resume_from, output_csv = args
+    return run_sims(tournament_year=tournament_year,
+                    womens=womens,
+                    num_simulations=num_simulations,
+                    model=model,
+                    resume_from=resume_from,
+                    output_csv=output_csv)
 
 
 def main():
     args = get_cmd_line_args()
+    if args.womens and (args.tournament_year != "2023"):
+        raise ValueError("If you want to simulate a Women's World Cup, "
+                         "tournament_year must be '2023'")
+    
     # use the fifa ratings as priors?
     ratings_src = None if args.dont_use_ratings else args.ratings_source
     # list of competitions to include
@@ -219,14 +252,15 @@ def main():
             comps.remove(comp)
     start_date, end_date = get_start_end_dates(args)
     resume_from = get_resume_from(args)
-    if pd.to_datetime(end_date) < pd.to_datetime(resume_from):
+    if (resume_from is not None) and (pd.to_datetime(end_date) < pd.to_datetime(resume_from)):
         end_date = resume_from
     timestamp = int(datetime.now().timestamp())
-    output_csv = f"{timestamp}_{args.output_csv}"
+    output_csv = f"{timestamp}_{args.output_csv}" if args.add_timestamp else args.output_csv
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
+    world_cup_spec_str = "for Women's World Cup" if args.womens else "for Men's World Cup"
     print(
         f"""
-Running simulations with
+Running simulations {world_cup_spec_str} with
 tournament_year: {args.tournament_year}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
@@ -234,7 +268,7 @@ end_date: {end_date}
 resume_from: {resume_from}
 comps: {comps}
 rankings: {ratings_src}
-{output_csv}
+output: {output_csv}
     """
     )
     if args.seed:
@@ -244,6 +278,7 @@ rankings: {ratings_src}
     model = get_and_train_model(
         start_date=start_date,
         end_date=end_date,
+        womens=args.womens,
         competitions=comps,
         rankings_source=ratings_src,
         epsilon=args.epsilon,
@@ -255,8 +290,9 @@ rankings: {ratings_src}
 
     sim_start = time()
     n_tournaments = math.ceil(args.num_simulations / args.per_tournament)
+    print(f"running {n_tournaments} tournaments each with {args.num_simulations} number of simulations")
     sim_args = (
-        (args.tournament_year, args.per_tournament, model, resume_from, output_csv)
+        (args.tournament_year, args.womens, args.per_tournament, model, resume_from, output_csv)
         for _ in range(n_tournaments)
     )
     with Pool(args.num_thread) as p:
