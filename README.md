@@ -16,7 +16,7 @@ There is some background information and description of the results [here](https
 
 The **[New Scientist](https://www.newscientist.com/article/2347699-brazil-picked-as-2022-world-cup-winners-by-alan-turing-institute-model/)** also has an article, as does **The Daily Mail**, which prompted one reader to enthuse: *"What an absolute load of rubbish, but typical of the anti-English establishment today!"*, and another to ponder: *"I have NEVER KNOW a Prediction from a Scientist to be Right Ever, But on this Prediction  I may be wrong."*. High praise indeed!
 
-Our model (AIrgentina) came 6th in [@Futbolmetrix1's WC2022 Sophisticated Prediction Contest](https://twitter.com/Futbolmetrix1/status/1604584845942087681) outperforming models developed by FiveThirtyEight, Opta and Betfair! 
+Our _AIrgentina_ model came [6th](https://twitter.com/Futbolmetrix1/status/1604584845942087681) in [@Futbolmetrix1's _World Cup 2022 Sophisticated Prediction Contest_](https://futbolmetrix.wordpress.com/2022/11/08/world-cup-2022-sophisticated-prediction-contest/) outperforming models developed by FiveThirtyEight, Opta and Betfair! 
 
 ## Installation
 
@@ -95,5 +95,17 @@ Position |  Team   | Points | GS |  GA
 ## FIFA Men's 2022 World Cup
 ![world_cup_2022_predictions](plots/mens_2022/plots/predictions.png)
 
+### How well did we do in 2022?
+
+Our top two favourites to win the competition, Brazil (25%) and Belgium (19%) got knocked out early on in the competition, getting eliminated in the quarter-final and group stages, respectively. However, AIrgentina gave the eventual winners, Argentina, a 13% chance of winning the tournament. 
+
+For England and Wales, our model suggested their most likely outcomes were being knocked out at the quarter-finals and group stages respectively which unfortunately were their actual outcomes in Qatar.
+
+We entered our pre-tournament predictions to [_@Futbolmetrix1's WC2022 Sophisticated Prediction Contest_](https://futbolmetrix.wordpress.com/2022/11/08/world-cup-2022-sophisticated-prediction-contest/) and in the end came [6th]((https://twitter.com/Futbolmetrix1/status/1604584845942087681))!
+
 ## FIFA Women's 2023 World Cup
 ![world_cup_2023_predictions](plots/womens_2023/plots/predictions.png)
+
+### How well did we do in 2023?
+
+We'll see 😉
