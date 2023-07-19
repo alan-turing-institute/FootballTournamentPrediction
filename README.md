@@ -101,7 +101,7 @@ Our top two favourites to win the competition, Brazil (25%) and Belgium (19%) go
 
 For England and Wales, our model suggested their most likely outcomes were being knocked out at the quarter-finals and group stages respectively which unfortunately were their actual outcomes in Qatar.
 
-We entered our pre-tournament predictions to [_@Futbolmetrix1's WC2022 Sophisticated Prediction Contest_](https://futbolmetrix.wordpress.com/2022/11/08/world-cup-2022-sophisticated-prediction-contest/) and in the end came [6th]((https://twitter.com/Futbolmetrix1/status/1604584845942087681))!
+We entered our pre-tournament predictions to [_@Futbolmetrix1's WC2022 Sophisticated Prediction Contest_](https://futbolmetrix.wordpress.com/2022/11/08/world-cup-2022-sophisticated-prediction-contest/) and in the end came [6th](https://twitter.com/Futbolmetrix1/status/1604584845942087681)!
 
 ## FIFA Women's 2023 World Cup
 ![world_cup_2023_predictions](plots/womens_2023/plots/predictions.png)
