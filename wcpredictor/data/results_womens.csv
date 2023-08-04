@@ -5626,11 +5626,11 @@ date,home_team,away_team,home_score,away_score,tournament,city,country,neutral
 2023-07-29,Panama,Jamaica,0,1,FIFA World Cup,Perth,Australia,TRUE
 2023-07-30,South Korea,Morocco,0,1,FIFA World Cup,Adelaide,Australia,TRUE
 2023-07-30,Germany,Colombia,1,2,FIFA World Cup,Sydney,Australia,TRUE
-2023-07-30,Switzerland,New Zealand,0,0,FIFA World Cup,Dunedin,New Zealand,FALSE
+2023-07-30,New Zealand,Switzerland,0,0,FIFA World Cup,Dunedin,New Zealand,FALSE
 2023-07-30,Norway,Philippines,6,0,FIFA World Cup,Auckland,New Zealand,TRUE
 2023-07-31,Japan,Spain,4,0,FIFA World Cup,Wellington,New Zealand,TRUE
 2023-07-31,Costa Rica,Zambia,1,3,FIFA World Cup,Hamilton,New Zealand,TRUE
-2023-07-31,Canada,Australia,0,4,FIFA World Cup,Melbourne,Australia,FALSE
+2023-07-31,Australia,Canada,4,0,FIFA World Cup,Melbourne,Australia,FALSE
 2023-07-31,Republic of Ireland,Nigeria,0,0,FIFA World Cup,Brisbane,Australia,TRUE
 2023-08-01,Portugal,USA,0,0,FIFA World Cup,Auckland,New Zealand,TRUE
 2023-08-01,Vietnam,Netherlands,0,7,FIFA World Cup,Dunedin,New Zealand,TRUE
