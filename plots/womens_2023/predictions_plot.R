@@ -6,14 +6,10 @@ library(webshot2)
 
 # before World Cup
  original <- read.csv("original_predictions.csv")
-# # after Round 1 games
-# round_1 <- read.csv("after_round_1.csv")
-# # after Round 2 games
-# round_2 <- read.csv("after_round_2.csv")
-# # after Round 3 games (predicting R16 onwards)
+# after Round 3 games (predicting R16 onwards)
 R16 <- read.csv("R16.csv")
-# # after R16 (predicting QF onwards)
-# QF <- read.csv("QF.csv")
+# after R16 (predicting QF onwards)
+QF <- read.csv("QF.csv")
 # # after QF (predicting SF onwards)
 # SF <- read.csv("SF.csv")
 # # after SF (predicting F)
@@ -127,50 +123,12 @@ create_table_plot_alt_colours <- function(data_frame,
 }
 
 # original plot
-# original_prob <- get_progression_probabilties(original, 100000)
-#
-# create_table_plot(original_prob, c(-0.5, 1), filename = "plots/predictions.png")
-# create_table_plot(original_prob[1:10,], c(-0.5, 1), filename = "plots/predictions_top_10.png")
+original_prob <- get_progression_probabilties(original, 100000)
 
-# # after round 1 plots
-# after_round_1_prob <- get_progression_probabilties(round_1, 100000)
-# after_round_1_diff <- get_progression_prob_differences(new_df = after_round_1_prob,
-#                                                        old_df = original_prob)
-#
-# create_table_plot(data_frame = after_round_1_prob,
-#                   domain = c(-0.5, 1),
-#                   subtitle = "After Round 1",
-#                   filename = "plots/after_round_1.png")
-# create_table_plot(data_frame = after_round_1_diff,
-#                   domain = c(-0.5, 0.5),
-#                   subtitle = "Difference in probability after Round 1",
-#                   filename = "plots/after_round_1_diff.png")
-# create_table_plot_alt_colours(data_frame = after_round_1_prob,
-#                               data_frame_for_colours = after_round_1_diff,
-#                               domain = c(-0.5, 0.5),
-#                               subtitle = "After Round 1",
-#                               filename = "plots/after_round_1_colour_diff.png")
-#
-# # after round 2 plots
-# after_round_2_prob <- get_progression_probabilties(round_2, 100000)
-# after_round_2_diff <- get_progression_prob_differences(new_df = after_round_2_prob,
-#                                                        old_df = after_round_1_prob)
-#
-# create_table_plot(data_frame = after_round_2_prob,
-#                   domain = c(-0.5, 1),
-#                   subtitle = "After Round 2",
-#                   filename = "plots/after_round_2.png")
-# create_table_plot(data_frame = after_round_2_diff,
-#                   domain = c(-0.5, 0.5),
-#                   subtitle = "Difference in probability between Round 2 and Round 1",
-#                   filename = "plots/after_round_2_dff.png")
-# create_table_plot_alt_colours(data_frame = after_round_2_prob,
-#                               data_frame_for_colours = after_round_2_diff,
-#                               domain = c(-0.5, 0.5),
-#                               subtitle = "After Round 2",
-#                               filename = "plots/after_round_2_colour_diff.png")
-#
-# # after round 3 plots
+create_table_plot(original_prob, c(-0.5, 1), filename = "plots/predictions.png")
+create_table_plot(original_prob[1:10,], c(-0.5, 1), filename = "plots/predictions_top_10.png")
+
+# after round 3 plots
 R16_prob <- get_progression_probabilties(R16, 100000)
 
 create_table_plot(data_frame = R16_prob[1:16, c("Team", "QF", "SF", "F", "W")],
@@ -178,14 +136,14 @@ create_table_plot(data_frame = R16_prob[1:16, c("Team", "QF", "SF", "F", "W")],
                    subtitle = "Round of 16",
                    filename = "plots/R16.png")
 
-# # after R16 plots
-# QF_prob <- get_progression_probabilties(QF, 100000)
-#
-# create_table_plot(data_frame = QF_prob[1:8, c("Team", "SF", "F", "W")],
-#                   domain = c(-0.5, 1),
-#                   subtitle = "Quarter Finalists",
-#                   filename = "plots/QF.png")
-#
+# after R16 plots
+QF_prob <- get_progression_probabilties(QF, 100000)
+
+create_table_plot(data_frame = QF_prob[1:8, c("Team", "SF", "F", "W")],
+                  domain = c(-0.5, 1),
+                  subtitle = "Quarter Finalists",
+                  filename = "plots/QF.png")
+
 # # after SF plots
 # SF_prob <- get_progression_probabilties(SF, 100000)
 #
