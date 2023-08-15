@@ -5644,9 +5644,14 @@ date,home_team,away_team,home_score,away_score,tournament,city,country,neutral
 2023-08-03,Morocco,Colombia,1,0,FIFA World Cup,Perth,Australia,TRUE
 2023-08-05,Switzerland,Spain,1,5,FIFA World Cup,Auckland,New Zealand,TRUE
 2023-08-05,Japan,Norway,3,1,FIFA World Cup,Wellington,New Zealand,TRUE
-2023-08-06,Netherlands,South Africa,2,0,FIFA World Cup,Sydney,New Zealand,TRUE
-2023-08-06,Sweden,USA,0,0,FIFA World Cup,Melbourne,New Zealand,TRUE
-2023-08-07,England,Nigeria,0,0,FIFA World Cup,Brisbane,New Zealand,TRUE
-2023-08-07,Australia,Denmark,2,0,FIFA World Cup,Sydney,New Zealand,TRUE
-2023-08-08,Colombia,Jamaica,1,0,FIFA World Cup,Melbourne,New Zealand,TRUE
-2023-08-08,France,Morocco,4,0,FIFA World Cup,Adelaide,New Zealand,TRUE
+2023-08-06,Netherlands,South Africa,2,0,FIFA World Cup,Sydney,Australia,TRUE
+2023-08-06,Sweden,USA,0,0,FIFA World Cup,Melbourne,Australia,TRUE
+2023-08-07,England,Nigeria,0,0,FIFA World Cup,Brisbane,Australia,TRUE
+2023-08-07,Australia,Denmark,2,0,FIFA World Cup,Sydney,Australia,TRUE
+2023-08-08,Colombia,Jamaica,1,0,FIFA World Cup,Melbourne,Australia,TRUE
+2023-08-08,France,Morocco,4,0,FIFA World Cup,Adelaide,Australia,TRUE
+2023-08-11,Spain,Netherlands,2,1,FIFA World Cup,Wellington,New Zealand,TRUE
+2023-08-11,Japan,Sweden,1,2,FIFA World Cup,Auckland,New Zealand,TRUE
+2023-08-12,Australia,France,0,0,FIFA World Cup,Brisbane,Australia,TRUE
+2023-08-12,England,Colombia,2,1,FIFA World Cup,Sydney,Australia,TRUE
+2023-08-15,Spain,Sweden,2,1,FIFA World Cup,Auckland,New Zealand,TRUE
