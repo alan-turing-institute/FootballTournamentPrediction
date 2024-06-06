@@ -7,24 +7,24 @@ import pandas as pd
 
 
 def get_teams_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
-    if year not in ["2014", "2018", "2022", "2023"]:
+    if year not in ["2014", "2018", "2022", "2023", "2024"]:
         raise RuntimeError(f"Unknown year {year}")
     current_dir = os.path.dirname(__file__)
     file_name = f"teams_{year}.csv" if not womens else f"teams_{year}_womens.csv"
     csv_path = os.path.join(current_dir, "..", "data", file_name)
     print(f"Loading teams data from {csv_path}")
-    
+
     return pd.read_csv(csv_path)
 
 
 def get_fixture_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
-    if year not in ["2014", "2018", "2022", "2023"]:
+    if year not in ["2014", "2018", "2022", "2023", "2024"]:
         raise RuntimeError(f"Unknown year {year}")
     current_dir = os.path.dirname(__file__)
     file_name = f"fixtures_{year}.csv" if not womens else f"fixtures_{year}_womens.csv"
     csv_path = os.path.join(current_dir, "..", "data", file_name)
     print(f"Loading fixtures data from {csv_path}")
-    
+
     return pd.read_csv(csv_path, parse_dates=["date"])
 
 
@@ -36,7 +36,7 @@ def get_confederations_data() -> pd.DataFrame:
     filename = "confederations.csv"
     csv_path = os.path.join(current_dir, "..", "data", filename)
     print(f"Loading confederations data from {csv_path}")
-    
+
     return pd.read_csv(csv_path)
 
 
@@ -47,7 +47,7 @@ def load_game_rankings(womens: bool = False) -> pd.DataFrame:
     csv_path = os.path.join(current_dir, "..", "data", filename)
     print(f"Loading FIFA game rankings from {csv_path}")
     df = pd.read_csv(csv_path)
-    
+
     # assign default values to teams not otherwise covered
     confederations = get_confederations_data()
     confed_dict = dict(zip(confederations.Team, confederations.Confederation))
@@ -82,7 +82,7 @@ def load_game_rankings(womens: bool = False) -> pd.DataFrame:
             "Overall": overalls,
         }
     )
-    
+
     return pd.concat([df, new_df]).reset_index(drop=True)
 
 
@@ -92,7 +92,7 @@ def load_org_rankings(womens: bool = False) -> pd.DataFrame:
     filename = "fifa_rankings.csv" if not womens else "fifa_rankings_womens.csv"
     csv_path = os.path.join(current_dir, "..", "data", filename)
     print(f"Loading FIFA organisation ratings from {csv_path}")
-    
+
     return pd.read_csv(csv_path)
 
 
@@ -141,25 +141,25 @@ def get_results_data(
     csv_path = os.path.join(current_dir, "..", "data", results_file_path)
     print(f"Using results data from {csv_path}")
     results_df = pd.read_csv(csv_path, parse_dates=["date"])
-    
+
     # get an index of what competition is in what category
     competition_file_path = "competition_index.json" if not womens else "competition_index_womens.json"
     json_path = os.path.join(current_dir, "..", "data", competition_file_path)
     print(f"Using competitions index file from {csv_path}")
     competitions_index = json.load(open(json_path))
-    
+
     print(f"Filtering games for period: {start_date} to {end_date}")
     # filter by date
     results_df = results_df[
         (results_df.date >= start_date) & (results_df.date <= end_date)
     ]
-    
+
     # replace any names that we have written differently elsewhere
     results_df = results_df.replace("United States", "USA")
     results_df = results_df.replace(
         "United States Virgin Islands", "USA Virgin Islands"
     )
-    
+
     # filter matches with non-fifa recognised teams
     if rankings_source:
         rankings_df = get_fifa_rankings_data(source=rankings_source, womens=womens)
@@ -168,15 +168,15 @@ def get_results_data(
             (results_df.home_team.isin(fifa_teams))
             & (results_df.away_team.isin(fifa_teams))
         ]
-        
+
     # filter by competition
     print(f"Only using competitons from {competitions}")
     comp_filter = [competitions_index[comp] for comp in competitions]
-    
+
     # flatten this nested list
     comp_filter = [comp for complist in comp_filter for comp in complist]
     results_df = results_df[results_df.tournament.isin(comp_filter)]
-    
+
     # obtain time difference to the latest date in the dataframe
     # number of years back from end_date as a fraction
     end_date = pd.Timestamp(end_date)
@@ -197,9 +197,9 @@ def get_results_data(
     return results_df, weight_dict
 
 
-def get_wcresults_data(year: str) -> pd.DataFrame:
+def get_actual_results_data(year: str) -> pd.DataFrame:
     current_dir = os.path.dirname(__file__)
-    csv_path = os.path.join(current_dir, "..", "data", f"wcresults_{year}.csv")
+    csv_path = os.path.join(current_dir, "..", "data", f"actual_results_{year}.csv")
     return pd.read_csv(csv_path)
 
 
@@ -208,5 +208,5 @@ def get_alias_data(year: str, womens: bool = False) -> pd.DataFrame:
     file_name = f"aliases_{year}.csv" if not womens else f"aliases_{year}_womens.csv"
     csv_path = os.path.join(current_dir, "..", "data", file_name)
     print(f"Loading in alias data from {csv_path}")
-    
+
     return pd.read_csv(csv_path, index_col="alias")

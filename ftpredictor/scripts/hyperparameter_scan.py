@@ -2,7 +2,7 @@ import argparse
 import os
 from multiprocessing import Process, Queue
 
-from wcpredictor.src.utils import get_and_train_model
+from ftpredictor.src.utils import get_and_train_model
 
 from .run_simulations import get_dates_from_years_training, run_sims
 

@@ -12,11 +12,11 @@ from typing import Optional
 
 import pandas as pd
 
-from wcpredictor import WCPred, Tournament, get_and_train_model
-from wcpredictor.src.bpl_interface import WC_HOSTS
-from wcpredictor.src.data_loader import get_fixture_data
-from wcpredictor.src.tournament import STAGES
-from wcpredictor.src.utils import get_stage_difference_loss
+from ftpredictor import FTPred, Tournament, get_and_train_model
+from ftpredictor.src.bpl_interface import FT_HOSTS
+from ftpredictor.src.data_loader import get_fixture_data
+from ftpredictor.src.tournament import STAGES
+from ftpredictor.src.utils import get_stage_difference_loss
 
 
 def get_cmd_line_args():
@@ -179,10 +179,10 @@ def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     )
     simresults_df = simresults_df.groupby("Team").sum()
     print(simresults_df.sort_values(by=["W", "RU", "SF", "QF", "R16"], ascending=False))
-    
+
     simresults_df.to_csv(output_csv)
     print(f"outputting to {output_csv}")
-    
+
     for f in files:
         os.remove(f)
 
@@ -241,7 +241,7 @@ def main():
     if args.womens and (args.tournament_year != "2023"):
         raise ValueError("If you want to simulate a Women's World Cup, "
                          "tournament_year must be '2023'")
-    
+
     # use the fifa ratings as priors?
     ratings_src = None if args.dont_use_ratings else args.ratings_source
     # list of competitions to include

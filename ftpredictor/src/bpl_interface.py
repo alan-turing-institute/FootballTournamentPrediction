@@ -10,20 +10,22 @@ import copy
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
-from wcpredictor.src.data_loader import get_confederations_data
+from ftpredictor.src.data_loader import get_confederations_data
 
-WC_HOSTS = {
+FT_HOSTS = {
     "2002": ["South Korea", "Japan"],
     "2006": ["Germany"],
     "2010": ["South Africa"],
     "2014": ["Brazil"],
     "2018": ["Russia"],
     "2022": ["Qatar"],
-    "2023": ["Australia", "New Zealand"]
+    "2023": ["Australia", "New Zealand"],
+    "2024": ["Germany"]
+
 }
 
 
-class WCPred:
+class FTPred:
     def __init__(
         self,
         results: pd.DataFrame,
@@ -35,7 +37,7 @@ class WCPred:
         world_cup_weight: float = 1.0,
         weights_dict: Optional[dict[str, float]] = None,
         model: BaseMatchPredictor = None,
-        host: str = "Qatar",
+        host: str = "Germany",
     ):
         self.results = results
         self.fixtures = fixtures
