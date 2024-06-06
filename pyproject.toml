@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "wcpredictor"
+name = "ftpredictor"
 version = "0.1.0"
-description = "Using Bayesian methods to predict outcomes of the 2022 football World Cup"
+description = "Using Bayesian methods to predict outcomes of international football tournaments"
 authors = ["Nick Barlow", "Ryan Chan", "Jack Roberts"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<3.11"
+python = ">=3.8.1,<3.12"
 bpl = { git = "https://github.com/anguswilliams91/bpl-next" }
 pandas = "^1.4.2"
 matplotlib = "^3.6.0"
@@ -28,12 +28,12 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-wcpred_run_simulations = "wcpredictor.scripts.run_simulations:main"
-wcpred_forecast_evaluation = "wcpredictor.scripts.metrics_scan:main"
-wcpred_scan_hyperparameters = "wcpredictor.scripts.hyperparameter_scan:main"
-wcpred_plot_winners = "wcpredictor.scripts.plot_winners:main"
-wcpred_plot_progress = "wcpredictor.scripts.plot_progress:main"
-wcpred_show_match_predictions = "wcpredictor.scripts.get_most_probable_scores:main"
+ftpred_run_simulations = "ftpredictor.scripts.run_simulations:main"
+ftpred_forecast_evaluation = "ftpredictor.scripts.metrics_scan:main"
+ftpred_scan_hyperparameters = "ftpredictor.scripts.hyperparameter_scan:main"
+ftpred_plot_winners = "ftpredictor.scripts.plot_winners:main"
+ftpred_plot_progress = "ftpredictor.scripts.plot_progress:main"
+ftpred_show_match_predictions = "ftpredictor.scripts.get_most_probable_scores:main"
 
 [tool.isort]
 profile = "black"
