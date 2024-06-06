@@ -6,22 +6,26 @@ import numpy as np
 import pandas as pd
 
 
-def get_teams_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
+def get_teams_data(year: str = "2024", womens: bool = False) -> pd.DataFrame:
     if year not in ["2014", "2018", "2022", "2023", "2024"]:
         raise RuntimeError(f"Unknown year {year}")
-    current_dir = os.path.dirname(__file__)
-    file_name = f"teams_{year}.csv" if not womens else f"teams_{year}_womens.csv"
-    csv_path = os.path.join(current_dir, "..", "data", file_name)
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    data_dir = os.path.join(data_dir, year)
+    file_name = "teams.csv"
+    csv_path = os.path.join(data_dir, file_name)
     print(f"Loading teams data from {csv_path}")
 
     return pd.read_csv(csv_path)
 
 
-def get_fixture_data(year: str = "2022", womens: bool = False) -> pd.DataFrame:
+def get_fixture_data(year: str = "2024", womens: bool = False) -> pd.DataFrame:
     if year not in ["2014", "2018", "2022", "2023", "2024"]:
         raise RuntimeError(f"Unknown year {year}")
-    current_dir = os.path.dirname(__file__)
-    file_name = f"fixtures_{year}.csv" if not womens else f"fixtures_{year}_womens.csv"
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    data_dir = os.path.join(data_dir, year)
+    file_name = "fixtures.csv"
     csv_path = os.path.join(current_dir, "..", "data", file_name)
     print(f"Loading fixtures data from {csv_path}")
 

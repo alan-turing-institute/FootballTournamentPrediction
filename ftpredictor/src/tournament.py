@@ -12,7 +12,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 
-from .bpl_interface import WCPred
+from .bpl_interface import FTPred
 from .data_loader import (
     get_alias_data,
     get_fixture_data,
@@ -592,15 +592,15 @@ class Tournament:
         return sampled_results
 
     def play_tournament(
-        self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
+        self, ft_pred: FTPred, seed: Optional[int] = None, head_to_head: bool = True
     ):
         if self.resume_stage == "Group":
-            self.play_group_stage(wc_pred, seed, head_to_head)
-        self.play_knockout_stages(wc_pred, seed)
+            self.play_group_stage(ft_pred, seed, head_to_head)
+        self.play_knockout_stages(ft_pred, seed)
         self.count_stages()
 
     def play_group_stage(
-        self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
+        self, ft_pred: FTPred, seed: Optional[int] = None, head_to_head: bool = True
     ) -> None:
         if self.verbose:
             print("Simulating Group...")
@@ -609,7 +609,7 @@ class Tournament:
         fixtures_to_sample, fixtures_with_results = self.split_played_fixtures("Group")
 
         # sample fixtures without results
-        sampled_results = wc_pred.sample_score(
+        sampled_results = ft_pred.sample_score(
             fixtures_to_sample["home_team"],
             fixtures_to_sample["away_team"],
             seed=seed,
@@ -631,7 +631,7 @@ class Tournament:
         if self.verbose:
             print(f"Group took {time() - t:.2f}s")
 
-    def play_knockout_stages(self, wc_pred: WCPred, seed: Optional[int] = None) -> None:
+    def play_knockout_stages(self, ft_pred: FTPred, seed: Optional[int] = None) -> None:
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
@@ -651,7 +651,7 @@ class Tournament:
             fixtures_to_sample = stage_fixtures.loc[sample_mask.values]
 
             if self.resume_stage == stage:
-                sampled_outcomes = wc_pred.sample_outcome(
+                sampled_outcomes = ft_pred.sample_outcome(
                     self.bracket[fixtures_to_sample["home_team"]].iloc[0].values,
                     self.bracket[fixtures_to_sample["away_team"]].iloc[0].values,
                     knockout=True,
@@ -659,7 +659,7 @@ class Tournament:
                     num_samples=self.num_samples,
                 ).T
             else:
-                sampled_outcomes = wc_pred.sample_outcome(
+                sampled_outcomes = ft_pred.sample_outcome(
                     self.bracket[fixtures_to_sample["home_team"]].values.flatten(),
                     self.bracket[fixtures_to_sample["away_team"]].values.flatten(),
                     knockout=True,

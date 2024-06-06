@@ -10,13 +10,13 @@ import pandas as pd
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
-from .bpl_interface import WCPred
+from .bpl_interface import FTPred
 from .data_loader import (
     get_confederations_data,
     get_fifa_rankings_data,
     get_results_data,
     get_teams_data,
-    get_wcresults_data,
+    get_actual_results_data,
 )
 
 
@@ -31,7 +31,7 @@ def get_and_train_model(
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
     host: str = "Qatar",
     **fit_args,
-) -> WCPred:
+) -> FTPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
     Key for competitions:
@@ -46,9 +46,9 @@ def get_and_train_model(
     values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
     neither (None).
     """
-    results_data_choice = "Women's" if womens else "Men's" 
+    results_data_choice = "Women's" if womens else "Men's"
     print(f"Fitting model to data for {results_data_choice} international games")
-    
+
     results, weights_dict = get_results_data(
         start_date=start_date,
         end_date=end_date,
@@ -60,7 +60,7 @@ def get_and_train_model(
 
     print(f"Using {len(results)} rows in training data")
     ratings = get_fifa_rankings_data(source=rankings_source, womens=womens) if rankings_source else None
-    wc_pred = WCPred(
+    ft_pred = FTPred(
         results=results,
         ratings=ratings,
         epsilon=epsilon,
@@ -69,10 +69,10 @@ def get_and_train_model(
         model=model,
         host=host,
     )
-    wc_pred.set_training_data()
-    wc_pred.fit_model(**fit_args)
+    ft_pred.set_training_data()
+    ft_pred.fit_model(**fit_args)
 
-    return wc_pred
+    return ft_pred
 
 
 def test_model(
@@ -287,7 +287,7 @@ def sort_teams_by(table_dict, metric):
 
 
 def get_most_probable_scoreline(
-    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
+    ft_pred: FTPred, team_1: str, team_2: str, seed: Optional[int] = None
 ) -> Tuple[int, int, float]:
     """
     Parameters
@@ -299,7 +299,7 @@ def get_most_probable_scoreline(
     score_1:int, score_2:int,  prob:float, scores of each team, and prob
                                            of that scoreline
     """
-    return wc_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
+    return ft_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
 
 
 def get_difference_in_stages(stage_1: Union[str, pd.Series], stage_2: str) -> int:
@@ -341,7 +341,7 @@ def get_stage_difference_loss(
     """
     Compute the total loss for a set of simulations of a world cup using
     get_difference_in_stages
-    
+
     Note that this evaluation metric is not currently available for
     the Women's World Cup.
 
