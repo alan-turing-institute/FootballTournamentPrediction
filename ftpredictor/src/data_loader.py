@@ -26,7 +26,7 @@ def get_fixture_data(year: str = "2024", womens: bool = False) -> pd.DataFrame:
     data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
     data_dir = os.path.join(data_dir, year)
     file_name = "fixtures.csv"
-    csv_path = os.path.join(current_dir, "..", "data", file_name)
+    csv_path = os.path.join(data_dir, file_name)
     print(f"Loading fixtures data from {csv_path}")
 
     return pd.read_csv(csv_path, parse_dates=["date"])
@@ -46,9 +46,10 @@ def get_confederations_data() -> pd.DataFrame:
 
 def load_game_rankings(womens: bool = False) -> pd.DataFrame:
     print("Using FIFA videogame rankings")
-    current_dir = os.path.dirname(__file__)
-    filename = "fifa_game_rankings.csv" if not womens else f"fifa_game_rankings_womens.csv"
-    csv_path = os.path.join(current_dir, "..", "data", filename)
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    filename = "fifa_game_rankings.csv"
+    csv_path = os.path.join(data_dir, filename)
     print(f"Loading FIFA game rankings from {csv_path}")
     df = pd.read_csv(csv_path)
 
@@ -92,11 +93,11 @@ def load_game_rankings(womens: bool = False) -> pd.DataFrame:
 
 def load_org_rankings(womens: bool = False) -> pd.DataFrame:
     print("Using FIFA organisation rankings")
-    current_dir = os.path.dirname(__file__)
-    filename = "fifa_rankings.csv" if not womens else "fifa_rankings_womens.csv"
-    csv_path = os.path.join(current_dir, "..", "data", filename)
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    filename = "fifa_rankings.csv"
+    csv_path = os.path.join(data_dir, filename)
     print(f"Loading FIFA organisation ratings from {csv_path}")
-
     return pd.read_csv(csv_path)
 
 
@@ -122,7 +123,7 @@ def get_fifa_rankings_data(source: str = "game",
 
 def get_results_data(
     start_date: str = "2018-06-01",
-    end_date: str = "2022-11-20",
+    end_date: str = "2024-06-10",
     womens: bool = False,
     competitions: List[str] = None,
     rankings_source: str = "org",
@@ -140,15 +141,16 @@ def get_results_data(
     """
     if competitions is None:
         competitions = ["W", "C1", "WQ", "CQ", "C2", "F"]
-    current_dir = os.path.dirname(__file__)
-    results_file_path = "results.csv" if not womens else "results_womens.csv"
-    csv_path = os.path.join(current_dir, "..", "data", results_file_path)
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    filename = "results.csv"
+    csv_path = os.path.join(data_dir, filename)
     print(f"Using results data from {csv_path}")
     results_df = pd.read_csv(csv_path, parse_dates=["date"])
 
     # get an index of what competition is in what category
-    competition_file_path = "competition_index.json" if not womens else "competition_index_womens.json"
-    json_path = os.path.join(current_dir, "..", "data", competition_file_path)
+    competition_filename = "competition_index.json"
+    json_path = os.path.join(data_dir, competition_filename)
     print(f"Using competitions index file from {csv_path}")
     competitions_index = json.load(open(json_path))
 
@@ -201,16 +203,20 @@ def get_results_data(
     return results_df, weight_dict
 
 
-def get_actual_results_data(year: str) -> pd.DataFrame:
-    current_dir = os.path.dirname(__file__)
-    csv_path = os.path.join(current_dir, "..", "data", f"actual_results_{year}.csv")
+def get_actual_results_data(year: str, womens: bool = False) -> pd.DataFrame:
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    data_dir = os.path.join(data_dir, year)
+    csv_path = os.path.join(data_dir, "actual_results.csv")
     return pd.read_csv(csv_path)
 
 
 def get_alias_data(year: str, womens: bool = False) -> pd.DataFrame:
-    current_dir = os.path.dirname(__file__)
-    file_name = f"aliases_{year}.csv" if not womens else f"aliases_{year}_womens.csv"
-    csv_path = os.path.join(current_dir, "..", "data", file_name)
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
+    data_dir = os.path.join(data_dir, year)
+    file_name = "aliases.csv"
+    csv_path = os.path.join(data_dir, file_name)
     print(f"Loading in alias data from {csv_path}")
 
     return pd.read_csv(csv_path, index_col="alias")
