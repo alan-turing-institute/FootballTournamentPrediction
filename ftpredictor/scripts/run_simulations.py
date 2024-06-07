@@ -44,9 +44,9 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--tournament_year",
-        help="Which world cup to simulate? 2014, 2018, 2022 or 2023 (Womens)",
-        choices={"2014", "2018", "2022", "2023"},
-        default="2022",
+        help="Which tournament to simulate? 2014, 2018, 2022, 2023 (Womens), or 2024",
+        choices={"2014", "2018", "2022", "2023", "2024"},
+        default="2024",
     )
     parser.add_argument("--training_data_start", help="earliest date for training data")
     parser.add_argument("--training_data_end", help="latest date for training data")
@@ -61,7 +61,7 @@ def get_cmd_line_args():
         help=(
             "Use actual results up to the given date or round strings, and then "
             "simulate the tournament from that point onwards. Defaults to today's "
-            "date if simulating 2022 or 2023 or 'None' otherwise"
+            "date if simulating 2022, 2023, or 2024 or 'None' otherwise"
         ),
         type=str,
         default="None",
@@ -157,9 +157,9 @@ def get_start_end_dates(args):
 
 def get_resume_from(args):
     if args.resume_from == "None":
-        return str(datetime.now().date()) if args.tournament_year in ["2022", "2023"] else None
+        return str(datetime.now().date()) if args.tournament_year in ["2022", "2023", "2024"] else None
     elif args.resume_from in STAGES:
-        # obtain fixtures for world cup year
+        # obtain fixtures for tournament year
         fixtures_df = get_fixture_data(year=args.tournament_year, womens=args.womens).sort_values(by="date")
         # obtain round start date
         dates = pd.to_datetime(fixtures_df["date"])
@@ -171,6 +171,7 @@ def get_resume_from(args):
 
 def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     files = glob(f"*_{output_csv}")
+    print(f"merge_csv_outputs found files {files}")
     simresults_df = pd.concat(
         [
             pd.read_csv(f, usecols=["Team", "Group", "R16", "QF", "SF", "RU", "W"])
@@ -196,7 +197,7 @@ def run_sims(
     tournament_year: str,
     womens: bool,
     num_simulations: int,
-    model: WCPred,
+    model: FTPred,
     resume_from: Optional[str],
     output_csv: str,
     output_loss: Optional[str] = None,
@@ -220,7 +221,7 @@ def run_sims(
     print(t.stage_counts)
     t.stage_counts.to_csv(output_csv)
 
-    if output_loss and (tournament_year not in ["2022", "2023"]):
+    if output_loss and (tournament_year not in ["2022", "2023", "2024"]):
         get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
 
     return runid
@@ -257,10 +258,10 @@ def main():
     timestamp = int(datetime.now().timestamp())
     output_csv = f"{timestamp}_{args.output_csv}" if args.add_timestamp else args.output_csv
     output_loss_txt = f"{timestamp}_{args.output_loss_txt}"
-    world_cup_spec_str = "for Women's World Cup" if args.womens else "for Men's World Cup"
+    tournament_spec_str = "for European Championship" if args.tournament_year == "2024" else "for Women's World Cup" if args.womens else "for Men's World Cup"
     print(
         f"""
-Running simulations {world_cup_spec_str} with
+Running simulations {tournament_spec_str} with
 tournament_year: {args.tournament_year}
 num_simulations: {args.num_simulations}
 start_date: {start_date}
@@ -283,7 +284,7 @@ output: {output_csv}
         rankings_source=ratings_src,
         epsilon=args.epsilon,
         world_cup_weight=args.world_cup_weight,
-        host=WC_HOSTS[args.tournament_year],
+        host=FT_HOSTS[args.tournament_year],
     )
     model_time = time() - model_start
     print(f"Model fit took {model_time:.2f}s")
@@ -299,7 +300,7 @@ output: {output_csv}
         p.imap_unordered(run_wrapper, sim_args)
         p.close()
         p.join()
-
+    print(f"Will try to merge csv {output_csv} {args.tournament_year} {output_loss_txt}")
     merge_csv_outputs(output_csv, args.tournament_year, output_loss_txt)
 
     print(f"Model fit took {model_time:.2f}s")

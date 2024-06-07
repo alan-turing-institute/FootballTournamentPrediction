@@ -22,14 +22,14 @@ from .data_loader import (
 
 def get_and_train_model(
     start_date: str = "2002-06-01",
-    end_date: str = "2022-12-31",
+    end_date: str = "2024-06-10",
     womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
     epsilon: float = 2.0,
     world_cup_weight: float = 4.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
-    host: str = "Qatar",
+    host: str = "Germany",
     **fit_args,
 ) -> FTPred:
     """
