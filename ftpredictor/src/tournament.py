@@ -107,7 +107,7 @@ class Group:
                 - self.table["goals_against"][team_idx, :]
             )
 
-    def get_qualifiers(self) -> Tuple:
+    def get_top_two(self) -> Tuple:
         """
         return the two teams that topped the group
         """
@@ -126,10 +126,10 @@ class Group:
         if self.standings is None:
             self.calc_standings()
         team_index = np.nonzero(self.standings.T == 3)[1]
-        team_name = self.teams[team_index]
+        team = self.teams[team_index]
         points = self.table["points"][team_index]
         goal_difference = self.table["goal_difference"][team_index]
-        return team_name[0], int(points[0]), int(goal_difference[0])
+        return team, points, goal_difference
 
     def fill_standings_position(
         self, sample, team_idx: int, position: int, verbose: bool = False
@@ -459,6 +459,7 @@ class Tournament:
         resume_from: Optional[str] = None,
         verbose: bool = True,
     ):
+        print("in tournament constructor p0")
         self.teams_df = get_teams_data(year=year, womens=womens)
         self.fixtures_df = get_fixture_data(year=year, womens=womens).sort_values(by="date")
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -466,6 +467,7 @@ class Tournament:
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
+        print("in tournament constructor p1")
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
@@ -631,7 +633,7 @@ class Tournament:
         aliases += [t for t in r16_fixtures.away_team if t.startswith("3")]
         return aliases
 
-    def _set_r16_aliases(self, third_place_qualifiers: list[str]):
+    def _set_r16_aliases(self, third_place_groups: list[str]):
         """
         Assign 3rd place teams to aliases such as 3ABF as required.
 
@@ -641,8 +643,7 @@ class Tournament:
         """
         aliases = self._get_r16_aliases()
         # find which groups have the best 3rd place.  List of 4 e.g. ["A","B","D","F"]
-        third_place_groups = [q.split(",")[3] for q in third_place_qualifiers]
-
+        print(f"3rd place groups {third_place_groups}")
 
         def try_assign_aliases():
             # which of the aliases can each group go into?
@@ -666,6 +667,7 @@ class Tournament:
         assignments = {}
         while len(assignments) < len(aliases):
             assignments = try_assign_aliases()
+        print(f"group/alias assignments {assignments}")
         return assignments
 
     def set_r16_qualifiers(self):
@@ -676,9 +678,10 @@ class Tournament:
         """
         print("Setting r16 qualifiers")
         for g in self.groups.values():
-            t1, t2 = g.get_qualifiers()
+            t1, t2 = g.get_top_two()
             self.bracket["1" + g.name] = t1
             self.bracket["2" + g.name] = t2
+        print(f"set first and second placed teams in bracket {self.bracket['1'+g.name]}")
         if len(self.groups) == 8:
             # we're done!
             return
@@ -687,20 +690,22 @@ class Tournament:
             third_placed_teams = []
             # make a sortable list of strings
             for k,g in self.groups.items():
-                print(f" group {k}")
                 team_name, points, gd = g.get_third_place_team_with_stats()
-                third_placed_teams.append(f"{points},{gd},{team_name},{k}")
-            print("pp1")
-            third_place_qualifiers = sorted(third_placed_teams, reverse=True)[:4]
-            # now figure out the aliases
-            third_place_assignments = self._set_r16_aliases(third_place_qualifiers)
-            print("pp1")
+                third_placed_teams.append((points,gd,team_name,k))
+            
+            third_place_qualifiers = sorted(third_placed_teams, key=lambda element: (element[0], element[1]), reverse=True)[:4]
+            best_four_groups = [q[3] for q in third_place_qualifiers]
+            print(f"third place qualifiers {third_place_qualifiers}")
+            # now figure out the aliases, given the four top groups.
+            third_place_assignments = self._set_r16_aliases(best_four_groups)
+            
             # that will be a dictionary {"alias": "group"}.   We need to get the team
             # name for each group from the third_place_qualifiers string
             for alias, group in third_place_assignments.items():
-                team = [q.split(",")[2] for q in third_place_qualifiers if q.endswith(group)][0]
-                self.bracket[alias] = np.array([team])
-            print("pp4")
+                team = [q[2] for q in third_place_qualifiers if q[3]==group]
+                self.bracket[alias] = team[0]
+            print(f"third place teams {self.bracket[alias]}")
+            
 
 
     def play_group_stage(
@@ -709,9 +714,7 @@ class Tournament:
         if self.verbose:
             print("Simulating Group...")
         t = time()
-        print("p1")
         fixtures_to_sample, fixtures_with_results = self.split_played_fixtures("Group")
-        print("p2")
         # sample fixtures without results
         sampled_results = ft_pred.sample_score(
             fixtures_to_sample["home_team"],
@@ -719,18 +722,14 @@ class Tournament:
             seed=seed,
             num_samples=self.num_samples,
         )
-        print("p3")
         # merge simulated results and actual results
         results = self._merge_scores(
             sampled_results, fixtures_with_results, self.num_samples
         )
-        print("p4")
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
-        print("p5")
         self.set_r16_qualifiers()
-        print("p6")
         if self.verbose:
             print(f"Group took {time() - t:.2f}s")
 

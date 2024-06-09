@@ -61,7 +61,7 @@ def get_cmd_line_args():
         help=(
             "Use actual results up to the given date or round strings, and then "
             "simulate the tournament from that point onwards. Defaults to today's "
-            "date if simulating 2022, 2023, or 2024 or 'None' otherwise"
+            "date if simulating 2024 or 'None' otherwise"
         ),
         type=str,
         default="None",
@@ -157,7 +157,7 @@ def get_start_end_dates(args):
 
 def get_resume_from(args):
     if args.resume_from == "None":
-        return str(datetime.now().date()) if args.tournament_year in ["2022", "2023", "2024"] else None
+        return str(datetime.now().date()) if args.tournament_year in ["2024"] else None
     elif args.resume_from in STAGES:
         # obtain fixtures for tournament year
         fixtures_df = get_fixture_data(year=args.tournament_year, womens=args.womens).sort_values(by="date")
@@ -187,7 +187,7 @@ def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     for f in files:
         os.remove(f)
 
-    if tournament_year not in ["2022", "2023"]:
+    if tournament_year not in ["2024"]:
         get_stage_difference_loss(
             tournament_year, simresults_df, output_path=output_txt, verbose=True
         )
@@ -203,6 +203,7 @@ def run_sims(
     output_loss: Optional[str] = None,
     add_runid: bool = True,
 ):
+    print(f"resuming tournament from {resume_from}")
     t = Tournament(
         year=tournament_year,
         womens=womens,

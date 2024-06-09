@@ -29,6 +29,7 @@ def get_and_train_model(
     epsilon: float = 2.0,
     world_cup_weight: float = 4.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
+    #model: BaseMatchPredictor = DummyModel(max_goals=10),
     host: str = "Germany",
     **fit_args,
 ) -> FTPred:
@@ -46,7 +47,7 @@ def get_and_train_model(
     values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
     neither (None).
     """
-    results_data_choice = "Women's" if womens else "Men's"
+    results_data_choice = "women's" if womens else "men's"
     print(f"Fitting model to data for {results_data_choice} international games")
 
     results, weights_dict = get_results_data(
@@ -57,7 +58,7 @@ def get_and_train_model(
         rankings_source=rankings_source,
         world_cup_weight=world_cup_weight,
     )
-
+    print("Model is "+str(type(model)))
     print(f"Using {len(results)} rows in training data")
     ratings = get_fifa_rankings_data(source=rankings_source, womens=womens) if rankings_source else None
     ft_pred = FTPred(
@@ -73,7 +74,6 @@ def get_and_train_model(
     ft_pred.fit_model(**fit_args)
 
     return ft_pred
-
 
 def test_model(
     model: BaseMatchPredictor,
@@ -365,7 +365,7 @@ def get_stage_difference_loss(
     teams_df = get_teams_data(tournament_year)
     teams = list(teams_df.Team.values)
     wcresults_df = None
-    wcresults_df = get_wcresults_data(tournament_year)
+    wcresults_df = get_actual_results_data(tournament_year)
     total_loss = 0
     for team in teams:
         actual_result = wcresults_df.loc[wcresults_df.Team == team].stage.values[0]
