@@ -113,8 +113,8 @@ def get_cmd_line_args():
         default=0.0,
     )
     parser.add_argument(
-        "--world_cup_weight",
-        help="How much more to weight World Cup games in the data",
+        "--tournament_weight",
+        help="How much to weight games according to tournament in the data",
         type=float,
         default=1.0,
     )
@@ -284,7 +284,7 @@ output: {output_csv}
         competitions=comps,
         rankings_source=ratings_src,
         epsilon=args.epsilon,
-        world_cup_weight=args.world_cup_weight,
+        tournament_weight=args.tournament_weight,
         host=FT_HOSTS[args.tournament_year],
     )
     model_time = time() - model_start

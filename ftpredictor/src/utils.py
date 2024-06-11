@@ -27,7 +27,7 @@ def get_and_train_model(
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
     epsilon: float = 2.0,
-    world_cup_weight: float = 4.0,
+    tournament_weight: float = 4.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
     #model: BaseMatchPredictor = DummyModel(max_goals=10),
     host: str = "Germany",
@@ -56,7 +56,7 @@ def get_and_train_model(
         womens=womens,
         competitions=competitions,
         rankings_source=rankings_source,
-        world_cup_weight=world_cup_weight,
+        tournament_weight=tournament_weight,
     )
     print("Model is "+str(type(model)))
     print(f"Using {len(results)} rows in training data")
@@ -65,7 +65,7 @@ def get_and_train_model(
         results=results,
         ratings=ratings,
         epsilon=epsilon,
-        world_cup_weight=world_cup_weight,
+        tournament_weight=tournament_weight,
         weights_dict=weights_dict,
         model=model,
         host=host,
@@ -82,7 +82,7 @@ def test_model(
     womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     epsilon: float = 0.0,
-    world_cup_weight: float = 1.0,
+    tournament_weight: float = 1.0,
     train_end_date: Optional[str] = None,
 ) -> float:
     """
@@ -148,7 +148,7 @@ def test_model(
             test_data["away_goals"],
         )
 
-    if epsilon != 0 or world_cup_weight != 1:
+    if epsilon != 0 or tournament_weight != 1:
         # obtain time difference to last date model was trained on, or test start date
         # if not given
         if train_end_date is None:
