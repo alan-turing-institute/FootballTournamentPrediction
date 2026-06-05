@@ -10,28 +10,29 @@ import pandas as pd
 from bpl import NeutralDixonColesMatchPredictor, NeutralDixonColesMatchPredictorWC
 from bpl.base import BaseMatchPredictor
 
-from .bpl_interface import WCPred
+from .bpl_interface import FTPred
 from .data_loader import (
     get_confederations_data,
     get_fifa_rankings_data,
     get_results_data,
     get_teams_data,
-    get_wcresults_data,
+    get_actual_results_data,
 )
 
 
 def get_and_train_model(
     start_date: str = "2002-06-01",
-    end_date: str = "2022-12-31",
+    end_date: str = "2024-06-10",
     womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     rankings_source: str = "org",
     epsilon: float = 2.0,
-    world_cup_weight: float = 4.0,
+    tournament_weight: float = 4.0,
     model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
-    host: str = "Qatar",
+    #model: BaseMatchPredictor = DummyModel(max_goals=10),
+    host: str = "Germany",
     **fit_args,
-) -> WCPred:
+) -> FTPred:
     """
     Use 'competitions' argument to specify which rows to include in training data.
     Key for competitions:
@@ -46,34 +47,33 @@ def get_and_train_model(
     values for the covariates ("game"), or use the FIFA organisation ones ("org"), or
     neither (None).
     """
-    results_data_choice = "Women's" if womens else "Men's" 
+    results_data_choice = "women's" if womens else "men's"
     print(f"Fitting model to data for {results_data_choice} international games")
-    
+
     results, weights_dict = get_results_data(
         start_date=start_date,
         end_date=end_date,
         womens=womens,
         competitions=competitions,
         rankings_source=rankings_source,
-        world_cup_weight=world_cup_weight,
+        tournament_weight=tournament_weight,
     )
-
+    print("Model is "+str(type(model)))
     print(f"Using {len(results)} rows in training data")
     ratings = get_fifa_rankings_data(source=rankings_source, womens=womens) if rankings_source else None
-    wc_pred = WCPred(
+    ft_pred = FTPred(
         results=results,
         ratings=ratings,
         epsilon=epsilon,
-        world_cup_weight=world_cup_weight,
+        tournament_weight=tournament_weight,
         weights_dict=weights_dict,
         model=model,
         host=host,
     )
-    wc_pred.set_training_data()
-    wc_pred.fit_model(**fit_args)
+    ft_pred.set_training_data()
+    ft_pred.fit_model(**fit_args)
 
-    return wc_pred
-
+    return ft_pred
 
 def test_model(
     model: BaseMatchPredictor,
@@ -82,7 +82,7 @@ def test_model(
     womens: bool = False,
     competitions: List[str] = ["W", "C1", "WQ", "CQ", "C2", "F"],
     epsilon: float = 0.0,
-    world_cup_weight: float = 1.0,
+    tournament_weight: float = 1.0,
     train_end_date: Optional[str] = None,
 ) -> float:
     """
@@ -148,7 +148,7 @@ def test_model(
             test_data["away_goals"],
         )
 
-    if epsilon != 0 or world_cup_weight != 1:
+    if epsilon != 0 or tournament_weight != 1:
         # obtain time difference to last date model was trained on, or test start date
         # if not given
         if train_end_date is None:
@@ -287,7 +287,7 @@ def sort_teams_by(table_dict, metric):
 
 
 def get_most_probable_scoreline(
-    wc_pred: WCPred, team_1: str, team_2: str, seed: Optional[int] = None
+    ft_pred: FTPred, team_1: str, team_2: str, seed: Optional[int] = None
 ) -> Tuple[int, int, float]:
     """
     Parameters
@@ -299,7 +299,7 @@ def get_most_probable_scoreline(
     score_1:int, score_2:int,  prob:float, scores of each team, and prob
                                            of that scoreline
     """
-    return wc_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
+    return ft_pred.get_most_probable_scoreline(team_1, team_2, seed=seed)
 
 
 def get_difference_in_stages(stage_1: Union[str, pd.Series], stage_2: str) -> int:
@@ -341,7 +341,7 @@ def get_stage_difference_loss(
     """
     Compute the total loss for a set of simulations of a world cup using
     get_difference_in_stages
-    
+
     Note that this evaluation metric is not currently available for
     the Women's World Cup.
 
@@ -365,7 +365,7 @@ def get_stage_difference_loss(
     teams_df = get_teams_data(tournament_year)
     teams = list(teams_df.Team.values)
     wcresults_df = None
-    wcresults_df = get_wcresults_data(tournament_year)
+    wcresults_df = get_actual_results_data(tournament_year)
     total_loss = 0
     for team in teams:
         actual_result = wcresults_df.loc[wcresults_df.Team == team].stage.values[0]

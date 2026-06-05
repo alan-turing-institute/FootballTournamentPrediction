@@ -1,5 +1,5 @@
 """
-Code to run the World Cup tournament, from group stages through the
+Code to run an international football tournament, from group stages through the
 knockout stages, to the final, and produce a winner.
 """
 
@@ -12,7 +12,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 
-from .bpl_interface import WCPred
+from .bpl_interface import FTPred
 from .data_loader import (
     get_alias_data,
     get_fixture_data,
@@ -107,7 +107,7 @@ class Group:
                 - self.table["goals_against"][team_idx, :]
             )
 
-    def get_qualifiers(self) -> Tuple:
+    def get_top_two(self) -> Tuple:
         """
         return the two teams that topped the group
         """
@@ -116,6 +116,20 @@ class Group:
         first = np.nonzero(self.standings.T == 1)[1]
         second = np.nonzero(self.standings.T == 2)[1]
         return self.teams[first], self.teams[second]
+
+    def get_third_place_team_with_stats(self) -> Tuple:
+        """
+        Return (team_name, points, goal-diff) for third-place team.
+        This is needed e.g. for Euro2024, when the four best 3rd place
+        teams go through to the round of 16.
+        """
+        if self.standings is None:
+            self.calc_standings()
+        team_index = np.nonzero(self.standings.T == 3)[1]
+        team = self.teams[team_index]
+        points = self.table["points"][team_index]
+        goal_difference = self.table["goal_difference"][team_index]
+        return team, points, goal_difference
 
     def fill_standings_position(
         self, sample, team_idx: int, position: int, verbose: bool = False
@@ -402,7 +416,7 @@ class Group:
                 if verbose:
                     print("-" * 15)
 
-    def add_results(self, results):
+    def add_results(self, results) -> None:
         """
         Add a results for group-stage matches.
         Parameters
@@ -439,12 +453,13 @@ class Group:
 class Tournament:
     def __init__(
         self,
-        year: str = "2022",
+        year: str = "2024",
         womens: bool = False,
         num_samples: int = 1,
         resume_from: Optional[str] = None,
         verbose: bool = True,
     ):
+        print("in tournament constructor p0")
         self.teams_df = get_teams_data(year=year, womens=womens)
         self.fixtures_df = get_fixture_data(year=year, womens=womens).sort_values(by="date")
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -452,6 +467,7 @@ class Tournament:
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
+        print("in tournament constructor p1")
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
@@ -495,7 +511,7 @@ class Tournament:
             start_date=f"{year}-01-01",
             end_date=end_date,
             womens=womens,
-            competitions="W",
+            competitions=["W","C1"],
         )
 
         for _, result in actual_results.iterrows():
@@ -552,6 +568,7 @@ class Tournament:
 
         return bracket
 
+
     def split_played_fixtures(self, stage):
         """Separate matches with and without actual results"""
         group_fixtures = self.fixtures_df[self.fixtures_df.stage == stage]
@@ -592,46 +609,131 @@ class Tournament:
         return sampled_results
 
     def play_tournament(
-        self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
+        self, ft_pred: FTPred, seed: Optional[int] = None, head_to_head: bool = True
     ):
+
+        print("About to play group")
         if self.resume_stage == "Group":
-            self.play_group_stage(wc_pred, seed, head_to_head)
-        self.play_knockout_stages(wc_pred, seed)
+            self.play_group_stage(ft_pred, seed, head_to_head)
+        print("About to play knockout")
+        self.play_knockout_stages(ft_pred, seed)
         self.count_stages()
 
+    def _get_r16_aliases(self):
+        """
+        For tournaments with 24 teams, look at fixtures to see what are the aliases
+        for third-placed teams we need to fill for the round of 16.
+
+        Should return a list of strings like "3DEF" corresponding to which groups can
+        give a team with that alias.
+        """
+        r16_fixtures = self.fixtures_df[self.fixtures_df.stage == "R16"]
+        aliases = []
+        aliases += [t for t in r16_fixtures.home_team if t.startswith("3")]
+        aliases += [t for t in r16_fixtures.away_team if t.startswith("3")]
+        return aliases
+
+    def _set_r16_aliases(self, third_place_groups: list[str]):
+        """
+        Assign 3rd place teams to aliases such as 3ABF as required.
+
+        parameters:
+        ==========
+        third_place_qualifiers: list[str] in format '{points},{goal-diff},{team_name},{group}'
+        """
+        aliases = self._get_r16_aliases()
+        # find which groups have the best 3rd place.  List of 4 e.g. ["A","B","D","F"]
+        print(f"3rd place groups {third_place_groups}")
+
+        def try_assign_aliases():
+            # which of the aliases can each group go into?
+            allowed_aliases = {}
+            for g in third_place_groups:
+                allowed_aliases[g] = [a for a in aliases if g in a]
+
+            def remove_allowed_alias(alias):
+                for k, v in allowed_aliases.items():
+                    allowed_aliases[k] = [g for g in v if g != alias]
+
+            trial_assignments = {}
+            for g in third_place_groups:
+                try:
+                    alias = random.choice(allowed_aliases[g])
+                    trial_assignments[alias] = g
+                    remove_allowed_alias(alias)
+                except(IndexError):
+                    continue
+            return trial_assignments
+        assignments = {}
+        while len(assignments) < len(aliases):
+            assignments = try_assign_aliases()
+        print(f"group/alias assignments {assignments}")
+        return assignments
+
+    def set_r16_qualifiers(self):
+        """
+        If we have 32 teams, this is simple - top 2 from each group.
+        However, Euros have 24 teams - top 2 in each group plus
+        the 4 best 3rd-place teams.
+        """
+        print("Setting r16 qualifiers")
+        for g in self.groups.values():
+            t1, t2 = g.get_top_two()
+            self.bracket["1" + g.name] = t1
+            self.bracket["2" + g.name] = t2
+        print(f"set first and second placed teams in bracket {self.bracket['1'+g.name]}")
+        if len(self.groups) == 8:
+            # we're done!
+            return
+        else:
+            print("dealing with third placed teams")
+            third_placed_teams = []
+            # make a sortable list of strings
+            for k,g in self.groups.items():
+                team_name, points, gd = g.get_third_place_team_with_stats()
+                third_placed_teams.append((points,gd,team_name,k))
+            
+            third_place_qualifiers = sorted(third_placed_teams, key=lambda element: (element[0], element[1]), reverse=True)[:4]
+            best_four_groups = [q[3] for q in third_place_qualifiers]
+            print(f"third place qualifiers {third_place_qualifiers}")
+            # now figure out the aliases, given the four top groups.
+            third_place_assignments = self._set_r16_aliases(best_four_groups)
+            
+            # that will be a dictionary {"alias": "group"}.   We need to get the team
+            # name for each group from the third_place_qualifiers string
+            for alias, group in third_place_assignments.items():
+                team = [q[2] for q in third_place_qualifiers if q[3]==group]
+                self.bracket[alias] = team[0]
+            print(f"third place teams {self.bracket[alias]}")
+            
+
+
     def play_group_stage(
-        self, wc_pred: WCPred, seed: Optional[int] = None, head_to_head: bool = True
+        self, ft_pred: FTPred, seed: Optional[int] = None, head_to_head: bool = True
     ) -> None:
         if self.verbose:
             print("Simulating Group...")
         t = time()
-
         fixtures_to_sample, fixtures_with_results = self.split_played_fixtures("Group")
-
         # sample fixtures without results
-        sampled_results = wc_pred.sample_score(
+        sampled_results = ft_pred.sample_score(
             fixtures_to_sample["home_team"],
             fixtures_to_sample["away_team"],
             seed=seed,
             num_samples=self.num_samples,
         )
-
         # merge simulated results and actual results
         results = self._merge_scores(
             sampled_results, fixtures_with_results, self.num_samples
         )
-
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
-            t1, t2 = g.get_qualifiers()
-            self.bracket["1" + g.name] = t1
-            self.bracket["2" + g.name] = t2
-
+        self.set_r16_qualifiers()
         if self.verbose:
             print(f"Group took {time() - t:.2f}s")
 
-    def play_knockout_stages(self, wc_pred: WCPred, seed: Optional[int] = None) -> None:
+    def play_knockout_stages(self, ft_pred: FTPred, seed: Optional[int] = None) -> None:
         """
         For the round of 16, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
@@ -651,7 +753,7 @@ class Tournament:
             fixtures_to_sample = stage_fixtures.loc[sample_mask.values]
 
             if self.resume_stage == stage:
-                sampled_outcomes = wc_pred.sample_outcome(
+                sampled_outcomes = ft_pred.sample_outcome(
                     self.bracket[fixtures_to_sample["home_team"]].iloc[0].values,
                     self.bracket[fixtures_to_sample["away_team"]].iloc[0].values,
                     knockout=True,
@@ -659,7 +761,7 @@ class Tournament:
                     num_samples=self.num_samples,
                 ).T
             else:
-                sampled_outcomes = wc_pred.sample_outcome(
+                sampled_outcomes = ft_pred.sample_outcome(
                     self.bracket[fixtures_to_sample["home_team"]].values.flatten(),
                     self.bracket[fixtures_to_sample["away_team"]].values.flatten(),
                     knockout=True,

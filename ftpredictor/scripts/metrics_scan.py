@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue
 
 import pandas as pd
 
-from wcpredictor.src.utils import forecast_evaluation, get_and_train_model
+from ftpredictor.src.utils import forecast_evaluation, get_and_train_model
 
 from .run_simulations import get_dates_from_years_training
 
@@ -79,7 +79,7 @@ def run_metrics_wrapper(queue, pid, output_dir):
         if status == "DONE":
             print(f"Process {pid} finished all jobs!")
             break
-        
+
         (
             womens,
             metric,

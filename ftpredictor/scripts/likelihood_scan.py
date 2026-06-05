@@ -8,7 +8,7 @@ import jsonpickle
 import numpy as np
 from bpl import NeutralDixonColesMatchPredictorWC
 
-from wcpredictor.src.utils import get_and_train_model, test_model
+from ftpredictor.src.utils import get_and_train_model, test_model
 
 
 def run_wrapper(

@@ -2,7 +2,7 @@
 
 import argparse
 
-from wcpredictor import get_and_train_model, get_fixture_data
+from ftpredictor import get_and_train_model, get_fixture_data
 
 
 def get_cmd_line_args():
