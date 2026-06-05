@@ -123,11 +123,11 @@ def get_fifa_rankings_data(source: str = "game",
 
 def get_results_data(
     start_date: str = "2018-06-01",
-    end_date: str = "2024-06-10",
+    end_date: str = "2024-06-12",
     womens: bool = False,
     competitions: List[str] = None,
     rankings_source: str = "org",
-    world_cup_weight: float = 1.0,
+    tournament_weight: float = 1.0,
 ) -> Tuple[pd.DataFrame, dict[str, float]]:
     """
     filter the results dataframe by date and competition.
@@ -188,9 +188,14 @@ def get_results_data(
     end_date = pd.Timestamp(end_date)
     results_df["time_diff"] = (end_date - results_df.date) / pd.Timedelta(days=365)
     # compute game weights
-    weight_dict = dict(
-        zip(["F", "C2", "CQ", "WQ", "C1", "W"], np.linspace(1, world_cup_weight, 6))
-    )
+    if "2024" in str(end_date): # euros - weight them higher
+        weight_dict = dict(
+            zip(["F", "C2", "WQ", "CQ", "W", "C1"], np.linspace(1, tournament_weight, 6))
+        )
+    else: # weight world cups higher
+        weight_dict = dict(
+            zip(["F", "C2", "CQ", "WQ", "C1", "W"], np.linspace(1, tournament_weight, 6))
+        )
     reverse_competitions_index = {
         comp: key for key, value in competitions_index.items() for comp in value
     }
