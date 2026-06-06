@@ -20,7 +20,7 @@ from .data_loader import (
     get_teams_data,
 )
 
-STAGES = ["Group", "R16", "QF", "SF", "F"]
+STAGES = ["Group", "R32", "R16", "QF", "SF", "F"]
 
 
 class Group:
@@ -453,13 +453,13 @@ class Group:
 class Tournament:
     def __init__(
         self,
-        year: str = "2024",
+        year: str = "2026",
         womens: bool = False,
         num_samples: int = 1,
         resume_from: Optional[str] = None,
         verbose: bool = True,
     ):
-        print("in tournament constructor p0")
+        print("in tournament constructor")
         self.teams_df = get_teams_data(year=year, womens=womens)
         self.fixtures_df = get_fixture_data(year=year, womens=womens).sort_values(by="date")
         self.group_names = list(set(self.teams_df["Group"].values))
@@ -467,7 +467,7 @@ class Tournament:
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
-        print("in tournament constructor p1")
+        print("in tournament constructor")
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
@@ -619,10 +619,10 @@ class Tournament:
         self.play_knockout_stages(ft_pred, seed)
         self.count_stages()
 
-    def _get_r16_aliases(self):
+    def _get_knockout_aliases(self):
         """
-        For tournaments with 24 teams, look at fixtures to see what are the aliases
-        for third-placed teams we need to fill for the round of 16.
+        For tournaments with 24 (48) teams, look at fixtures to see what are the aliases
+        for third-placed teams we need to fill for the round of 16 (32).
 
         Should return a list of strings like "3DEF" corresponding to which groups can
         give a team with that alias.
@@ -633,7 +633,7 @@ class Tournament:
         aliases += [t for t in r16_fixtures.away_team if t.startswith("3")]
         return aliases
 
-    def _set_r16_aliases(self, third_place_groups: list[str]):
+    def _set_knockout_aliases(self, third_place_groups: list[str]):
         """
         Assign 3rd place teams to aliases such as 3ABF as required.
 
@@ -641,7 +641,7 @@ class Tournament:
         ==========
         third_place_qualifiers: list[str] in format '{points},{goal-diff},{team_name},{group}'
         """
-        aliases = self._get_r16_aliases()
+        aliases = self._get_knockout_aliases()
         # find which groups have the best 3rd place.  List of 4 e.g. ["A","B","D","F"]
         print(f"3rd place groups {third_place_groups}")
 
@@ -670,13 +670,13 @@ class Tournament:
         print(f"group/alias assignments {assignments}")
         return assignments
 
-    def set_r16_qualifiers(self):
+    def set_knockout_qualifiers(self):
         """
         If we have 32 teams, this is simple - top 2 from each group.
-        However, Euros have 24 teams - top 2 in each group plus
-        the 4 best 3rd-place teams.
+        However, Euros have 24 teams - top 2 in each group plus the 4 best 3rd-place teams.
+        World Cup 2026 has 48 teams - top 2 in each group plus 8 best 3rd place teams.
         """
-        print("Setting r16 qualifiers")
+        print("Setting knockout qualifiers")
         for g in self.groups.values():
             t1, t2 = g.get_top_two()
             self.bracket["1" + g.name] = t1
@@ -692,20 +692,20 @@ class Tournament:
             for k,g in self.groups.items():
                 team_name, points, gd = g.get_third_place_team_with_stats()
                 third_placed_teams.append((points,gd,team_name,k))
-            
+
             third_place_qualifiers = sorted(third_placed_teams, key=lambda element: (element[0], element[1]), reverse=True)[:4]
             best_four_groups = [q[3] for q in third_place_qualifiers]
             print(f"third place qualifiers {third_place_qualifiers}")
             # now figure out the aliases, given the four top groups.
             third_place_assignments = self._set_r16_aliases(best_four_groups)
-            
+
             # that will be a dictionary {"alias": "group"}.   We need to get the team
             # name for each group from the third_place_qualifiers string
             for alias, group in third_place_assignments.items():
                 team = [q[2] for q in third_place_qualifiers if q[3]==group]
                 self.bracket[alias] = team[0]
             print(f"third place teams {self.bracket[alias]}")
-            
+
 
 
     def play_group_stage(
@@ -735,7 +735,7 @@ class Tournament:
 
     def play_knockout_stages(self, ft_pred: FTPred, seed: Optional[int] = None) -> None:
         """
-        For the round of 16, assign the first and second place teams
+        For the round of 32, assign the first and second place teams
         from each group to the aliases e.g. "A1", "B2"
         """
         if self.resume_stage == "Group":
@@ -811,5 +811,5 @@ class Tournament:
         self.stage_counts["W"] = self.stage_counts["W"].fillna(0)
         self.stage_counts["RU"] = self.stage_counts["F"] - self.stage_counts["W"]
         self.stage_counts = self.stage_counts[
-            ["Group", "R16", "QF", "SF", "RU", "W"]
+            ["Group", "R32", "R16", "QF", "SF", "RU", "W"]
         ].astype(int)

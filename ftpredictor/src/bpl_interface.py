@@ -20,7 +20,8 @@ FT_HOSTS = {
     "2018": ["Russia"],
     "2022": ["Qatar"],
     "2023": ["Australia", "New Zealand"],
-    "2024": ["Germany"]
+    "2024": ["Germany"],
+    "2026": ["United States", "Mexico", "Canada"]
 
 }
 

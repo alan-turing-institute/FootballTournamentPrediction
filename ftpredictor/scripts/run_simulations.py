@@ -44,9 +44,9 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--tournament_year",
-        help="Which tournament to simulate? 2014, 2018, 2022, 2023 (Womens), or 2024",
-        choices={"2014", "2018", "2022", "2023", "2024"},
-        default="2024",
+        help="Which tournament to simulate? 2014, 2018, 2022, 2023 (Womens), 2024, 2026",
+        choices={"2014", "2018", "2022", "2023", "2024", "2026"},
+        default="2026",
     )
     parser.add_argument("--training_data_start", help="earliest date for training data")
     parser.add_argument("--training_data_end", help="latest date for training data")
@@ -61,7 +61,7 @@ def get_cmd_line_args():
         help=(
             "Use actual results up to the given date or round strings, and then "
             "simulate the tournament from that point onwards. Defaults to today's "
-            "date if simulating 2024 or 'None' otherwise"
+            "date if simulating 2026 or 'None' otherwise"
         ),
         type=str,
         default="None",

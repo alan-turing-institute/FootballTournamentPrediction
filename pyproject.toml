@@ -8,13 +8,14 @@ authors = [
    { name="Jack Roberts", email="jroberts@turing.ac.uk"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+license = {file = "LICENSE.md"}
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "bpl @ git+https://github.com/anguswilliams91/bpl-next",
     "pandas>=1.4.2",
     "matplotlib>=3.6.0",
     "requests>=2.27.1",
-    "numpyro>=0.13.2",
+    "numpyro>=0.15.0",
     "jupyter>=1.0.0",
     "seaborn>=0.12.1",
     "jsonpickle>=2.2.0",
