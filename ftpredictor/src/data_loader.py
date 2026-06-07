@@ -154,14 +154,14 @@ def get_results_data(
     print(f"Using competitions index file from {csv_path}")
     competitions_index = json.load(open(json_path))
 
-    print(f"Filtering games for period: {start_date} to {end_date}")
+    print(f"Filtering games for the period: {start_date} to {end_date}")
     # filter by date
     results_df = results_df[
         (results_df.date >= start_date) & (results_df.date <= end_date)
     ]
 
     # replace any names that we have written differently elsewhere
-    results_df = results_df.replace("United States", "USA")
+    #results_df = results_df.replace("United States", "USA")
     results_df = results_df.replace(
         "United States Virgin Islands", "USA Virgin Islands"
     )

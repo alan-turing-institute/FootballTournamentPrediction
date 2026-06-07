@@ -627,10 +627,10 @@ class Tournament:
         Should return a list of strings like "3DEF" corresponding to which groups can
         give a team with that alias.
         """
-        r16_fixtures = self.fixtures_df[self.fixtures_df.stage == "R16"]
+        r32_fixtures = self.fixtures_df[self.fixtures_df.stage == "R32"]
         aliases = []
-        aliases += [t for t in r16_fixtures.home_team if t.startswith("3")]
-        aliases += [t for t in r16_fixtures.away_team if t.startswith("3")]
+        aliases += [t for t in r32_fixtures.home_team if t.startswith("3")]
+        aliases += [t for t in r32_fixtures.away_team if t.startswith("3")]
         return aliases
 
     def _set_knockout_aliases(self, third_place_groups: list[str]):
@@ -693,12 +693,12 @@ class Tournament:
                 team_name, points, gd = g.get_third_place_team_with_stats()
                 third_placed_teams.append((points,gd,team_name,k))
 
-            third_place_qualifiers = sorted(third_placed_teams, key=lambda element: (element[0], element[1]), reverse=True)[:4]
-            best_four_groups = [q[3] for q in third_place_qualifiers]
+            third_place_qualifiers = sorted(third_placed_teams, key=lambda element: (element[0], element[1]), reverse=True)[:8]
+            best_eight_groups = [q[3] for q in third_place_qualifiers]
             print(f"third place qualifiers {third_place_qualifiers}")
             # now figure out the aliases, given the four top groups.
-            third_place_assignments = self._set_r16_aliases(best_four_groups)
-
+            third_place_assignments = self._set_knockout_aliases(best_eight_groups)
+            self.best_eight_groups = best_eight_groups
             # that will be a dictionary {"alias": "group"}.   We need to get the team
             # name for each group from the third_place_qualifiers string
             for alias, group in third_place_assignments.items():
@@ -729,7 +729,7 @@ class Tournament:
         for g in self.groups.values():
             g.add_results(results)
             g.calc_standings(head_to_head=head_to_head)
-        self.set_r16_qualifiers()
+        self.set_knockout_qualifiers()
         if self.verbose:
             print(f"Group took {time() - t:.2f}s")
 

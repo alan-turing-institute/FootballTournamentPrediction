@@ -38,7 +38,7 @@ class FTPred:
         tournament_weight: float = 1.0,
         weights_dict: Optional[dict[str, float]] = None,
         model: BaseMatchPredictor = None,
-        host: str = "Germany",
+        host: str = "United States",
     ):
         self.results = results
         self.fixtures = fixtures
