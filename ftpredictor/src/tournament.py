@@ -467,7 +467,6 @@ class Tournament:
         for n in self.group_names:
             g = Group(n, list(self.teams_df[self.teams_df["Group"] == n].Team.values))
             self.groups[n] = g
-        print("in tournament constructor")
         self.is_complete = False
         self.num_samples = num_samples
         self.stage_counts = None
@@ -682,7 +681,6 @@ class Tournament:
             t1, t2 = g.get_top_two()
             self.bracket["1" + g.name] = t1
             self.bracket["2" + g.name] = t2
-        print(f"set first and second placed teams in bracket {self.bracket['1'+g.name]}")
         if len(self.groups) == 8:
             # we're done!
             return
