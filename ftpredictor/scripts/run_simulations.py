@@ -222,7 +222,7 @@ def run_sims(
     print(t.stage_counts)
     t.stage_counts.to_csv(output_csv)
 
-    if output_loss and (tournament_year not in ["2022", "2023", "2024"]):
+    if output_loss and (tournament_year not in ["2022", "2023", "2024", "2026"]):
         get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
 
     return runid

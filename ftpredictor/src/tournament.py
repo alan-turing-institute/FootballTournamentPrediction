@@ -545,14 +545,15 @@ class Tournament:
 
         for aka, team in aliases["team"].items():
             # only fill up to resume_stage
-            if (self.resume_stage == "R16") and (len(aka) > 2):
-                break
-            if (self.resume_stage == "QF") and (len(aka) > 4):
-                break
-            if (self.resume_stage == "SF") and (len(aka) > 8):
-                break
-            if (self.resume_stage == "F") and (len(aka) > 16):
-                break
+
+ #resume_stage == "R16") and (len(aka) > 2):
+ #
+ #resume_stage == "QF") and (len(aka) > 4):
+ #
+ #resume_stage == "SF") and (len(aka) > 8):
+ #
+ #resume_stage == "F") and (len(aka) > 16):
+ #
             bracket[aka] = team
 
         # check for fixtures played up to resume_date in resume_stage
