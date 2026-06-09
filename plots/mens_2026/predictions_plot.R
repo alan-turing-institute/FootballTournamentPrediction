@@ -105,7 +105,7 @@ create_table_plot <- function(data_frame,
       data_row.padding = px(.8)
     ) %>%
     tab_source_note(
-      source_note = md("The Alan Turing Institute (Nick Barlow, Jack Roberts, Ryan Chan)<br>Based on 100,000 simulations<br>Data: GitHub (martj42/international_results)<br>Country Images: Flaticon.com and GitHub (lbenz730/world_cup_2022)")
+      source_note = md("The Alan Turing Institute (Nick Barlow, Jack Roberts, Ryan Chan)<br>Based on 10,000 simulations<br>Data: GitHub (martj42/international_results)<br>Country Images: Flaticon.com and GitHub (lbenz730/world_cup_2022)")
     )
   if (!is.null(filename)) {
     gtsave(full_table, filename = filename)
@@ -129,13 +129,13 @@ create_table_plot_alt_colours <- function(data_frame,
 }
 
 # original plot
-original_prob <- get_progression_probabiltiies(original, 4000)
+original_prob <- get_progression_probabiltiies(original, 10000)
 
 create_table_plot(original_prob, c(-0.5, 1), filename = "plots/predictions.png")
 create_table_plot(original_prob[1:10,], c(-0.5, 1), filename = "plots/predictions_top_10.png")
 
 ## after round 1 plots
-#after_round_1_prob <- get_progression_probabiltiies(round_1, 100000)
+#after_round_1_prob <- get_progression_probabiltiies(round_1, 10000)
 #after_round_1_diff <- get_progression_prob_differences(new_df = after_round_1_prob,
 #                                                       old_df = original_prob)
 #
