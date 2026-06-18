@@ -44,9 +44,9 @@ def get_cmd_line_args():
     )
     parser.add_argument(
         "--tournament_year",
-        help="Which tournament to simulate? 2014, 2018, 2022, 2023 (Womens), or 2024",
-        choices={"2014", "2018", "2022", "2023", "2024"},
-        default="2024",
+        help="Which tournament to simulate? 2014, 2018, 2022, 2023 (Womens), 2024, 2026",
+        choices={"2014", "2018", "2022", "2023", "2024", "2026"},
+        default="2026",
     )
     parser.add_argument("--training_data_start", help="earliest date for training data")
     parser.add_argument("--training_data_end", help="latest date for training data")
@@ -61,7 +61,7 @@ def get_cmd_line_args():
         help=(
             "Use actual results up to the given date or round strings, and then "
             "simulate the tournament from that point onwards. Defaults to today's "
-            "date if simulating 2024 or 'None' otherwise"
+            "date if simulating 2026 or 'None' otherwise"
         ),
         type=str,
         default="None",
@@ -157,7 +157,7 @@ def get_start_end_dates(args):
 
 def get_resume_from(args):
     if args.resume_from == "None":
-        return str(datetime.now().date()) if args.tournament_year in ["2024"] else None
+        return str(datetime.now().date()) if args.tournament_year in ["2026"] else None
     elif args.resume_from in STAGES:
         # obtain fixtures for tournament year
         fixtures_df = get_fixture_data(year=args.tournament_year, womens=args.womens).sort_values(by="date")
@@ -172,14 +172,17 @@ def get_resume_from(args):
 def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     files = glob(f"*_{output_csv}")
     print(f"merge_csv_outputs found files {files}")
+    if len(files) == 0:
+        print(f"No files found matching string {output_csv} - doing nothing")
+        return
     simresults_df = pd.concat(
         [
-            pd.read_csv(f, usecols=["Team", "Group", "R16", "QF", "SF", "RU", "W"])
+            pd.read_csv(f, usecols=["Team", "Group", "R32", "R16", "QF", "SF", "RU", "W"])
             for f in files
         ]
     )
     simresults_df = simresults_df.groupby("Team").sum()
-    print(simresults_df.sort_values(by=["W", "RU", "SF", "QF", "R16"], ascending=False))
+    print(simresults_df.sort_values(by=["W", "RU", "SF", "QF", "R32", "R16"], ascending=False))
 
     simresults_df.to_csv(output_csv)
     print(f"outputting to {output_csv}")
@@ -187,7 +190,7 @@ def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
     for f in files:
         os.remove(f)
 
-    if tournament_year not in ["2024"]:
+    if tournament_year is not "2026":
         get_stage_difference_loss(
             tournament_year, simresults_df, output_path=output_txt, verbose=True
         )
@@ -222,7 +225,7 @@ def run_sims(
     print(t.stage_counts)
     t.stage_counts.to_csv(output_csv)
 
-    if output_loss and (tournament_year not in ["2022", "2023", "2024"]):
+    if output_loss and (tournament_year not in ["2022", "2023", "2024", "2026"]):
         get_stage_difference_loss(tournament_year, t.stage_counts, output_loss)
 
     return runid

@@ -1,0 +1,104 @@
+home_team,away_team,date,stage
+Mexico,South Africa,2026-06-11,Group
+South Korea,Czech Republic,2026-06-12,Group
+Canada,Bosnia and Herzegovina,2026-06-12,Group
+United States,Paraguay,2026-06-13,Group
+Qatar,Switzerland,2026-06-13,Group
+Brazil,Morocco,2026-06-13,Group
+Haiti,Scotland,2026-06-14,Group
+Australia,Turkey,2026-06-14,Group
+Germany,Curaçao,2026-06-14,Group
+Netherlands,Japan,2026-06-14,Group
+Ivory Coast,Ecuador,2026-06-15,Group
+Sweden,Tunisia,2026-06-15,Group
+Spain,Cape Verde,2026-06-15,Group
+Belgium,Egypt,2026-06-15,Group
+Saudi Arabia,Uruguay,2026-06-15,Group
+Iran,New Zealand,2026-06-16,Group
+France,Senegal,2026-06-16,Group
+Iraq,Norway,2026-06-16,Group
+Argentina,Algeria,2026-06-17,Group
+Austria,Jordan,2026-06-17,Group
+Portugal,DR Congo,2026-06-17,Group
+England,Croatia,2026-06-17,Group
+Ghana,Panama,2026-06-18,Group
+Uzbekistan,Colombia,2026-06-18,Group
+Czech Republic,South Africa,2026-06-18,Group
+Switzerland,Bosnia and Herzegovina,2026-06-18,Group
+Canada,Qatar,2026-06-18,Group
+Mexico,South Korea,2026-06-19,Group
+United States,Australia,2026-06-19,Group
+Scotland,Morocco,2026-06-19,Group
+Brazil,Haiti,2026-06-20,Group
+Turkey,Paraguay,2026-06-20,Group
+Netherlands,Sweden,2026-06-20,Group
+Germany,Ivory Coast,2026-06-20,Group
+Ecuador,Curaçao,2026-06-21,Group
+Tunisia,Japan,2026-06-21,Group
+Spain,Saudi Arabia,2026-06-21,Group
+Belgium,Iran,2026-06-21,Group
+Uruguay,Cape Verde,2026-06-21,Group
+New Zealand,Egypt,2026-06-22,Group
+Argentina,Austria,2026-06-22,Group
+France,Iraq,2026-06-22,Group
+Norway,Senegal,2026-06-23,Group
+Jordan,Algeria,2026-06-23,Group
+Portugal,Uzbekistan,2026-06-23,Group
+England,Ghana,2026-06-23,Group
+Panama,Croatia,2026-06-24,Group
+Colombia,DR Congo,2026-06-24,Group
+Switzerland,Canada,2026-06-24,Group
+Bosnia and Herzegovina,Qatar,2026-06-24,Group
+Morocco,Haiti,2026-06-24,Group
+Scotland,Brazil,2026-06-24,Group
+South Africa,South Korea,2026-06-25,Group
+Czech Republic,Mexico,2026-06-25,Group
+Curaçao,Ivory Coast,2026-06-25,Group
+Ecuador,Germany,2026-06-25,Group
+Tunisia,Netherlands,2026-06-26,Group
+Japan,Sweden,2026-06-26,Group
+Turkey,United States,2026-06-26,Group
+Paraguay,Australia,2026-06-26,Group
+Norway,France,2026-06-26,Group
+Senegal,Iraq,2026-06-26,Group
+Cape Verde,Saudi Arabia,2026-06-27,Group
+Uruguay,Spain,2026-06-27,Group
+New Zealand,Belgium,2026-06-27,Group
+Egypt,Iran,2026-06-27,Group
+Panama,England,2026-06-27,Group
+Croatia,Ghana,2026-06-27,Group
+Colombia,Portugal,2026-06-28,Group
+DR Congo,Uzbekistan,2026-06-28,Group
+Algeria,Austria,2026-06-28,Group
+Jordan,Argentina,2026-06-28,Group
+2A,2B,2026-06-28,R32
+1C,2F,2026-06-29,R32
+1E,3ABCDF,2026-06-29,R32
+1F,2C,2026-06-30,R32
+2E,2I,2026-06-30,R32
+1I,3CDFGH,2026-06-30,R32
+1A,3CEFHI,2026-07-01,R32
+1L,3EHIJK,2026-07-01,R32
+1G,3AEHIJ,2026-07-01,R32
+1D,3BEFIJ,2026-07-02,R32
+1H,2J,2026-07-02,R32
+2K,2L,2026-07-03,R32
+1B,3EFGIJ,2026-07-03,R32
+2D,2G,2026-07-03,R32
+1J,2H,2026-07-03,R32
+1K,3DEIJL,2026-07-04,R32
+1C2F,2E2I,2026-07-04,R16
+2A2B,1E3ABCDF,2026-07-04,R16
+1F2C,1I3CDFGH,2026-07-05,R16
+1A3CEFHI,1L3EHIJK,2026-07-06,R16
+1H2J,2K2L,2026-07-06,R16
+1G3AEHIJ,1D3BEFIJ,2026-07-07,R16
+2D2G,1K3DEIJL,2026-07-07,R16
+1B3EFGIJ,1J2H,2026-07-07,R16
+1C2F2E2I,2A2B1E3ABCDF,2026-07-09,QF
+1H2J2K2L,1G3AEHIJ1D3BEFIJ,2026-07-10,QF
+1F2C1I3CDFGH,1A3CEFHI1L3EHIJK,2026-07-11,QF
+2D2G1K3DEIJL,1B3EFGIJ1J2H,2026-07-12,QF
+1C2F2E2I2A2B1E3ABCDF,1H2J2K2L1G3AEHIJ1D3BEFIJ,2026-07-14,SF
+1F2C1I3CDFGH1A3CEFHI1L3EHIJK,2D2G1K3DEIJL1B3EFGIJ1J2H,2026-07-15,SF
+1C2F2E2I2A2B1E3ABCDF1H2J2K2L1G3AEHIJ1D3BEFIJ,1F2C1I3CDFGH1A3CEFHI1L3EHIJK2D2G1K3DEIJL1B3EFGIJ1J2H,2026-07-19,F

@@ -28,7 +28,7 @@ def get_and_train_model(
     rankings_source: str = "org",
     epsilon: float = 2.0,
     tournament_weight: float = 4.0,
-    model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(max_goals=10),
+    model: BaseMatchPredictor = NeutralDixonColesMatchPredictorWC(),
     #model: BaseMatchPredictor = DummyModel(max_goals=10),
     host: str = "Germany",
     **fit_args,

@@ -1,33 +1,43 @@
-[tool.poetry]
+[project]
 name = "ftpredictor"
 version = "0.1.0"
 description = "Using Bayesian methods to predict outcomes of international football tournaments"
-authors = ["Nick Barlow", "Ryan Chan", "Jack Roberts"]
+authors = [
+   { name="Nick Barlow", email="nbarlow@turing.ac.uk"},
+   { name="Ryan Chan", email="rchan@turing.ac.uk"},
+   { name="Jack Roberts", email="jroberts@turing.ac.uk"}
+]
 readme = "README.md"
+license = {file = "LICENSE.md"}
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "bpl @ git+https://github.com/anguswilliams91/bpl-next",
+    "pandas>=1.4.2",
+    "matplotlib>=3.6.0",
+    "requests>=2.27.1",
+    "numpyro>=0.15.0",
+    "jupyter>=1.0.0",
+    "seaborn>=0.12.1",
+    "jsonpickle>=2.2.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-bpl = { git = "https://github.com/anguswilliams91/bpl-next" }
-pandas = "^1.4.2"
-matplotlib = "^3.6.0"
-requests = "^2.27.1"
-numpyro = "^0.13.2"
-jupyter = "^1.0.0"
-seaborn = "^0.12.1"
-jsonpickle = "^2.2.0"
-
-[tool.poetry.dev-dependencies]
-pytest = ">=5.2"
-pytest-mock = ">=3.10.0"
-black = ">=22.1.0"
-flake8 = ">=5.0.4"
-isort = ">=5.10.1"
+[dependency-groups]
+dev = [
+    "pytest>=5.2",
+    "pytest-mock>=3.10.0",
+    "black>=22.1.0",
+    "flake8>=5.0.4",
+    "isort>=5.10.1"
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.scripts]
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.scripts]
 ftpred_run_simulations = "ftpredictor.scripts.run_simulations:main"
 ftpred_forecast_evaluation = "ftpredictor.scripts.metrics_scan:main"
 ftpred_scan_hyperparameters = "ftpredictor.scripts.hyperparameter_scan:main"

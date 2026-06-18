@@ -7,7 +7,7 @@ import pandas as pd
 
 
 def get_teams_data(year: str = "2024", womens: bool = False) -> pd.DataFrame:
-    if year not in ["2014", "2018", "2022", "2023", "2024"]:
+    if year not in ["2014", "2018", "2022", "2023", "2024", "2026"]:
         raise RuntimeError(f"Unknown year {year}")
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
@@ -20,7 +20,7 @@ def get_teams_data(year: str = "2024", womens: bool = False) -> pd.DataFrame:
 
 
 def get_fixture_data(year: str = "2024", womens: bool = False) -> pd.DataFrame:
-    if year not in ["2014", "2018", "2022", "2023", "2024"]:
+    if year not in ["2014", "2018", "2022", "2023", "2024", "2026"]:
         raise RuntimeError(f"Unknown year {year}")
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     data_dir = os.path.join(data_dir, "womens") if womens else os.path.join(data_dir, "mens")
@@ -123,7 +123,7 @@ def get_fifa_rankings_data(source: str = "game",
 
 def get_results_data(
     start_date: str = "2018-06-01",
-    end_date: str = "2024-06-12",
+    end_date: str = "2026-06-12",
     womens: bool = False,
     competitions: List[str] = None,
     rankings_source: str = "org",
@@ -154,14 +154,14 @@ def get_results_data(
     print(f"Using competitions index file from {csv_path}")
     competitions_index = json.load(open(json_path))
 
-    print(f"Filtering games for period: {start_date} to {end_date}")
+    print(f"Filtering games for the period: {start_date} to {end_date}")
     # filter by date
     results_df = results_df[
         (results_df.date >= start_date) & (results_df.date <= end_date)
     ]
 
     # replace any names that we have written differently elsewhere
-    results_df = results_df.replace("United States", "USA")
+    #results_df = results_df.replace("United States", "USA")
     results_df = results_df.replace(
         "United States Virgin Islands", "USA Virgin Islands"
     )
