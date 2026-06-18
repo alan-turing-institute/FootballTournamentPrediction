@@ -34,10 +34,10 @@ to first open a shell in a virtual environment, and then install the dependencie
 
 There are a couple of command-line applications that can be run when the `ftpredictor` package is installed as described above.
 
-In order to simulate the 2026 Men's World Cup $N$ times, you can do
+In order to simulate the 2026 Men's World Cup $N$ times, with $n$ tournament brackets running in parallel, you can do:
 
 ```bash
-ftpred_run_simulations --num_simulations N --tournament_year 2026 --training_data_start <YYYY-MM-DD> --training_data_end <YYYY-MM-DD> --resume_from=Group --output_csv <outputfilename>
+uv run ftpred_run_simulations --num_simulations N --per_tournament n --tournament_year 2026 --training_data_start <YYYY-MM-DD> --training_data_end <YYYY-MM-DD> --resume_from=Group --output_csv <outputfilename>
 ```
 
 For the 2023 Women's World Cup, you can run
@@ -91,8 +91,8 @@ Position |  Team   | Points | GS |  GA
 
 # Pre-tournament predictions:
 
-## FIFA Men's 2022 World Cup
-![world_cup_2022_predictions](plots/mens_2022/plots/predictions.png)
+## FIFA Men's 2026 World Cup
+![world_cup_2026_predictions](plots/mens_2026/plots/predictions.png)
 
 ### How well did we do in 2022?
 
