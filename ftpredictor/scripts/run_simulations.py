@@ -189,8 +189,7 @@ def merge_csv_outputs(output_csv: str, tournament_year: str, output_txt: str):
 
     for f in files:
         os.remove(f)
-
-    if tournament_year is not "2026":
+    if tournament_year != "2026":
         get_stage_difference_loss(
             tournament_year, simresults_df, output_path=output_txt, verbose=True
         )

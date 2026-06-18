@@ -125,10 +125,10 @@ class Group:
         """
         if self.standings is None:
             self.calc_standings()
-        team_index = np.nonzero(self.standings.T == 3)[1]
+        sample_idx, team_index = np.nonzero(self.standings.T == 3)
         team = self.teams[team_index]
-        points = self.table["points"][team_index]
-        goal_difference = self.table["goal_difference"][team_index]
+        points = self.table["points"][team_index, sample_idx]
+        goal_difference = self.table["goal_difference"][team_index, sample_idx]
         return team, points, goal_difference
 
     def fill_standings_position(
@@ -642,8 +642,7 @@ class Tournament:
         third_place_qualifiers: list[str] in format '{points},{goal-diff},{team_name},{group}'
         """
         aliases = self._get_knockout_aliases()
-        # find which groups have the best 3rd place.  List of 4 e.g. ["A","B","D","F"]
-        print(f"3rd place groups {third_place_groups}")
+        # find which groups have the best 3rd place.  List of 8 e.g. ["A","B","D","F"]
 
         def try_assign_aliases():
             # which of the aliases can each group go into?
@@ -667,7 +666,6 @@ class Tournament:
         assignments = {}
         while len(assignments) < len(aliases):
             assignments = try_assign_aliases()
-        print(f"group/alias assignments {assignments}")
         return assignments
 
     def set_knockout_qualifiers(self):
@@ -676,7 +674,6 @@ class Tournament:
         However, Euros have 24 teams - top 2 in each group plus the 4 best 3rd-place teams.
         World Cup 2026 has 48 teams - top 2 in each group plus 8 best 3rd place teams.
         """
-        print("Setting knockout qualifiers")
         for g in self.groups.values():
             t1, t2 = g.get_top_two()
             self.bracket["1" + g.name] = t1
@@ -685,25 +682,28 @@ class Tournament:
             # we're done!
             return
         else:
-            print("dealing with third placed teams")
-            third_placed_teams = []
-            # make a sortable list of strings
-            for k,g in self.groups.items():
+            # collect per-sample data for each group's third-place team
+            third_place_data = {}
+            for k, g in self.groups.items():
                 team_name, points, gd = g.get_third_place_team_with_stats()
-                third_placed_teams.append((points,gd,team_name,k))
+                third_place_data[k] = (team_name, points, gd)
 
-            third_place_qualifiers = sorted(third_placed_teams, key=lambda element: (element[0], element[1]), reverse=True)[:8]
-            best_eight_groups = [q[3] for q in third_place_qualifiers]
-            print(f"third place qualifiers {third_place_qualifiers}")
-            # now figure out the aliases, given the four top groups.
-            third_place_assignments = self._set_knockout_aliases(best_eight_groups)
-            self.best_eight_groups = best_eight_groups
-            # that will be a dictionary {"alias": "group"}.   We need to get the team
-            # name for each group from the third_place_qualifiers string
-            for alias, group in third_place_assignments.items():
-                team = [q[2] for q in third_place_qualifiers if q[3]==group]
-                self.bracket[alias] = team[0]
-            print(f"third place teams {self.bracket[alias]}")
+            group_keys = list(third_place_data.keys())
+            n_qualifiers = len(self._get_knockout_aliases())
+
+            for s in range(self.num_samples):
+                # rank groups by their third-place team's stats for this sample
+                sample_thirds = sorted(
+                    [(third_place_data[k][1][s], third_place_data[k][2][s], k)
+                     for k in group_keys],
+                    key=lambda e: (e[0], e[1]),
+                    reverse=True,
+                )[:n_qualifiers]
+                top_groups = [grp for _, _, grp in sample_thirds]
+                assignments = self._set_knockout_aliases(top_groups)
+                for alias, group in assignments.items():
+                    self.bracket.loc[s, alias] = third_place_data[group][0][s]
+            print(f"third place teams assigned to {n_qualifiers} bracket slots")
 
 
 
